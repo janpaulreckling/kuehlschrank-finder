@@ -90,7 +90,15 @@ input[type=range] { width: 100%; accent-color: var(--accent); height: 28px }
 .sort { display: flex; gap: 8px; align-items: center }
 .sort select { border: 1px solid var(--line); background: var(--surface); border-radius: 8px; padding: 6px 10px }
 .list { display: flex; flex-direction: column; gap: 14px }
-.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px; display: grid; grid-template-columns: 76px minmax(0, 1fr); gap: 16px }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px; display: grid; grid-template-columns: 130px minmax(0, 1fr); gap: 18px }
+.side { display: flex; flex-direction: column; align-items: center; gap: 14px }
+.photo { width: 130px; aspect-ratio: 3 / 4; max-width: 100%; border-radius: 8px; background: #fff; display: grid; place-items: center; overflow: hidden; border: 1px solid var(--line) }
+.photo img { width: 100%; height: 100%; object-fit: contain }
+.photo.none svg { width: 46%; height: auto }
+.photo-cap { font-size: .7rem; color: var(--muted); text-align: center; margin-top: -8px }
+@media (max-width: 520px) { .card { grid-template-columns: 92px minmax(0, 1fr); gap: 12px; padding: 14px } .photo { width: 92px } }
+.thumb { width: 64px; aspect-ratio: 3 / 4; border-radius: 6px; background: #fff; border: 1px solid var(--line); overflow: hidden; display: grid; place-items: center; flex: none }
+.thumb img { width: 100%; height: 100%; object-fit: contain }
 .card.top1 { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent) }
 .card.out { opacity: .82 }
 .score { width: 76px; height: 76px; border-radius: 50%; display: grid; place-items: center; position: relative }
@@ -438,7 +446,7 @@ function card(m, ev, rank) {
   const idealo = "https://www.idealo.de/preisvergleich/MainSearchProductCategory.html?q=" + encodeURIComponent(m.model);
   const chips = ev.checks.slice().sort((a, b) => ({ bad: 0, warn: 1, ok: 2 }[a.lvl] - { bad: 0, warn: 1, ok: 2 }[b.lvl]));
   return `<article class="card${rank === 1 && !ev.fail ? " top1" : ""}${ev.fail ? " out" : ""}" data-id="${esc(m.id)}">
-    <div class="score" title="Passung ${ev.score} von 100">${ring(ev.score, ev.fail)}<b>${ev.score}</b><small>Passung</small></div>
+    <div class="side">${photo(m, "photo")}<div class="score" title="Passung ${ev.score} von 100">${ring(ev.score, ev.fail)}<b>${ev.score}</b><small>Passung</small></div></div>
     <div class="card-body">
       <div class="card-head">
         <div class="name">
@@ -471,6 +479,12 @@ function card(m, ev, rank) {
       </div>
     </div></article>`;
 }
+const FRIDGE_ICON = `<svg viewBox="0 0 40 70" aria-hidden="true"><rect x="2" y="2" width="36" height="66" rx="3" fill="none" stroke="#8a979c" stroke-width="3"/><line x1="20" y1="2" x2="20" y2="44" stroke="#8a979c" stroke-width="2.5"/><line x1="2" y1="44" x2="38" y2="44" stroke="#8a979c" stroke-width="2.5"/></svg>`;
+function photo(m, cls) {
+  return m.image ? `<div class="${cls}"><img src="${esc(m.image)}" alt="${esc(m.brand + " " + m.model)}" loading="lazy"></div>`
+    : `<div class="${cls} none" title="Kein Bild gefunden">${FRIDGE_ICON}</div>`;
+}
+document.addEventListener("error", e => { const img = e.target; if (img.tagName === "IMG" && img.parentNode) { img.parentNode.classList.add("none"); img.outerHTML = FRIDGE_ICON } }, true);
 const p = m => m.price_eur == null ? "Preis ?" : "ab " + fmtEur(m.price_eur);
 
 let lastEval = {};
@@ -541,7 +555,7 @@ function renderCompare() {
     ["Garantie & Haltbarkeit", m => m.reliability_notes],
   ];
   const cell = (v, f) => v == null || v === "" ? "–" : (f ? f(v) : esc(v));
-  $("#cmp-body").innerHTML = `<div class="table-wrap"><table class="cmp"><thead><tr><th></th>${ms.map(m => `<th data-id="${esc(m.id)}">${esc(m.brand)} ${esc(m.name || m.model)}<br><button type="button" class="btn" style="margin-top:6px;padding:4px 10px;font-size:.8rem" data-act="uncmp">Entfernen</button></th>`).join("")}</tr></thead><tbody>${
+  $("#cmp-body").innerHTML = `<div class="table-wrap"><table class="cmp"><thead><tr><th></th>${ms.map(m => `<th data-id="${esc(m.id)}">${photo(m, "thumb")}${esc(m.brand)} ${esc(m.name || m.model)}<br><button type="button" class="btn" style="margin-top:6px;padding:4px 10px;font-size:.8rem" data-act="uncmp">Entfernen</button></th>`).join("")}</tr></thead><tbody>${
     rows.map(([label, get, best, f]) => {
       const vals = ms.map(get);
       let bi = -1;
@@ -555,8 +569,8 @@ function renderCompare() {
 function renderFavs() {
   const ids = Object.keys(favs).filter(id => favs[id]?.fav && byId[id]);
   $("#fav-body").innerHTML = ids.length ? ids.map(id => { const m = byId[id];
-    return `<div class="fav-row" data-id="${esc(id)}"><div><h3>${esc(m.brand)} ${esc(m.name || "")}</h3><span class="muted">${esc(m.model)} · ${p(m)} · Passung ${lastEval[id]?.score ?? "–"}</span>
-      <div class="actions" style="margin-top:8px"><button type="button" class="btn fav" data-act="fav" aria-pressed="true">★ Entfernen</button><button type="button" class="btn" data-act="cmp" aria-pressed="${cmp.includes(id)}">${cmp.includes(id) ? "✓ Im Vergleich" : "Vergleichen"}</button></div></div>
+    return `<div class="fav-row" data-id="${esc(id)}"><div style="display:flex;gap:12px"><div>${photo(m, "thumb")}</div><div><h3>${esc(m.brand)} ${esc(m.name || "")}</h3><span class="muted">${esc(m.model)} · ${p(m)} · Passung ${lastEval[id]?.score ?? "–"}</span>
+      <div class="actions" style="margin-top:8px"><button type="button" class="btn fav" data-act="fav" aria-pressed="true">★ Entfernen</button><button type="button" class="btn" data-act="cmp" aria-pressed="${cmp.includes(id)}">${cmp.includes(id) ? "✓ Im Vergleich" : "Vergleichen"}</button></div></div></div>
       <label><span class="label">Notiz</span><textarea id="note-${esc(id)}" data-note="${esc(id)}" placeholder="z. B. im Laden angesehen, Türen gefallen">${esc(favs[id].note || "")}</textarea></label></div>` }).join("")
     : `<p class="muted">Noch nichts gemerkt. Tippen Sie bei einem Gerät auf „☆ Merken“.</p>`;
   $("#fav-copy").hidden = !ids.length;
@@ -706,7 +720,7 @@ $("#checklist").addEventListener("change", e => { const i = +e.target.dataset.i;
 const rel = DATA.brand_reliability || [];
 if (rel.length) $("#rel").innerHTML = rel.map(x => `<li>${esc(x)}</li>`).join(""); else $("#rel-sec").hidden = true;
 
-$("#foot").innerHTML = `<p>Stand der Daten: ${esc(DATA.meta?.stand ? new Date(DATA.meta.stand).toLocaleDateString("de-DE") : "")}. Preise schwanken; „ab“ ist der niedrigste gefundene Preis. „–“ heißt: Wert nicht sicher belegt. Alle Angaben ohne Gewähr, vor dem Kauf im Datenblatt prüfen.</p>${
+$("#foot").innerHTML = `<p>Stand der Daten: ${esc(DATA.meta?.stand ? new Date(DATA.meta.stand).toLocaleDateString("de-DE") : "")}. Preise schwanken; „ab“ ist der niedrigste gefundene Preis. „–“ heißt: Wert nicht sicher belegt. Produktbilder: Hersteller bzw. Händler, nur zur Ansicht. Alle Angaben ohne Gewähr, vor dem Kauf im Datenblatt prüfen.</p>${
   DATA.sources?.length ? `<p>Quellen: ${DATA.sources.slice(0, 30).map((s, i) => `<a href="${esc(s)}" target="_blank" rel="noopener">[${i + 1}]</a>`).join(" ")}</p>` : ""}`;
 
 writeForm(); render(); connectDb();
