@@ -162,6 +162,11 @@ details.more[open] summary { margin-bottom: 8px }
 .more-grid .kicker { display: block; margin-bottom: 2px; color: var(--ink-2) }
 .out-head { margin-top: 28px; border-bottom: 2px solid var(--rule); padding-bottom: 6px; display: flex; justify-content: space-between; gap: 12px; align-items: end; flex-wrap: wrap }
 .out-head h2 { font-size: 1.5rem; text-transform: uppercase }
+details.fold > summary { cursor: pointer; list-style: none }
+details.fold > summary::-webkit-details-marker { display: none }
+details.fold > summary .tap { font-family: var(--font-display); font-weight: 700; text-decoration: underline; text-underline-offset: 3px }
+details.fold[open] > summary .tap { display: none }
+.show-all { margin-top: 18px; width: 100%; justify-content: center; font-size: 1.05rem }
 @media (max-width: 700px) {
   .item { grid-template-columns: 120px minmax(0, 1fr); gap: 14px }
   .item .photo { width: 120px }
@@ -322,8 +327,7 @@ dialog::backdrop { background: rgb(0 0 0 / .55) }
         <select id="sort"><option value="score">Beste Passung</option><option value="price">Preis</option><option value="noise">Leiseste</option><option value="energy">Sparsamste</option><option value="vol">Größter Inhalt</option></select></div>
     </div>
     <div id="list"></div>
-    <div class="out-head" id="out-head"></div>
-    <div id="list-out"></div>
+    <details class="fold" id="out-fold"><summary class="out-head" id="out-head"></summary><div id="list-out"></div></details>
   </div>
 </div></div>
 
@@ -345,8 +349,8 @@ dialog::backdrop { background: rgb(0 0 0 / .55) }
 </div></section>
 
 <section class="band gutter" aria-labelledby="rel-h" id="rel-sec"><div class="inner">
-  <h2 id="rel-h" style="font-size:2rem;text-transform:uppercase">Wie zuverlässig sind die Marken?</h2>
-  <ul class="rel" id="rel"></ul>
+  <details class="fold"><summary><h2 id="rel-h" style="font-size:2rem;text-transform:uppercase">Wie zuverlässig sind die Marken?</h2><span class="tap">Lesen ▾</span></summary>
+  <ul class="rel" id="rel"></ul></details>
 </div></section>
 
 <footer class="gutter"><div class="inner" id="foot"></div></footer>
@@ -597,7 +601,7 @@ function actions(m, withLinks) {
     <button type="button" class="btn fav" data-act="fav" aria-pressed="${!!f.fav}">${f.fav ? "★ Gemerkt" : "☆ Merken"}</button>
     <button type="button" class="btn" data-act="cmp" aria-pressed="${cmp.includes(m.id)}">${cmp.includes(m.id) ? "✓ Im Vergleich" : "Vergleichen"}</button>
     <button type="button" class="btn" data-act="door">Passt er hin?</button>
-    ${withLinks ? `<a class="btn" href="${idealo}" target="_blank" rel="noopener">Preise ↗</a>` : ""}
+    ${withLinks ? `<a class="btn" href="${idealo}" target="_blank" rel="noopener">Preise vergleichen ↗</a>` : ""}
   </div>`;
 }
 function specs(m) {
@@ -613,7 +617,7 @@ function fitList(ev) {
   const rest = ev.checks.filter(c => c.lvl !== "ok").sort((a, b) => (a.lvl === "bad" ? 0 : 1) - (b.lvl === "bad" ? 0 : 1));
   return `<div class="fit">${rest.map(c => `<span class="${c.lvl === "bad" ? "b" : "w"}">${esc(c.text)}</span>`).join("")}${ok.length ? `<span class="okline">${esc(ok.join(" · "))}</span>` : ""}</div>`;
 }
-function more(m) {
+function more(m, noPrice) {
   const idealo = "https://www.idealo.de/preisvergleich/MainSearchProductCategory.html?q=" + encodeURIComponent(m.model);
   return `<details class="more"><summary>Mehr zu diesem Gerät</summary><div class="more-grid">
     <div><span class="kicker">Genaue Bezeichnung</span><p>${esc(m.brand)} ${esc(m.name || "")} (${esc(m.model)})</p></div>
@@ -622,7 +626,7 @@ function more(m) {
     ${m.interior_highlights?.length ? `<div><span class="kicker">Innenausstattung</span><ul>${m.interior_highlights.map(x => `<li>${esc(x)}</li>`).join("")}</ul></div>` : ""}
     ${m.reliability_notes ? `<div><span class="kicker">Haltbarkeit &amp; Garantie</span><p>${esc(m.reliability_notes)}</p></div>` : ""}
     ${m.notes ? `<div><span class="kicker">Hinweis</span><p>${esc(m.notes)}</p></div>` : ""}
-    <div class="actions"><a class="btn" href="${idealo}" target="_blank" rel="noopener">Preise vergleichen ↗</a>${m.product_url ? `<a class="btn" href="${esc(m.product_url)}" target="_blank" rel="noopener">Herstellerseite ↗</a>` : ""}</div>
+    <div class="actions">${noPrice ? "" : `<a class="btn" href="${idealo}" target="_blank" rel="noopener">Preise vergleichen ↗</a>`}${m.product_url ? `<a class="btn" href="${esc(m.product_url)}" target="_blank" rel="noopener">Herstellerseite ↗</a>` : ""}</div>
   </div></details>`;
 }
 
@@ -638,7 +642,7 @@ function heroHtml(m, ev) {
     ${ev.checks.some(c => c.lvl !== "ok") ? fitList({ checks: ev.checks.filter(c => c.lvl !== "ok") }) : ""}
     <div class="hero-row">${priceTag(m, true)}<span class="verdict-word">${word(ev)}<span class="muted" style="font-size:.9rem"> · ${ev.score}/100</span></span></div>
     <div data-id="${esc(m.id)}">${actions(m, true)}</div>
-    ${more(m)}
+    ${more(m, true)}
   </div>`;
 }
 function itemHtml(m, ev, nr) {
@@ -671,12 +675,17 @@ function render() {
     : `<div class="hero-body"><h2 id="hero-h">Kein Gerät erfüllt alle Wünsche</h2><p>Lockern Sie eine Einstellung, zum Beispiel Lautstärke oder Budget. Unten steht bei jedem Gerät der Grund in Rot.</p></div>`;
   const rest = fit.filter(r => r !== top).sort(sorters[$("#sort").value]);
   $("#sum-title").textContent = top ? `${rest.length} weitere passende Geräte` : "Keine passenden Geräte";
-  $("#list").innerHTML = rest.map(r => itemHtml(r.m, r.ev, ranked.indexOf(r) + 1)).join("");
-  $("#out-head").innerHTML = out.length ? `<h2>Passt nicht (${out.length})</h2><span class="muted">Der Grund steht in Rot</span>` : "";
+  const shown = showAll ? rest : rest.slice(0, 3);
+  $("#list").innerHTML = shown.map(r => itemHtml(r.m, r.ev, ranked.indexOf(r) + 1)).join("")
+    + (rest.length > 3 ? `<button type="button" class="btn show-all" id="show-all">${showAll ? "Weniger anzeigen" : `Alle ${rest.length} weiteren anzeigen`}</button>` : "");
+  $("#out-fold").hidden = !out.length;
+  $("#out-head").innerHTML = `<h2>Passt nicht (${out.length})</h2><span class="tap">Anzeigen ▾</span>`;
   $("#list-out").innerHTML = out.map(r => itemHtml(r.m, r.ev, 0)).join("");
   renderCompare(); renderFavs(); renderBar();
 }
 $("#sort").addEventListener("change", render);
+let showAll = false;
+document.addEventListener("click", e => { if (e.target.closest("#show-all")) { showAll = !showAll; render(); if (!showAll) $("#sum-title").scrollIntoView({ block: "start" }) } });
 
 document.addEventListener("click", e => {
   const b = e.target.closest("[data-act]"); if (!b) return;
