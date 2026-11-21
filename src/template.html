@@ -1,0 +1,714 @@
+<title>Kühlschrank-Finder</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&display=swap">
+<style>
+/* Layout: Wunsch-Panel links (auf dem Handy oben), Rangliste rechts; Vergleich + Merkliste + Kaufhinweise darunter. */
+:root {
+  --bg: #f3f5f6;          /* gebürsteter Stahl, hell */
+  --surface: #ffffff;
+  --surface-2: #e8edef;
+  --line: #cfd8dc;
+  --fg: #172226;
+  --muted: #52646b;
+  --accent: #0b6a85;      /* Eisblau */
+  --accent-fg: #ffffff;
+  --accent-soft: #d6eef4;
+  --ok: #1f7a43;  --ok-soft: #dcf1e3;
+  --warn: #9a6200; --warn-soft: #fbedd0;
+  --bad: #b3261e; --bad-soft: #f9dedc;
+  --star: #c98a00;
+  --wall: #8a979c;
+  --font-display: "Bricolage Grotesque", "Avenir Next", system-ui, sans-serif;
+  --font-body: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --radius: 10px;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #11181b; --surface: #182327; --surface-2: #213036; --line: #33454c;
+  --fg: #e6eef0; --muted: #9db0b6; --accent: #5cc4e0; --accent-fg: #06222b; --accent-soft: #163a45;
+  --ok: #6fd391; --ok-soft: #173826; --warn: #f0b84d; --warn-soft: #3a2c10; --bad: #ff8a80; --bad-soft: #3d1a18;
+  --star: #f2c14e; --wall: #5d6d73; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #11181b; --surface: #182327; --surface-2: #213036; --line: #33454c;
+  --fg: #e6eef0; --muted: #9db0b6; --accent: #5cc4e0; --accent-fg: #06222b; --accent-soft: #163a45;
+  --ok: #6fd391; --ok-soft: #173826; --warn: #f0b84d; --warn-soft: #3a2c10; --bad: #ff8a80; --bad-soft: #3d1a18;
+  --star: #f2c14e; --wall: #5d6d73; color-scheme: dark }
+
+* { box-sizing: border-box }
+body { background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 17px; line-height: 1.5;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 0 48px }
+h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; line-height: 1.15; margin: 0 }
+h1 { font-size: clamp(2rem, 5vw, 2.9rem); letter-spacing: -0.01em }
+h2 { font-size: 1.45rem }
+h3 { font-size: 1.15rem }
+p { margin: 0 }
+button, input, select, textarea { font: inherit; color: inherit }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px }
+.wrap { max-width: 1240px; margin: 0 auto; display: flex; flex-direction: column; gap: 28px }
+.num { font-variant-numeric: tabular-nums }
+.muted { color: var(--muted) }
+.label { font-size: .78rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); font-weight: 700 }
+
+/* Kopf */
+header.top { padding-block: 28px 4px; display: flex; flex-direction: column; gap: 10px }
+header.top p { max-width: 62ch; color: var(--muted); font-size: 1.05rem }
+.spec-strip { display: flex; flex-wrap: wrap; gap: 8px }
+.spec-strip span { background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 4px 12px; font-size: .9rem }
+
+/* Hauptbereich */
+.main { display: grid; grid-template-columns: minmax(280px, 340px) minmax(0, 1fr); gap: 24px; align-items: start }
+@media (max-width: 860px) { .main { grid-template-columns: minmax(0, 1fr) } }
+
+/* Wünsche */
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px; display: flex; flex-direction: column; gap: 20px }
+@media (min-width: 861px) { .panel { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 12px); max-height: calc(100vh - 24px); overflow: auto } }
+.presets { display: grid; grid-template-columns: 1fr 1fr; gap: 8px }
+.preset { border: 1px solid var(--line); background: var(--surface-2); border-radius: 8px; padding: 10px; text-align: left; cursor: pointer; display: flex; flex-direction: column; gap: 2px }
+.preset b { font-size: .95rem }
+.preset small { color: var(--muted); font-size: .8rem; line-height: 1.3 }
+.preset[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); box-shadow: inset 0 0 0 1px var(--accent) }
+fieldset { border: 0; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px }
+legend { font-weight: 700; padding: 0; margin-bottom: 6px }
+.seg { display: flex; flex-wrap: wrap; gap: 6px }
+.seg label { cursor: pointer }
+.seg input { position: absolute; opacity: 0; pointer-events: none }
+.seg span { display: inline-block; border: 1px solid var(--line); border-radius: 999px; padding: 6px 12px; font-size: .92rem; background: var(--surface) }
+.seg input:checked + span { background: var(--accent); color: var(--accent-fg); border-color: var(--accent) }
+.seg input:focus-visible + span { outline: 3px solid var(--accent); outline-offset: 2px }
+.range-row { display: flex; justify-content: space-between; align-items: baseline; gap: 8px }
+.range-row output { font-weight: 700; font-variant-numeric: tabular-nums }
+input[type=range] { width: 100%; accent-color: var(--accent); height: 28px }
+.hint { font-size: .85rem; color: var(--muted) }
+.weights { display: grid; grid-template-columns: auto 1fr; gap: 8px 10px; align-items: center }
+.weights .seg span { padding: 4px 10px; font-size: .85rem }
+
+/* Ergebnisse */
+.results { display: flex; flex-direction: column; gap: 16px; min-width: 0 }
+.summary { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 16px; align-items: baseline }
+.summary h2 { font-size: 1.6rem }
+.sort { display: flex; gap: 8px; align-items: center }
+.sort select { border: 1px solid var(--line); background: var(--surface); border-radius: 8px; padding: 6px 10px }
+.list { display: flex; flex-direction: column; gap: 14px }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px; display: grid; grid-template-columns: 76px minmax(0, 1fr); gap: 16px }
+.card.top1 { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent) }
+.card.out { opacity: .82 }
+.score { width: 76px; height: 76px; border-radius: 50%; display: grid; place-items: center; position: relative }
+.score svg { position: absolute; inset: 0 }
+.score b { font-family: var(--font-display); font-size: 1.5rem; font-variant-numeric: tabular-nums }
+.score small { position: absolute; bottom: -20px; left: 0; right: 0; text-align: center; font-size: .72rem; color: var(--muted) }
+.card-body { display: flex; flex-direction: column; gap: 12px; min-width: 0 }
+.card-head { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 16px }
+.card-head .name { display: flex; flex-direction: column; gap: 2px; min-width: 0 }
+.card-head .model { color: var(--muted); font-size: .9rem; overflow-wrap: anywhere }
+.price { text-align: right }
+.price b { font-family: var(--font-display); font-size: 1.4rem; font-variant-numeric: tabular-nums }
+.price small { display: block; color: var(--muted); font-size: .8rem }
+.badges { display: flex; flex-wrap: wrap; gap: 6px }
+.badge { font-size: .78rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; padding: 2px 8px; border-radius: 4px; background: var(--surface-2); color: var(--muted) }
+.badge.rank { background: var(--accent); color: var(--accent-fg) }
+.facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(118px, 1fr)); gap: 8px }
+.fact { background: var(--surface-2); border-radius: 8px; padding: 8px 10px; display: flex; flex-direction: column; gap: 1px }
+.fact .label { font-size: .7rem }
+.fact b { font-variant-numeric: tabular-nums; font-size: 1rem }
+.checks { display: flex; flex-wrap: wrap; gap: 6px }
+.chk { font-size: .88rem; padding: 3px 10px; border-radius: 999px; display: inline-flex; gap: 6px; align-items: center }
+.chk::before { font-weight: 700 }
+.chk.ok { background: var(--ok-soft); color: var(--ok) } .chk.ok::before { content: "✓" }
+.chk.warn { background: var(--warn-soft); color: var(--warn) } .chk.warn::before { content: "!" }
+.chk.bad { background: var(--bad-soft); color: var(--bad) } .chk.bad::before { content: "✕" }
+details.more summary { cursor: pointer; color: var(--accent); font-weight: 700 }
+details.more[open] summary { margin-bottom: 8px }
+.more-grid { display: grid; gap: 10px }
+.more-grid ul { margin: 0; padding-left: 20px }
+.actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center }
+.btn { border: 1px solid var(--line); background: var(--surface); border-radius: 8px; padding: 8px 14px; cursor: pointer; font-weight: 700; font-size: .95rem; text-decoration: none; color: var(--fg); display: inline-flex; gap: 6px; align-items: center }
+.btn:hover { border-color: var(--accent) }
+.btn.primary { background: var(--accent); color: var(--accent-fg); border-color: var(--accent) }
+.btn[aria-pressed="true"].fav { color: var(--star); border-color: var(--star) }
+.btn[aria-pressed="true"].cmp { background: var(--accent-soft); border-color: var(--accent) }
+.out-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-top: 8px }
+
+/* Vergleich */
+section.block { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; display: flex; flex-direction: column; gap: 14px }
+.table-wrap { overflow-x: auto }
+table.cmp { border-collapse: collapse; width: 100%; min-width: 520px; font-variant-numeric: tabular-nums }
+table.cmp th, table.cmp td { padding: 9px 10px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top }
+table.cmp thead th { font-family: var(--font-display); font-size: 1.02rem }
+table.cmp tbody th { color: var(--muted); font-weight: 400; width: 170px }
+table.cmp td.best { background: var(--ok-soft); color: var(--ok); font-weight: 700 }
+
+/* Merkliste */
+.favs { display: flex; flex-direction: column; gap: 12px }
+.fav-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); gap: 12px; align-items: start; padding-bottom: 12px; border-bottom: 1px solid var(--line) }
+@media (max-width: 600px) { .fav-row { grid-template-columns: minmax(0, 1fr) } }
+.fav-row textarea { width: 100%; min-height: 64px; border: 1px solid var(--line); border-radius: 8px; padding: 8px; background: var(--bg) }
+.sync { font-size: .88rem; padding: 6px 10px; border-radius: 8px; background: var(--surface-2) }
+
+/* Kaufhinweise */
+.checklist { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 10px 24px }
+.checklist label { display: grid; grid-template-columns: 24px minmax(0,1fr); gap: 10px; cursor: pointer }
+.checklist input { width: 20px; height: 20px; accent-color: var(--accent); margin-top: 3px }
+.checklist input:checked + span { color: var(--muted); text-decoration: line-through }
+
+/* Skizze */
+dialog { border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); color: var(--fg); padding: 0; width: min(760px, calc(100vw - 24px)); max-height: calc(100vh - 24px) }
+dialog::backdrop { background: rgb(0 0 0 / .45) }
+.dlg { padding: 20px; display: flex; flex-direction: column; gap: 14px }
+.dlg-head { display: flex; justify-content: space-between; gap: 12px; align-items: start }
+.sketch { width: 100%; height: auto; display: block; background: var(--bg); border-radius: 8px; border: 1px solid var(--line) }
+.verdict { padding: 10px 14px; border-radius: 8px; font-weight: 700 }
+.verdict.ok { background: var(--ok-soft); color: var(--ok) }
+.verdict.warn { background: var(--warn-soft); color: var(--warn) }
+.verdict.bad { background: var(--bad-soft); color: var(--bad) }
+footer { color: var(--muted); font-size: .85rem; display: flex; flex-direction: column; gap: 6px; max-width: 80ch }
+footer a { color: var(--accent) }
+.toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(env(safe-area-inset-bottom, 0px) + 18px); background: var(--fg); color: var(--bg); padding: 10px 16px; border-radius: 8px; font-weight: 700; z-index: 20 }
+@media (prefers-reduced-motion: no-preference) { .card { transition: border-color .2s } }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <span class="label">Für die neue Küche</span>
+    <h1>Kühlschrank-Finder</h1>
+    <p>Stellen Sie links ein, was Ihnen wichtig ist. Die Liste sortiert sich sofort neu: oben steht das Gerät, das am besten passt. Mit ★ merken, mit „Vergleichen“ bis zu drei Geräte nebeneinanderstellen.</p>
+    <div class="spec-strip" aria-label="Eckdaten des Stellplatzes">
+      <span>Wand direkt links</span><span>alte Breite 90–92 cm</span><span>20 cm Überstand ok</span><span>kein Wasseranschluss</span><span>5 cm Wandabstand hinten</span>
+    </div>
+  </header>
+
+  <div class="main">
+    <form class="panel" id="prefs" aria-label="Ihre Wünsche">
+      <div class="presets" role="group" aria-label="Fertige Einstellungen">
+        <button type="button" class="preset" data-preset="wunsch"><b>Unsere Wunschliste</b><small>Genau wie besprochen</small></button>
+        <button type="button" class="preset" data-preset="leise"><b>Leise &amp; sparsam</b><small>Ruhe und Strom zählen am meisten</small></button>
+        <button type="button" class="preset" data-preset="preis"><b>Günstig</b><small>Bis 2.000 €, Rest flexibel</small></button>
+        <button type="button" class="preset" data-preset="platz"><b>Viel Platz</b><small>Maximaler Inhalt</small></button>
+      </div>
+
+      <fieldset>
+        <legend>Bauform</legend>
+        <div class="seg">
+          <label><input type="checkbox" name="type" value="french" id="t-french"><span>French Door</span></label>
+          <label><input type="checkbox" name="type" value="multi" id="t-multi"><span>Multi-Door</span></label>
+          <label><input type="checkbox" name="type" value="sbs" id="t-sbs"><span>Side-by-Side</span></label>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Breite</legend>
+        <div class="seg">
+          <label><input type="radio" name="width" value="wide" id="w-wide"><span>90–92 cm</span></label>
+          <label><input type="radio" name="width" value="both" id="w-both"><span>90–92 oder 81–85 cm</span></label>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <div class="range-row"><legend>Höhe höchstens</legend><output id="o-height" class="num"></output></div>
+        <input type="range" id="height" min="175" max="195" step="1">
+      </fieldset>
+
+      <fieldset>
+        <legend>Eiswürfel</legend>
+        <div class="seg">
+          <label><input type="radio" name="ice" value="must" id="i-must"><span>Automatisch, Pflicht</span></label>
+          <label><input type="radio" name="ice" value="prefer" id="i-prefer"><span>Automatisch bevorzugt</span></label>
+          <label><input type="radio" name="ice" value="any" id="i-any"><span>Egal</span></label>
+        </div>
+        <p class="hint">Ohne Wasseranschluss klappt automatisches Eis nur mit eingebautem Wassertank zum Nachfüllen.</p>
+      </fieldset>
+
+      <fieldset>
+        <div class="range-row"><legend>Lautstärke höchstens</legend><output id="o-noise" class="num"></output></div>
+        <input type="range" id="noise" min="34" max="43" step="1">
+        <p class="hint">35–36 dB ist sehr leise, 39 dB noch gut. Jedes 3 dB klingt deutlich lauter.</p>
+      </fieldset>
+
+      <fieldset>
+        <div class="range-row"><legend>Budget</legend><output id="o-budget" class="num"></output></div>
+        <input type="range" id="budget" min="1000" max="4000" step="100">
+        <label class="hint" style="display:flex;gap:8px;align-items:center;cursor:pointer"><input type="checkbox" id="stretch" style="width:18px;height:18px;accent-color:var(--accent)"> Für ein Top-Gerät bis 3.000 € okay</label>
+      </fieldset>
+
+      <fieldset>
+        <div class="range-row"><legend>Inhalt mindestens</legend><output id="o-vol" class="num"></output></div>
+        <input type="range" id="vol" min="400" max="650" step="10">
+      </fieldset>
+
+      <fieldset>
+        <legend>Wie wichtig ist …</legend>
+        <div class="weights" id="weights"></div>
+      </fieldset>
+    </form>
+
+    <div class="results">
+      <div class="summary">
+        <h2 id="sum-title">…</h2>
+        <div class="sort"><label for="sort" class="muted">Sortieren:</label>
+          <select id="sort"><option value="score">Beste Passung</option><option value="price">Preis</option><option value="noise">Leiseste</option><option value="energy">Sparsamste</option><option value="vol">Größter Inhalt</option></select>
+        </div>
+      </div>
+      <div class="list" id="list"></div>
+      <div class="out-head" id="out-head"></div>
+      <div class="list" id="list-out"></div>
+    </div>
+  </div>
+
+  <section class="block" id="compare" aria-labelledby="cmp-h">
+    <div class="summary"><h2 id="cmp-h">Vergleich</h2><button type="button" class="btn" id="cmp-clear">Auswahl leeren</button></div>
+    <div id="cmp-body"></div>
+  </section>
+
+  <section class="block" id="favorites" aria-labelledby="fav-h">
+    <div class="summary"><h2 id="fav-h">★ Merkliste</h2><button type="button" class="btn" id="fav-copy">Merkliste als Text kopieren</button></div>
+    <p class="sync" id="sync">Merkliste wird geladen …</p>
+    <div class="favs" id="fav-body"></div>
+    <textarea id="fav-text" hidden readonly style="width:100%;min-height:120px"></textarea>
+  </section>
+
+  <section class="block" aria-labelledby="buy-h">
+    <h2 id="buy-h">Vor dem Kauf</h2>
+    <ul class="checklist" id="checklist"></ul>
+  </section>
+
+  <section class="block" aria-labelledby="rel-h" id="rel-sec">
+    <h2 id="rel-h">Wie zuverlässig sind die Marken?</h2>
+    <ul id="rel" style="margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;max-width:80ch"></ul>
+  </section>
+
+  <footer id="foot"></footer>
+</div>
+
+<dialog id="dlg" aria-labelledby="dlg-title">
+  <div class="dlg">
+    <div class="dlg-head">
+      <div><span class="label">Draufsicht, vereinfacht</span><h2 id="dlg-title">Passt die Tür?</h2></div>
+      <button type="button" class="btn" id="dlg-close">Schließen</button>
+    </div>
+    <svg class="sketch" id="sketch" viewBox="0 0 520 330" role="img" aria-label="Draufsicht: Wand links, Kühlschrank, Arbeitsplatte rechts"></svg>
+    <fieldset>
+      <div class="range-row"><legend>Abstand Gerät zur linken Wand</legend><output id="o-gap" class="num"></output></div>
+      <input type="range" id="gap" min="0" max="15" step="0.5">
+      <p class="hint">Am besten beim jetzigen Kühlschrank nachmessen. Griff-Tiefe angenommen: 6 cm.</p>
+    </fieldset>
+    <div class="verdict" id="verdict"></div>
+    <p class="hint" id="door-note"></p>
+  </div>
+</dialog>
+
+<script type="application/json" id="fridge-data">__DATA__</script>
+<script>
+(() => {
+"use strict";
+const DATA = JSON.parse(document.getElementById("fridge-data").textContent);
+const MODELS = DATA.models;
+const byId = Object.fromEntries(MODELS.map(m => [m.id, m]));
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const fmtEur = n => n == null ? "–" : n.toLocaleString("de-DE") + " €";
+const fmt = (n, u) => n == null ? "–" : String(n).replace(".", ",") + (u ? " " + u : "");
+const TYPE_NAME = { french: "French Door", multi: "Multi-Door", sbs: "Side-by-Side" };
+const ICE_NAME = { auto_tank: "Automatisch (Tank)", auto_plumbed_only: "Nur mit Wasseranschluss", trays: "Eiswürfelschalen", none: "Kein Eisfach-Zubehör" };
+
+const store = {
+  get(k, d) { try { const v = localStorage.getItem("kf:" + k); return v == null ? d : JSON.parse(v) } catch { return d } },
+  set(k, v) { try { localStorage.setItem("kf:" + k, JSON.stringify(v)) } catch {} }
+};
+
+/* ---------- Einstellungen ---------- */
+const PRESETS = {
+  wunsch: { types: ["french", "multi", "sbs"], width: "both", height: 185, ice: "prefer", noise: 39, budget: 2500, stretch: true, vol: 500, w: { leise: 3, sparsam: 2, preis: 2, platz: 2, form: 2 } },
+  leise:  { types: ["french", "multi", "sbs"], width: "both", height: 185, ice: "prefer", noise: 37, budget: 3000, stretch: true, vol: 480, w: { leise: 3, sparsam: 3, preis: 1, platz: 1, form: 1 } },
+  preis:  { types: ["french", "multi", "sbs"], width: "both", height: 185, ice: "any",    noise: 40, budget: 2000, stretch: false, vol: 480, w: { leise: 2, sparsam: 2, preis: 3, platz: 1, form: 1 } },
+  platz:  { types: ["french", "multi", "sbs"], width: "wide", height: 185, ice: "prefer", noise: 40, budget: 3000, stretch: true, vol: 580, w: { leise: 1, sparsam: 1, preis: 1, platz: 3, form: 2 } },
+};
+const WEIGHTS = [["leise", "Leise"], ["sparsam", "Wenig Strom"], ["preis", "Niedriger Preis"], ["platz", "Viel Platz"], ["form", "French Door"]];
+let S = Object.assign(structuredClone(PRESETS.wunsch), store.get("prefs", {}), { preset: store.get("preset", "wunsch") });
+
+$("#weights").innerHTML = WEIGHTS.map(([k, n]) => `<span>${n}</span><div class="seg" role="radiogroup" aria-label="${n}">${
+  [[1, "wenig"], [2, "mittel"], [3, "sehr"]].map(([v, t]) => `<label><input type="radio" name="w-${k}" id="w-${k}-${v}" value="${v}"><span>${t}</span></label>`).join("")}</div>`).join("");
+
+function writeForm() {
+  document.querySelectorAll('input[name=type]').forEach(i => i.checked = S.types.includes(i.value));
+  document.querySelectorAll('input[name=width]').forEach(i => i.checked = i.value === S.width);
+  document.querySelectorAll('input[name=ice]').forEach(i => i.checked = i.value === S.ice);
+  $("#height").value = S.height; $("#noise").value = S.noise; $("#budget").value = S.budget; $("#vol").value = S.vol; $("#stretch").checked = S.stretch;
+  WEIGHTS.forEach(([k]) => { const el = document.getElementById(`w-${k}-${S.w[k]}`); if (el) el.checked = true });
+  document.querySelectorAll(".preset").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.preset === S.preset)));
+  outputs();
+}
+function outputs() {
+  $("#o-height").textContent = S.height + " cm";
+  $("#o-noise").textContent = S.noise + " dB";
+  $("#o-budget").textContent = fmtEur(S.budget);
+  $("#o-vol").textContent = S.vol + " l";
+}
+function readForm() {
+  S.types = [...document.querySelectorAll('input[name=type]:checked')].map(i => i.value);
+  S.width = (document.querySelector('input[name=width]:checked') || {}).value || "both";
+  S.ice = (document.querySelector('input[name=ice]:checked') || {}).value || "prefer";
+  S.height = +$("#height").value; S.noise = +$("#noise").value; S.budget = +$("#budget").value; S.vol = +$("#vol").value; S.stretch = $("#stretch").checked;
+  WEIGHTS.forEach(([k]) => { const el = document.querySelector(`input[name=w-${k}]:checked`); if (el) S.w[k] = +el.value });
+}
+$("#prefs").addEventListener("input", () => { readForm(); S.preset = null; save(); writeForm(); render() });
+document.querySelectorAll(".preset").forEach(b => b.addEventListener("click", () => {
+  S = Object.assign(structuredClone(PRESETS[b.dataset.preset]), { preset: b.dataset.preset }); save(); writeForm(); render();
+}));
+function save() { const { preset, ...p } = S; store.set("prefs", p); store.set("preset", preset) }
+
+/* ---------- Bewertung ---------- */
+const clamp01 = x => Math.max(0, Math.min(1, x));
+function evaluate(m) {
+  const checks = []; let fail = false;
+  const add = (lvl, text) => { checks.push({ lvl, text }); if (lvl === "bad") fail = true };
+  // Bauform
+  if (!S.types.includes(m.type)) add("bad", `${TYPE_NAME[m.type]} abgewählt`);
+  // Breite
+  const w = m.width_cm;
+  if (w == null) add("warn", "Breite unbekannt");
+  else if (w >= 89.5 && w <= 92.5) add("ok", `Breite ${fmt(w)} cm`);
+  else if (w >= 80.5 && w <= 85.5) add(S.width === "both" ? "warn" : "bad", `Schmaler: ${fmt(w)} cm`);
+  else if (w > 92.5) add("bad", `Zu breit: ${fmt(w)} cm`);
+  else add("bad", `Zu schmal: ${fmt(w)} cm`);
+  // Höhe
+  const h = m.height_cm;
+  if (h == null) add("warn", "Höhe unbekannt");
+  else if (h <= S.height) add("ok", `Höhe ${fmt(h)} cm`);
+  else if (h <= S.height + 2) add("warn", `Knapp: ${fmt(h)} cm hoch`);
+  else add("bad", `Zu hoch: ${fmt(h)} cm`);
+  // No-Frost
+  if (m.no_frost === false) add("bad", "Kein No-Frost");
+  else if (m.no_frost == null) add("warn", "No-Frost unklar");
+  // Eis
+  if (m.ice === "auto_tank") add("ok", `Eis automatisch${m.water_tank_l ? `, Tank ${fmt(m.water_tank_l)} l` : ""}`);
+  else if (m.ice === "auto_plumbed_only") add(S.ice === "must" ? "bad" : "warn", "Eisbereiter braucht Wasseranschluss");
+  else add(S.ice === "must" ? "bad" : (S.ice === "prefer" ? "warn" : "ok"), "Eis nur per Schale");
+  // Lautstärke
+  const n = m.noise_db;
+  if (n == null) add("warn", "Lautstärke unbekannt");
+  else if (n <= Math.min(S.noise, 36)) add("ok", `Sehr leise: ${n} dB`);
+  else if (n <= S.noise) add("ok", `${n} dB`);
+  else if (n <= S.noise + 1) add("warn", `Etwas lauter: ${n} dB`);
+  else add("bad", `Zu laut: ${n} dB`);
+  // Preis
+  const p = m.price_eur, cap = S.stretch ? Math.max(S.budget, 3000) : S.budget;
+  if (p == null) add("warn", "Preis unbekannt");
+  else if (p <= S.budget) add("ok", `Im Budget`);
+  else if (p <= cap) add("warn", `Über Budget: ${fmtEur(p)}`);
+  else add("bad", `Zu teuer: ${fmtEur(p)}`);
+  // Inhalt
+  const v = m.total_l;
+  if (v != null && v < S.vol) add("warn", `Nur ${v} l Inhalt`);
+  if (m.fridge_l && m.freezer_l) {
+    const share = m.freezer_l / (m.fridge_l + m.freezer_l);
+    if (share < 0.3) add("warn", `Kleines Gefrierfach (${m.freezer_l} l)`);
+  }
+  if (m.color && !/edelstahl|silber|inox|steel/i.test(m.color)) add("warn", `Farbe: ${m.color.split("(")[0].trim()}`);
+  if (m.availability && /^(unsicher|auslauf)|discontinued|eingestellt/i.test(m.availability)) add("warn", "Schwer erhältlich");
+
+  // Punkte
+  const parts = [
+    [S.w.leise,   n == null ? .4 : clamp01((42 - n) / 7)],
+    [S.w.sparsam, m.kwh_year == null ? .4 : clamp01((460 - m.kwh_year) / 200)],
+    [S.w.preis,   p == null ? .4 : clamp01((3600 - p) / 2100)],
+    [S.w.platz,   v == null ? .4 : clamp01((v - 450) / 220)],
+    [S.w.form,    { french: 1, multi: .85, sbs: .55 }[m.type] ?? .5],
+    [S.ice === "any" ? 1 : 3, { auto_tank: 1, trays: .45, none: .35, auto_plumbed_only: .3 }[m.ice] ?? .3],
+  ];
+  const tw = parts.reduce((a, [w]) => a + w, 0);
+  let score = parts.reduce((a, [w, x]) => a + w * x, 0) / tw * 100;
+  score -= checks.filter(c => c.lvl === "warn").length * 5;
+  score = Math.round(Math.max(1, Math.min(99, score)));
+  return { checks, fail, score };
+}
+
+/* ---------- Vergleich & Merkliste: Zustand ---------- */
+let cmp = store.get("cmp", []).filter(id => byId[id]);
+let favs = store.get("favs", {});   // id -> {fav, note}
+let remote = null;                   // db-Anbindung, falls verfügbar
+
+/* ---------- Liste ---------- */
+function ring(score, fail) {
+  const r = 34, c = 2 * Math.PI * r, col = fail ? "var(--bad)" : score >= 70 ? "var(--ok)" : score >= 50 ? "var(--warn)" : "var(--muted)";
+  return `<svg viewBox="0 0 76 76" aria-hidden="true"><circle cx="38" cy="38" r="${r}" fill="none" stroke="var(--surface-2)" stroke-width="6"/><circle cx="38" cy="38" r="${r}" fill="none" stroke="${col}" stroke-width="6" stroke-linecap="round" stroke-dasharray="${c * score / 100} ${c}" transform="rotate(-90 38 38)"/></svg>`;
+}
+function card(m, ev, rank) {
+  const f = favs[m.id] || {};
+  const dims = [m.width_cm, m.height_cm, m.depth_cm].map(x => x == null ? "?" : fmt(x)).join(" × ");
+  const idealo = "https://www.idealo.de/preisvergleich/MainSearchProductCategory.html?q=" + encodeURIComponent(m.model);
+  const chips = ev.checks.slice().sort((a, b) => ({ bad: 0, warn: 1, ok: 2 }[a.lvl] - { bad: 0, warn: 1, ok: 2 }[b.lvl]));
+  return `<article class="card${rank === 1 && !ev.fail ? " top1" : ""}${ev.fail ? " out" : ""}" data-id="${esc(m.id)}">
+    <div class="score" title="Passung ${ev.score} von 100">${ring(ev.score, ev.fail)}<b>${ev.score}</b><small>Passung</small></div>
+    <div class="card-body">
+      <div class="card-head">
+        <div class="name">
+          <div class="badges">${rank && !ev.fail ? `<span class="badge rank">Platz ${rank}</span>` : ""}<span class="badge">${TYPE_NAME[m.type] || esc(m.type)}</span>${m.energy_class ? `<span class="badge">Energie ${esc(m.energy_class)}</span>` : ""}</div>
+          <h3>${esc(m.brand)} ${esc(m.name || "")}</h3>
+          <span class="model">${esc(m.model)}</span>
+        </div>
+        <div class="price"><b>${p(m)}</b><small>${esc(m.price_range || "")}</small></div>
+      </div>
+      <div class="facts">
+        <div class="fact"><span class="label">B × H × T (cm)</span><b>${dims}</b></div>
+        <div class="fact"><span class="label">Inhalt</span><b>${fmt(m.total_l, "l")}</b><span class="muted" style="font-size:.8rem">${m.fridge_l ? `${m.fridge_l} kühl / ${m.freezer_l ?? "?"} gefr.` : ""}</span></div>
+        <div class="fact"><span class="label">Lautstärke</span><b>${fmt(m.noise_db, "dB")}</b></div>
+        <div class="fact"><span class="label">Strom pro Jahr</span><b>${fmt(m.kwh_year, "kWh")}</b><span class="muted" style="font-size:.8rem">${m.kwh_year ? `≈ ${Math.round(m.kwh_year * 0.35)} € bei 35 ct` : ""}</span></div>
+        <div class="fact"><span class="label">Eis</span><b>${ICE_NAME[m.ice] || "–"}</b></div>
+      </div>
+      <div class="checks">${chips.map(c => `<span class="chk ${c.lvl}">${esc(c.text)}</span>`).join("")}</div>
+      <details class="more"><summary>Mehr zu diesem Gerät</summary><div class="more-grid">
+        ${m.interior_highlights?.length ? `<div><span class="label">Innenausstattung</span><ul>${m.interior_highlights.map(x => `<li>${esc(x)}</li>`).join("")}</ul></div>` : ""}
+        ${m.reliability_notes ? `<div><span class="label">Haltbarkeit &amp; Garantie</span><p>${esc(m.reliability_notes)}</p></div>` : ""}
+        ${m.door_open_notes ? `<div><span class="label">Türen</span><p>${esc(m.door_open_notes)}</p></div>` : ""}
+        ${m.notes ? `<div><span class="label">Hinweis</span><p>${esc(m.notes)}</p></div>` : ""}
+      </div></details>
+      <div class="actions">
+        <button type="button" class="btn fav" data-act="fav" aria-pressed="${!!f.fav}">${f.fav ? "★ Gemerkt" : "☆ Merken"}</button>
+        <button type="button" class="btn cmp" data-act="cmp" aria-pressed="${cmp.includes(m.id)}">${cmp.includes(m.id) ? "✓ Im Vergleich" : "Vergleichen"}</button>
+        <button type="button" class="btn" data-act="door">Passt die Tür?</button>
+        <a class="btn" href="${idealo}" target="_blank" rel="noopener">Preise ansehen ↗</a>
+        ${m.product_url ? `<a class="btn" href="${esc(m.product_url)}" target="_blank" rel="noopener">Hersteller ↗</a>` : ""}
+      </div>
+    </div></article>`;
+}
+const p = m => m.price_eur == null ? "Preis ?" : "ab " + fmtEur(m.price_eur);
+
+let lastEval = {};
+function render() {
+  const rows = MODELS.map(m => ({ m, ev: evaluate(m) }));
+  rows.forEach(r => lastEval[r.m.id] = r.ev);
+  const key = $("#sort").value;
+  const sorters = {
+    score: (a, b) => b.ev.score - a.ev.score,
+    price: (a, b) => (a.m.price_eur ?? 1e9) - (b.m.price_eur ?? 1e9),
+    noise: (a, b) => (a.m.noise_db ?? 99) - (b.m.noise_db ?? 99),
+    energy: (a, b) => (a.m.kwh_year ?? 1e9) - (b.m.kwh_year ?? 1e9),
+    vol: (a, b) => (b.m.total_l ?? 0) - (a.m.total_l ?? 0),
+  };
+  rows.sort(sorters[key]);
+  const fit = rows.filter(r => !r.ev.fail), out = rows.filter(r => r.ev.fail);
+  const ranked = fit.slice().sort(sorters.score);
+  $("#sum-title").textContent = fit.length ? `${fit.length} von ${MODELS.length} Geräten passen` : "Kein Gerät erfüllt alle Wünsche";
+  $("#list").innerHTML = fit.length ? fit.map(r => card(r.m, r.ev, ranked.indexOf(r) + 1)).join("")
+    : `<p class="block" style="padding:18px">Lockern Sie eine Einstellung, zum Beispiel Lautstärke oder Budget. Unten sehen Sie, woran es bei jedem Gerät scheitert.</p>`;
+  $("#out-head").innerHTML = out.length ? `<h2 style="font-size:1.2rem">Passt nicht ganz (${out.length})</h2><span class="muted">Rot markiert: der Grund</span>` : "";
+  $("#list-out").innerHTML = out.map(r => card(r.m, r.ev, 0)).join("");
+  renderCompare(); renderFavs();
+}
+$("#sort").addEventListener("change", render);
+
+document.addEventListener("click", e => {
+  const b = e.target.closest("[data-act]"); if (!b) return;
+  const id = b.closest("[data-id]").dataset.id;
+  if (b.dataset.act === "fav") toggleFav(id);
+  if (b.dataset.act === "cmp") toggleCmp(id);
+  if (b.dataset.act === "door") openDoor(id);
+  if (b.dataset.act === "uncmp") toggleCmp(id);
+});
+
+function toast(t) { const el = document.createElement("div"); el.className = "toast"; el.setAttribute("role", "status"); el.textContent = t; document.body.append(el); setTimeout(() => el.remove(), 2400) }
+
+function toggleCmp(id) {
+  if (cmp.includes(id)) cmp = cmp.filter(x => x !== id);
+  else { if (cmp.length >= 3) { toast("Höchstens 3 Geräte im Vergleich"); return } cmp.push(id); toast("Zum Vergleich hinzugefügt, unten ansehen") }
+  store.set("cmp", cmp); render();
+}
+$("#cmp-clear").addEventListener("click", () => { cmp = []; store.set("cmp", cmp); render() });
+
+/* ---------- Vergleich ---------- */
+function renderCompare() {
+  const ms = cmp.map(id => byId[id]);
+  if (!ms.length) { $("#cmp-body").innerHTML = `<p class="muted">Noch nichts ausgewählt. Tippen Sie bei bis zu drei Geräten auf „Vergleichen“.</p>`; $("#cmp-clear").hidden = true; return }
+  $("#cmp-clear").hidden = false;
+  const rows = [
+    ["Passung", m => lastEval[m.id].score, "max", v => v + " / 100"],
+    ["Preis ab", m => m.price_eur, "min", fmtEur],
+    ["Bauform", m => TYPE_NAME[m.type]],
+    ["Breite", m => m.width_cm, null, v => fmt(v, "cm")],
+    ["Höhe", m => m.height_cm, "min", v => fmt(v, "cm")],
+    ["Tiefe", m => m.depth_cm, null, v => fmt(v, "cm")],
+    ["Überstand über 60-cm-Arbeitsplatte", m => m.depth_cm == null ? null : Math.round(m.depth_cm + 5 - 60), null, v => v == null ? "–" : v + " cm"],
+    ["Inhalt gesamt", m => m.total_l, "max", v => fmt(v, "l")],
+    ["Kühlteil / Gefrierteil", m => m.fridge_l ? `${m.fridge_l} / ${m.freezer_l ?? "?"} l` : null],
+    ["Lautstärke", m => m.noise_db, "min", v => fmt(v, "dB")],
+    ["Strom pro Jahr", m => m.kwh_year, "min", v => fmt(v, "kWh")],
+    ["Energieklasse", m => m.energy_class],
+    ["Eiswürfel", m => ICE_NAME[m.ice]],
+    ["Wassertank", m => m.water_tank_l, null, v => fmt(v, "l")],
+    ["Wasserspender", m => m.water_dispenser == null ? null : (m.water_dispenser ? "ja" : "nein")],
+    ["No-Frost", m => m.no_frost == null ? null : (m.no_frost ? "ja" : "nein")],
+    ["Seitenabstand Tür (Hersteller)", m => m.hinge_clearance_cm, null, v => fmt(v, "cm")],
+    ["Garantie & Haltbarkeit", m => m.reliability_notes],
+  ];
+  const cell = (v, f) => v == null || v === "" ? "–" : (f ? f(v) : esc(v));
+  $("#cmp-body").innerHTML = `<div class="table-wrap"><table class="cmp"><thead><tr><th></th>${ms.map(m => `<th data-id="${esc(m.id)}">${esc(m.brand)} ${esc(m.name || m.model)}<br><button type="button" class="btn" style="margin-top:6px;padding:4px 10px;font-size:.8rem" data-act="uncmp">Entfernen</button></th>`).join("")}</tr></thead><tbody>${
+    rows.map(([label, get, best, f]) => {
+      const vals = ms.map(get);
+      let bi = -1;
+      if (best && ms.length > 1) { const nums = vals.map(v => typeof v === "number" ? v : null); const valid = nums.filter(v => v != null);
+        if (valid.length > 1) { const t = best === "max" ? Math.max(...valid) : Math.min(...valid); if (valid.filter(v => v === t).length === 1) bi = nums.indexOf(t) } }
+      return `<tr><th scope="row">${label}</th>${vals.map((v, i) => `<td class="${i === bi ? "best" : ""}">${cell(v, f)}</td>`).join("")}</tr>`;
+    }).join("")}</tbody></table></div><p class="hint">Grün = bester Wert in der Zeile. Überstand: Gerätetiefe plus 5 cm Wandabstand hinten, minus 60 cm Arbeitsplatte.</p>`;
+}
+
+/* ---------- Merkliste (geteilt über db, sonst nur dieses Gerät) ---------- */
+function renderFavs() {
+  const ids = Object.keys(favs).filter(id => favs[id]?.fav && byId[id]);
+  $("#fav-body").innerHTML = ids.length ? ids.map(id => { const m = byId[id];
+    return `<div class="fav-row" data-id="${esc(id)}"><div><h3>${esc(m.brand)} ${esc(m.name || "")}</h3><span class="muted">${esc(m.model)} · ${p(m)} · Passung ${lastEval[id]?.score ?? "–"}</span>
+      <div class="actions" style="margin-top:8px"><button type="button" class="btn fav" data-act="fav" aria-pressed="true">★ Entfernen</button><button type="button" class="btn" data-act="cmp" aria-pressed="${cmp.includes(id)}">${cmp.includes(id) ? "✓ Im Vergleich" : "Vergleichen"}</button></div></div>
+      <label><span class="label">Notiz</span><textarea id="note-${esc(id)}" data-note="${esc(id)}" placeholder="z. B. im Laden angesehen, Türen gefallen">${esc(favs[id].note || "")}</textarea></label></div>` }).join("")
+    : `<p class="muted">Noch nichts gemerkt. Tippen Sie bei einem Gerät auf „☆ Merken“.</p>`;
+  $("#fav-copy").hidden = !ids.length;
+}
+const noteTimers = {};
+document.addEventListener("input", e => {
+  const id = e.target.dataset?.note; if (!id) return;
+  favs[id] = { ...(favs[id] || {}), note: e.target.value }; store.set("favs", favs);
+  clearTimeout(noteTimers[id]); noteTimers[id] = setTimeout(() => pushFav(id), 900);
+});
+function toggleFav(id) {
+  const cur = favs[id] || {}; favs[id] = { ...cur, fav: !cur.fav }; store.set("favs", favs);
+  toast(favs[id].fav ? "Gemerkt" : "Von der Merkliste entfernt"); render(); pushFav(id);
+}
+const writing = {};
+async function pushFav(id) {
+  if (!remote) return;
+  if (writing[id]) { writing[id] = "again"; return }
+  writing[id] = true;
+  try { await remote.doc("favs/" + id).set({ fav: !!favs[id]?.fav, note: favs[id]?.note || "", at: new Date().toISOString() }) }
+  catch (e) { if (e?.code === "invalid_argument") { remote = null; setSync("local") } }
+  const again = writing[id] === "again"; writing[id] = false; if (again) pushFav(id);
+}
+function setSync(mode) {
+  $("#sync").textContent = mode === "shared" ? "Die Merkliste wird geteilt: Alle, die diesen Link angemeldet öffnen, sehen dieselbe Liste und Notizen."
+    : mode === "loading" ? "Merkliste wird geladen …"
+    : "Die Merkliste wird nur auf diesem Gerät gespeichert. Zum Weitergeben: „Merkliste als Text kopieren“ und per Nachricht schicken.";
+}
+$("#fav-copy").addEventListener("click", async () => {
+  const ids = Object.keys(favs).filter(id => favs[id]?.fav && byId[id]);
+  const text = "Unsere Kühlschrank-Merkliste:\n\n" + ids.map(id => { const m = byId[id];
+    return `★ ${m.brand} ${m.name || ""} (${m.model})\n  ${p(m)} · ${fmt(m.width_cm)}×${fmt(m.height_cm)}×${fmt(m.depth_cm)} cm · ${fmt(m.noise_db, "dB")} · ${fmt(m.total_l, "l")}${favs[id].note ? "\n  Notiz: " + favs[id].note : ""}` }).join("\n\n");
+  try { await navigator.clipboard.writeText(text); toast("Kopiert. Jetzt in eine Nachricht einfügen.") }
+  catch { const t = $("#fav-text"); t.hidden = false; t.value = text; t.focus(); t.select(); toast("Text markiert. Bitte kopieren.") }
+});
+
+async function connectDb() {
+  setSync("loading");
+  const timer = setTimeout(() => setSync("local"), 10000);
+  try {
+    const db = await window.claude?.use?.("db");
+    if (!db) { clearTimeout(timer); setSync("local"); return }
+    const u = await window.claude.use("user");
+    const canWrite = u ? await u.can("data.write") : null;
+    db.collection("favs").onSnapshot(snap => {
+      clearTimeout(timer);
+      if (!snap.metadata.fromCache) {
+        // Geteilten Stand übernehmen; lokale Einträge, die noch nicht geteilt sind, dazuschreiben
+        const shared = {}; snap.docs.forEach(d => { const x = d.data(); shared[d.id] = { fav: !!x.fav, note: x.note || "" } });
+        const localOnly = Object.keys(favs).filter(id => !(id in shared) && favs[id]?.fav);
+        favs = { ...shared }; localOnly.forEach(id => favs[id] = store.get("favs", {})[id]);
+        store.set("favs", favs);
+        if (canWrite !== false) { remote = db; setSync("shared"); localOnly.forEach(pushFav) } else setSync("local");
+        const active = document.activeElement?.dataset?.note; if (!active) render();
+      }
+    }, () => { clearTimeout(timer); remote = null; setSync("local") });
+  } catch { clearTimeout(timer); setSync("local") }
+}
+
+/* ---------- Türskizze ---------- */
+let doorId = null;
+const dlg = $("#dlg");
+$("#gap").value = store.get("gap", 3);
+function openDoor(id) { doorId = id; drawDoor(); try { dlg.showModal() } catch { dlg.setAttribute("open", "") } }
+$("#dlg-close").addEventListener("click", () => dlg.close ? dlg.close() : dlg.removeAttribute("open"));
+dlg.addEventListener("click", e => { if (e.target === dlg) dlg.close() });
+$("#gap").addEventListener("input", () => { store.set("gap", +$("#gap").value); drawDoor() });
+
+function maxAngle(gap, w, t, h) {
+  // Drehpunkt vorne links am Gehäuse. Tür: Breite w, Dicke t (hinter der Front), Griff h vor der Front, kurz vor dem Türende.
+  const pts = [[0, -t], [w, -t], [w, 0], [w - 6, h], [w - 16, h]];
+  let best = 0;
+  for (let a = 0; a <= 180; a += 1) {
+    const r = a * Math.PI / 180, ok = pts.every(([x, y]) => gap + x * Math.cos(r) - y * Math.sin(r) >= -0.01);
+    if (ok) best = a; else break;
+  }
+  return best;
+}
+function drawDoor() {
+  const m = byId[doorId]; if (!m) return;
+  const gap = +$("#gap").value; $("#o-gap").textContent = fmt(gap, "cm");
+  const W = m.width_cm ?? 91, D = m.depth_cm ?? 72, backGap = 5, counter = 60;
+  const doorW = m.type === "sbs" ? W * 0.42 : W / 2, t = 7, hnd = 6;
+  const ang = maxAngle(gap, doorW, t, hnd);
+  const S2 = 2.6, ox = 60, oy = 26; // Maßstab px/cm
+  const X = x => ox + x * S2, Y = y => oy + y * S2;
+  const front = backGap + D;
+  const showAng = Math.min(ang, 100), r = showAng * Math.PI / 180;
+  const rot = ([x, y]) => [gap + x * Math.cos(r) - y * Math.sin(r), front + x * Math.sin(r) + y * Math.cos(r)];
+  const door = [[0, -t], [doorW, -t], [doorW, 0], [0, 0]].map(rot);
+  const handle = [[doorW - 16, 0], [doorW - 16, hnd], [doorW - 6, hnd], [doorW - 6, 0]].map(rot);
+  const poly = pts => pts.map(([x, y]) => `${X(x).toFixed(1)},${Y(y).toFixed(1)}`).join(" ");
+  const arcR = doorW * S2;
+  const need = m.hinge_clearance_cm;
+  const svg = `
+    <defs><pattern id="hatch" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="8" height="8" fill="var(--surface-2)"/><line x1="0" y1="0" x2="0" y2="8" stroke="var(--wall)" stroke-width="3"/></pattern></defs>
+    <rect x="${X(-18)}" y="0" width="${18 * S2}" height="330" fill="url(#hatch)"/>
+    <rect x="${X(-18)}" y="0" width="520" height="${oy}" fill="url(#hatch)"/>
+    <text x="${X(-16)}" y="${Y(150)}" fill="var(--fg)" font-size="13" font-weight="700" transform="rotate(-90 ${X(-11)} ${Y(150)})">Wand</text>
+    <rect x="${X(gap + W)}" y="${Y(0)}" width="${(170 - gap - W) * S2}" height="${counter * S2}" fill="var(--surface-2)" stroke="var(--line)"/>
+    <text x="${X(gap + W + 6)}" y="${Y(30)}" fill="var(--muted)" font-size="13">Arbeitsplatte 60 cm</text>
+    <line x1="${X(gap + W)}" y1="${Y(counter)}" x2="${X(gap + W + 40)}" y2="${Y(counter)}" stroke="var(--muted)" stroke-dasharray="4 4"/>
+    <rect x="${X(gap)}" y="${Y(backGap)}" width="${W * S2}" height="${(D - t) * S2}" fill="var(--surface)" stroke="var(--fg)" stroke-width="2"/>
+    <text x="${X(gap + W / 2)}" y="${Y(backGap + D / 2 - 4)}" text-anchor="middle" fill="var(--fg)" font-size="14" font-weight="700">${esc(m.brand)}</text>
+    <text x="${X(gap + W / 2)}" y="${Y(backGap + D / 2 + 4)}" text-anchor="middle" fill="var(--muted)" font-size="12">${fmt(W)} × ${fmt(D)} cm</text>
+    <rect x="${X(gap + doorW)}" y="${Y(front - t)}" width="${(W - doorW) * S2}" height="${t * S2}" fill="var(--surface)" stroke="var(--fg)" stroke-width="1.5"/>
+    <path d="M ${X(gap + doorW)} ${Y(front)} A ${arcR} ${arcR} 0 0 1 ${X(gap)} ${Y(front + doorW)}" fill="none" stroke="var(--muted)" stroke-dasharray="3 5"/>
+    <polygon points="${poly(door)}" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="2"/>
+    <polygon points="${poly(handle)}" fill="var(--accent)"/>
+    <circle cx="${X(gap)}" cy="${Y(front)}" r="4" fill="var(--fg)"/>
+    <text x="${X(gap) + 10}" y="${Y(front) + 34}" fill="var(--accent)" font-size="15" font-weight="700">${ang >= 180 ? "180°+" : ang + "°"}</text>
+    <line x1="${X(gap + W + 2)}" y1="${Y(counter)}" x2="${X(gap + W + 2)}" y2="${Y(front)}" stroke="var(--fg)"/>
+    <text x="${X(gap + W + 5)}" y="${Y((counter + front) / 2) + 4}" fill="var(--fg)" font-size="12">${Math.round(front - counter)} cm Überstand</text>
+    ${gap > 0 ? `<text x="${X(gap / 2)}" y="${Y(backGap + 12)}" text-anchor="middle" fill="var(--fg)" font-size="11">${fmt(gap)}</text>` : ""}`;
+  $("#sketch").innerHTML = svg;
+  $("#dlg-title").textContent = `${m.brand} ${m.name || m.model}: Passt die Tür?`;
+  const v = $("#verdict");
+  const needOk = need == null || gap >= need;
+  if (ang >= 90 && needOk) { v.className = "verdict ok"; v.textContent = `Die linke Tür öffnet bis ca. ${ang >= 180 ? "180" : ang}°. Schubladen sollten sich herausziehen lassen.` }
+  else if (ang >= 90) { v.className = "verdict warn"; v.textContent = `Rechnerisch ${ang}°, aber der Hersteller verlangt ${fmt(need)} cm Seitenabstand. Lieber mehr Platz lassen.` }
+  else if (ang >= 80) { v.className = "verdict warn"; v.textContent = `Die Tür öffnet nur ca. ${ang}°. Schubladen gehen eventuell nicht ganz heraus. Etwas mehr Wandabstand hilft.` }
+  else { v.className = "verdict bad"; v.textContent = `Die Tür stößt bei ca. ${ang}° an die Wand. Schubladen lassen sich so nicht herausnehmen.` }
+  $("#door-note").textContent = [
+    need != null ? `Herstellerangabe Seitenabstand: ${fmt(need)} cm.` : "Herstellerangabe zum Seitenabstand nicht gefunden: in der Aufstellanleitung nachsehen.",
+    m.door_open_notes || "",
+    m.type === "sbs" ? "Bei Side-by-Side ist links das Gefrierteil: dessen Tür ist schmal, die Schubladen dahinter brauchen meist volle 90°." : "",
+    "Die Skizze rechnet mit 7 cm Türdicke und 6 cm Griff. Sie ersetzt nicht das Nachmessen."
+  ].filter(Boolean).join(" ");
+}
+
+/* ---------- Statische Teile ---------- */
+const CHECK = [
+  "Nische messen: Breite an drei Höhen, Höhe bis zum Hängeschrank, Tiefe bis zur Wand.",
+  "Abstand zur linken Wand beim alten Gerät messen und mit „Passt die Tür?“ prüfen.",
+  "Weg ins Haus messen: Haustür, Flur, Küchentür. Viele Geräte sind ohne Türen 70–75 cm tief.",
+  "Steckdose hinter dem Gerät: frei erreichbar, kein Mehrfachstecker.",
+  "Lieferung bis in die Küche, Aufstellen und Altgerät-Mitnahme mitbestellen.",
+  "Garantie prüfen: 2 Jahre gesetzlich, Kompressor oft 10–20 Jahre beim Hersteller registrieren.",
+  "Nach Lieferung 2–4 Stunden stehen lassen, bevor der Stecker rein kommt.",
+  "Wassertank fürs Eis: wöchentlich nachfüllen, Wasserfilter je nach Modell alle 6 Monate.",
+  "Preis kurz vor dem Kauf bei idealo vergleichen: Preise ändern sich oft wöchentlich.",
+];
+let done = store.get("check", []);
+$("#checklist").innerHTML = CHECK.map((c, i) => `<li><label><input type="checkbox" id="c-${i}" data-i="${i}" ${done.includes(i) ? "checked" : ""}><span>${esc(c)}</span></label></li>`).join("");
+$("#checklist").addEventListener("change", e => { const i = +e.target.dataset.i; done = e.target.checked ? [...new Set([...done, i])] : done.filter(x => x !== i); store.set("check", done) });
+
+const rel = DATA.brand_reliability || [];
+if (rel.length) $("#rel").innerHTML = rel.map(x => `<li>${esc(x)}</li>`).join(""); else $("#rel-sec").hidden = true;
+
+$("#foot").innerHTML = `<p>Stand der Daten: ${esc(DATA.meta?.stand ? new Date(DATA.meta.stand).toLocaleDateString("de-DE") : "")}. Preise schwanken; „ab“ ist der niedrigste gefundene Preis. „–“ heißt: Wert nicht sicher belegt. Alle Angaben ohne Gewähr, vor dem Kauf im Datenblatt prüfen.</p>${
+  DATA.sources?.length ? `<p>Quellen: ${DATA.sources.slice(0, 30).map((s, i) => `<a href="${esc(s)}" target="_blank" rel="noopener">[${i + 1}]</a>`).join(" ")}</p>` : ""}`;
+
+writeForm(); render(); connectDb();
+})();
+</script>
