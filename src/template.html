@@ -2,318 +2,340 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap">
 <style>
-/* Layout: Wunsch-Panel links (auf dem Handy oben), Rangliste rechts; Vergleich + Merkliste + Kaufhinweise darunter. */
+/* Layout: Prospekt. Roter Kopf, große Empfehlungsseite, darunter Katalogzeilen mit schwarzen Linien; Wünsche als Seitenspalte (Handy: eingeklappt). */
 :root {
-  --bg: #f3f5f6;          /* gebürsteter Stahl, hell */
-  --surface: #ffffff;
-  --surface-2: #e8edef;
-  --line: #cfd8dc;
-  --fg: #172226;
-  --muted: #52646b;
-  --accent: #0b6a85;      /* Eisblau */
-  --accent-fg: #ffffff;
-  --accent-soft: #d6eef4;
-  --ok: #1f7a43;  --ok-soft: #dcf1e3;
-  --warn: #9a6200; --warn-soft: #fbedd0;
-  --bad: #b3261e; --bad-soft: #f9dedc;
-  --star: #c98a00;
-  --wall: #8a979c;
-  --font-display: "Bricolage Grotesque", "Avenir Next", system-ui, sans-serif;
-  --font-body: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
-  --radius: 10px;
+  --paper: #ffffff;
+  --paper-2: #f3f2ee;
+  --ink: #111111;
+  --ink-2: #4a4a48;
+  --rule: #111111;
+  --hair: #d6d4cd;
+  --red: #d7141a;          /* Prospekt-Rot */
+  --red-fg: #ffffff;
+  --tag: #ffd60a;          /* Preisschild */
+  --tag-ink: #111111;
+  --ok: #17803d; --warn: #a15c00; --bad: #c41218;
+  --photo: #ffffff;
+  --font-display: "Archivo", "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
+  --font-body: "Atkinson Hyperlegible", "Segoe UI", Arial, sans-serif;
+  --base: 17px;
 }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
-  --bg: #11181b; --surface: #182327; --surface-2: #213036; --line: #33454c;
-  --fg: #e6eef0; --muted: #9db0b6; --accent: #5cc4e0; --accent-fg: #06222b; --accent-soft: #163a45;
-  --ok: #6fd391; --ok-soft: #173826; --warn: #f0b84d; --warn-soft: #3a2c10; --bad: #ff8a80; --bad-soft: #3d1a18;
-  --star: #f2c14e; --wall: #5d6d73; color-scheme: dark } }
+  --paper: #141414; --paper-2: #1f1f1d; --ink: #f2f1ec; --ink-2: #b9b7af; --rule: #f2f1ec; --hair: #3a3936;
+  --red: #e2272d; --tag: #ffd60a; --tag-ink: #111111; --ok: #5fd389; --warn: #f2b443; --bad: #ff6b6b; --photo: #ffffff; color-scheme: dark } }
 :root[data-theme="dark"] {
-  --bg: #11181b; --surface: #182327; --surface-2: #213036; --line: #33454c;
-  --fg: #e6eef0; --muted: #9db0b6; --accent: #5cc4e0; --accent-fg: #06222b; --accent-soft: #163a45;
-  --ok: #6fd391; --ok-soft: #173826; --warn: #f0b84d; --warn-soft: #3a2c10; --bad: #ff8a80; --bad-soft: #3d1a18;
-  --star: #f2c14e; --wall: #5d6d73; color-scheme: dark }
+  --paper: #141414; --paper-2: #1f1f1d; --ink: #f2f1ec; --ink-2: #b9b7af; --rule: #f2f1ec; --hair: #3a3936;
+  --red: #e2272d; --tag: #ffd60a; --tag-ink: #111111; --ok: #5fd389; --warn: #f2b443; --bad: #ff6b6b; --photo: #ffffff; color-scheme: dark }
 
 * { box-sizing: border-box }
-body { background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 17px; line-height: 1.5;
-  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 0 48px }
-h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; line-height: 1.15; margin: 0 }
-h1 { font-size: clamp(2rem, 5vw, 2.9rem); letter-spacing: -0.01em }
-h2 { font-size: 1.45rem }
-h3 { font-size: 1.15rem }
+html.big { --base: 20px }
+body { background: var(--paper); color: var(--ink); font-family: var(--font-body); font-size: var(--base); line-height: 1.5; margin: 0; padding-block: 0 96px }
+.gutter { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)) }
+.inner { max-width: 1240px; margin: 0 auto }
+h1, h2, h3 { font-family: var(--font-display); font-stretch: 75%; font-weight: 800; line-height: 1.02; margin: 0; text-wrap: balance; letter-spacing: -0.005em }
 p { margin: 0 }
 button, input, select, textarea { font: inherit; color: inherit }
-:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px }
-.wrap { max-width: 1240px; margin: 0 auto; display: flex; flex-direction: column; gap: 28px }
+:focus-visible { outline: 3px solid var(--red); outline-offset: 2px }
 .num { font-variant-numeric: tabular-nums }
-.muted { color: var(--muted) }
-.label { font-size: .78rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); font-weight: 700 }
+.kicker { font-family: var(--font-display); font-stretch: 100%; font-weight: 700; font-size: .78rem; letter-spacing: .12em; text-transform: uppercase }
+.muted { color: var(--ink-2) }
 
 /* Kopf */
-header.top { padding-block: 28px 4px; display: flex; flex-direction: column; gap: 10px }
-header.top p { max-width: 62ch; color: var(--muted); font-size: 1.05rem }
-.spec-strip { display: flex; flex-wrap: wrap; gap: 8px }
-.spec-strip span { background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 4px 12px; font-size: .9rem }
+.mast { background: var(--red); color: var(--red-fg); margin-top: calc(-1 * env(safe-area-inset-top, 0px)); padding-top: calc(env(safe-area-inset-top, 0px) + 18px); padding-bottom: 16px }
+.mast .inner { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: end; gap: 12px 24px }
+.mast h1 { font-size: clamp(2.6rem, 8vw, 4.6rem); font-weight: 900; font-stretch: 62%; text-transform: uppercase; letter-spacing: -0.01em }
+.mast p { max-width: 46ch; font-size: .95rem; opacity: .95 }
+.mast-tools { display: flex; gap: 8px; align-items: center }
+.mast button { background: transparent; color: var(--red-fg); border: 2px solid var(--red-fg); padding: 6px 12px; font-family: var(--font-display); font-weight: 700; cursor: pointer }
+.mast button[aria-pressed="true"] { background: var(--red-fg); color: var(--red) }
+.facts-strip { border-bottom: 3px solid var(--rule); padding-block: 10px }
+.facts-strip .inner { display: flex; flex-wrap: wrap; gap: 4px 22px; font-size: .88rem }
+.facts-strip b { font-family: var(--font-display); font-stretch: 100%; text-transform: uppercase; letter-spacing: .06em; font-size: .78rem; margin-right: 4px }
 
-/* Hauptbereich */
-.main { display: grid; grid-template-columns: minmax(280px, 340px) minmax(0, 1fr); gap: 24px; align-items: start }
-@media (max-width: 860px) { .main { grid-template-columns: minmax(0, 1fr) } }
+/* Buttons */
+.btn { border: 2px solid var(--ink); background: var(--paper); color: var(--ink); padding: 8px 14px; cursor: pointer; font-family: var(--font-display); font-stretch: 100%; font-weight: 700; font-size: .92rem; text-decoration: none; display: inline-flex; gap: 6px; align-items: center; min-height: 44px }
+.btn:hover { background: var(--paper-2) }
+.btn.red { background: var(--red); border-color: var(--red); color: var(--red-fg) }
+.btn[aria-pressed="true"] { background: var(--ink); color: var(--paper) }
+.btn[aria-pressed="true"].fav { background: var(--tag); color: var(--tag-ink); border-color: var(--tag-ink) }
+.actions { display: flex; flex-wrap: wrap; gap: 8px }
+
+/* Preisschild */
+.tag { display: inline-flex; flex-direction: column; align-items: flex-end; background: var(--tag); color: var(--tag-ink); padding: 6px 14px 8px; transform: rotate(-2deg); box-shadow: 3px 3px 0 var(--tag-ink); line-height: 1 }
+.tag small { font-family: var(--font-display); font-weight: 700; font-size: .8rem }
+.tag b { font-family: var(--font-display); font-weight: 900; font-stretch: 62%; font-size: 2.4rem; font-variant-numeric: tabular-nums; letter-spacing: -0.01em }
+.tag.big b { font-size: 3.6rem }
+.tag.none b { font-size: 1.4rem }
+
+/* Empfehlung */
+.hero { border-bottom: 3px solid var(--rule); padding-block: 22px 28px }
+.hero .inner { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: 28px; align-items: start; position: relative }
+.hero-photo { position: relative }
+.hero .photo { aspect-ratio: 1 / 1; max-height: 70vh; margin-inline: auto }
+.stoerer { position: absolute; top: -6px; left: -6px; width: 112px; height: 112px; border-radius: 50%; background: var(--red); color: var(--red-fg); display: grid; place-items: center; text-align: center; font-family: var(--font-display); font-weight: 900; font-stretch: 75%; font-size: 1.05rem; line-height: 1; text-transform: uppercase; transform: rotate(-12deg); z-index: 2; padding: 10px }
+.hero-body { display: flex; flex-direction: column; gap: 14px; min-width: 0 }
+.hero h2 { font-size: clamp(2rem, 4.6vw, 3.3rem); text-transform: uppercase }
+.hero .model { font-family: var(--font-display); font-stretch: 100%; font-weight: 600; color: var(--ink-2) }
+.reasons { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; font-size: 1.08rem }
+.reasons li { display: grid; grid-template-columns: 1.4em minmax(0, 1fr); }
+.reasons li::before { content: "✓"; color: var(--ok); font-weight: 700 }
+.hero-row { display: flex; flex-wrap: wrap; gap: 18px 28px; align-items: center }
+.verdict-word { font-family: var(--font-display); font-weight: 800; font-stretch: 75%; font-size: 1.4rem; text-transform: uppercase }
+@media (max-width: 760px) { .hero .inner { grid-template-columns: minmax(0, 1fr) } .stoerer { width: 92px; height: 92px; font-size: .9rem } }
+
+/* Fotos & Galerie */
+.photo { position: relative; background: var(--photo); border: 1px solid var(--hair); aspect-ratio: 4 / 5; max-width: 100%; overflow: hidden; display: grid; place-items: center }
+.photo img { width: 100%; height: 100%; object-fit: contain }
+.photo.none svg { width: 40%; height: auto }
+.gal { cursor: zoom-in }
+.gal-nav { position: absolute; bottom: 0; width: 40px; height: 34px; border: 2px solid #111; background: #fff; color: #111; font-size: 1.4rem; line-height: 1; cursor: pointer; display: grid; place-items: center; padding: 0 }
+.gal-nav.prev { right: 39px } .gal-nav.next { right: 0 }
+.gal-count { position: absolute; left: 0; bottom: 0; background: #111; color: #fff; font-size: .74rem; padding: 0 8px; line-height: 34px; max-width: calc(100% - 80px); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-family: var(--font-display); font-stretch: 100%; font-weight: 600 }
+.thumb { width: 56px; aspect-ratio: 4 / 5; background: var(--photo); border: 1px solid var(--hair); overflow: hidden; display: grid; place-items: center; flex: none }
+.thumb img { width: 100%; height: 100%; object-fit: contain }
+.thumb.none svg { width: 50% }
+
+/* Hauptteil */
+.main { display: grid; grid-template-columns: minmax(270px, 320px) minmax(0, 1fr); gap: 32px; align-items: start; padding-block: 24px }
+@media (max-width: 900px) { .main { grid-template-columns: minmax(0, 1fr); gap: 16px } }
 
 /* Wünsche */
-.panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px; display: flex; flex-direction: column; gap: 20px }
-@media (min-width: 861px) { .panel { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 12px); max-height: calc(100vh - 24px); overflow: auto } }
-.presets { display: grid; grid-template-columns: 1fr 1fr; gap: 8px }
-.preset { border: 1px solid var(--line); background: var(--surface-2); border-radius: 8px; padding: 10px; text-align: left; cursor: pointer; display: flex; flex-direction: column; gap: 2px }
-.preset b { font-size: .95rem }
-.preset small { color: var(--muted); font-size: .8rem; line-height: 1.3 }
-.preset[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); box-shadow: inset 0 0 0 1px var(--accent) }
+details.wishes { border: 3px solid var(--rule); background: var(--paper) }
+@media (min-width: 901px) { details.wishes { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 12px); max-height: calc(100vh - 24px); overflow: auto } }
+details.wishes > summary { list-style: none; cursor: pointer; padding: 12px 16px; background: var(--ink); color: var(--paper); font-family: var(--font-display); font-weight: 800; font-stretch: 75%; font-size: 1.3rem; text-transform: uppercase; display: flex; justify-content: space-between; align-items: center }
+details.wishes > summary::-webkit-details-marker { display: none }
+details.wishes > summary::after { content: "＋"; font-size: 1.2rem }
+details.wishes[open] > summary::after { content: "−" }
+.wish-body { padding: 16px; display: flex; flex-direction: column; gap: 20px }
+.presets { display: grid; grid-template-columns: 1fr 1fr; gap: 0; border: 2px solid var(--ink) }
+.preset { border: 0; border-right: 1px solid var(--ink); border-bottom: 1px solid var(--ink); background: var(--paper); padding: 10px; text-align: left; cursor: pointer; display: flex; flex-direction: column; gap: 2px }
+.preset:nth-child(2n) { border-right: 0 } .preset:nth-child(n+3) { border-bottom: 0 }
+.preset b { font-family: var(--font-display); font-stretch: 100%; font-size: .95rem }
+.preset small { color: var(--ink-2); font-size: .8rem; line-height: 1.3 }
+.preset[aria-pressed="true"] { background: var(--tag); color: var(--tag-ink) } .preset[aria-pressed="true"] small { color: var(--tag-ink) }
 fieldset { border: 0; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px }
-legend { font-weight: 700; padding: 0; margin-bottom: 6px }
+legend { font-family: var(--font-display); font-stretch: 100%; font-weight: 700; padding: 0; margin-bottom: 6px }
 .seg { display: flex; flex-wrap: wrap; gap: 6px }
 .seg label { cursor: pointer }
 .seg input { position: absolute; opacity: 0; pointer-events: none }
-.seg span { display: inline-block; border: 1px solid var(--line); border-radius: 999px; padding: 6px 12px; font-size: .92rem; background: var(--surface) }
-.seg input:checked + span { background: var(--accent); color: var(--accent-fg); border-color: var(--accent) }
-.seg input:focus-visible + span { outline: 3px solid var(--accent); outline-offset: 2px }
+.seg span { display: inline-block; border: 2px solid var(--ink); padding: 5px 10px; font-size: .9rem; background: var(--paper) }
+.seg input:checked + span { background: var(--ink); color: var(--paper) }
+.seg input:focus-visible + span { outline: 3px solid var(--red); outline-offset: 2px }
 .range-row { display: flex; justify-content: space-between; align-items: baseline; gap: 8px }
-.range-row output { font-weight: 700; font-variant-numeric: tabular-nums }
-input[type=range] { width: 100%; accent-color: var(--accent); height: 28px }
-.hint { font-size: .85rem; color: var(--muted) }
-.weights { display: grid; grid-template-columns: auto 1fr; gap: 8px 10px; align-items: center }
-.weights .seg span { padding: 4px 10px; font-size: .85rem }
+.range-row output { font-family: var(--font-display); font-weight: 800; font-variant-numeric: tabular-nums }
+input[type=range] { width: 100%; accent-color: var(--red); height: 30px }
+.hint { font-size: .85rem; color: var(--ink-2) }
+.weights { display: grid; grid-template-columns: auto 1fr; gap: 8px 10px; align-items: center; font-size: .92rem }
+.weights .seg span { padding: 3px 8px; font-size: .82rem }
 
-/* Ergebnisse */
-.results { display: flex; flex-direction: column; gap: 16px; min-width: 0 }
-.summary { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 16px; align-items: baseline }
-.summary h2 { font-size: 1.6rem }
-.sort { display: flex; gap: 8px; align-items: center }
-.sort select { border: 1px solid var(--line); background: var(--surface); border-radius: 8px; padding: 6px 10px }
-.list { display: flex; flex-direction: column; gap: 14px }
-.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px; display: grid; grid-template-columns: 130px minmax(0, 1fr); gap: 18px }
-.side { display: flex; flex-direction: column; align-items: center; gap: 14px }
-.photo { width: 130px; aspect-ratio: 3 / 4; max-width: 100%; border-radius: 8px; background: #fff; display: grid; place-items: center; overflow: hidden; border: 1px solid var(--line) }
-.photo img { width: 100%; height: 100%; object-fit: contain }
-.photo.none svg { width: 46%; height: auto }
-.photo-cap { font-size: .7rem; color: var(--muted); text-align: center; margin-top: -8px }
-@media (max-width: 520px) { .card { grid-template-columns: minmax(0, 1fr); gap: 12px; padding: 14px } .side { flex-direction: row; justify-content: flex-start; gap: 24px } .photo { width: 96px } .score small { bottom: -18px } }
-.gal { position: relative; cursor: zoom-in }
-.gal-nav { position: absolute; top: 50%; transform: translateY(-50%); width: 34px; height: 34px; border-radius: 50%; border: 1px solid #cfd8dc; background: rgb(255 255 255 / .92); color: #172226; font-size: 1.3rem; line-height: 1; cursor: pointer; display: grid; place-items: center; padding: 0 }
-.gal-nav.prev { left: 4px } .gal-nav.next { right: 4px }
-.gal-count { position: absolute; left: 0; right: 0; bottom: 0; background: rgb(23 34 38 / .72); color: #fff; font-size: .72rem; text-align: center; padding: 3px 4px; line-height: 1.25 }
-#lb { width: min(980px, calc(100vw - 16px)) }
-.lb-stage { position: relative; background: #fff; border-radius: 8px; display: grid; place-items: center; height: min(68vh, 640px); touch-action: pan-y; user-select: none }
-.lb-stage img { max-width: 100%; max-height: 100%; object-fit: contain }
-.lb-stage .gal-nav { width: 52px; height: 52px; font-size: 1.8rem }
-.lb-stage .gal-nav.prev { left: 10px } .lb-stage .gal-nav.next { right: 10px }
-.lb-thumbs { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px }
-.lb-thumbs button { flex: none; width: 72px; height: 72px; border: 2px solid var(--line); border-radius: 6px; background: #fff; padding: 2px; cursor: pointer }
-.lb-thumbs button[aria-current="true"] { border-color: var(--accent) }
-.lb-thumbs img { width: 100%; height: 100%; object-fit: contain }
-.thumb { width: 64px; aspect-ratio: 3 / 4; border-radius: 6px; background: #fff; border: 1px solid var(--line); overflow: hidden; display: grid; place-items: center; flex: none }
-.thumb img { width: 100%; height: 100%; object-fit: contain }
-.card.top1 { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent) }
-.card.out { opacity: .82 }
-.score { width: 76px; height: 76px; border-radius: 50%; display: grid; place-items: center; position: relative }
-.score svg { position: absolute; inset: 0 }
-.score b { font-family: var(--font-display); font-size: 1.5rem; font-variant-numeric: tabular-nums }
-.score small { position: absolute; bottom: -20px; left: 0; right: 0; text-align: center; font-size: .72rem; color: var(--muted) }
-.card-body { display: flex; flex-direction: column; gap: 12px; min-width: 0 }
-.card-head { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px 16px; align-items: start }
-
-.card-head .name { display: flex; flex-direction: column; gap: 2px; min-width: 0 }
-.card-head .model { color: var(--muted); font-size: .9rem; overflow-wrap: anywhere }
-.price { text-align: right }
-.price b { font-family: var(--font-display); font-size: 1.4rem; font-variant-numeric: tabular-nums }
-.price small { display: block; color: var(--muted); font-size: .8rem; max-width: 26ch; margin-left: auto }
-@media (max-width: 600px) { .card-head { grid-template-columns: minmax(0, 1fr) } .price { text-align: left } .price small { margin-left: 0 } }
-.badges { display: flex; flex-wrap: wrap; gap: 6px }
-.badge { font-size: .78rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; padding: 2px 8px; border-radius: 4px; background: var(--surface-2); color: var(--muted) }
-.badge.rank { background: var(--accent); color: var(--accent-fg) }
-.facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(118px, 40%), 1fr)); gap: 8px }
-.fact { background: var(--surface-2); border-radius: 8px; padding: 8px 10px; display: flex; flex-direction: column; gap: 1px }
-.fact .label { font-size: .7rem }
-.fact b { font-variant-numeric: tabular-nums; font-size: 1rem }
-.checks { display: flex; flex-wrap: wrap; gap: 6px }
-.chk { font-size: .88rem; padding: 3px 10px; border-radius: 999px; display: inline-flex; gap: 6px; align-items: center }
-.chk::before { font-weight: 700 }
-.chk.ok { background: var(--ok-soft); color: var(--ok) } .chk.ok::before { content: "✓" }
-.chk.warn { background: var(--warn-soft); color: var(--warn) } .chk.warn::before { content: "!" }
-.chk.bad { background: var(--bad-soft); color: var(--bad) } .chk.bad::before { content: "✕" }
-details.more summary { cursor: pointer; color: var(--accent); font-weight: 700 }
+/* Katalog */
+.results { min-width: 0; display: flex; flex-direction: column }
+.list-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: end; gap: 8px 16px; border-bottom: 3px solid var(--rule); padding-bottom: 8px }
+.list-head h2 { font-size: 2rem; text-transform: uppercase }
+.sort { display: flex; gap: 8px; align-items: center; font-size: .92rem }
+.sort select { border: 2px solid var(--ink); background: var(--paper); padding: 6px 8px }
+.item { display: grid; grid-template-columns: 150px minmax(0, 1fr) auto; gap: 20px; padding-block: 20px; border-bottom: 1px solid var(--rule) }
+.item .photo { width: 150px }
+.item-body { display: flex; flex-direction: column; gap: 10px; min-width: 0 }
+.item h3 { font-size: 1.6rem; text-transform: uppercase }
+.item .sub { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: .9rem; color: var(--ink-2) }
+.item .sub .nr { color: var(--red); font-family: var(--font-display); font-weight: 900; font-stretch: 75%; font-size: 1.1rem }
+.specs { display: flex; flex-wrap: wrap; gap: 6px 26px }
+.spec { display: flex; flex-direction: column }
+.spec span { font-size: .74rem; text-transform: uppercase; letter-spacing: .06em; color: var(--ink-2); font-family: var(--font-display); font-stretch: 100%; font-weight: 600 }
+.spec b { font-family: var(--font-display); font-weight: 800; font-stretch: 85%; font-size: 1.25rem; font-variant-numeric: tabular-nums; white-space: nowrap }
+.fit { display: flex; flex-direction: column; gap: 2px; font-size: .95rem }
+.fit .okline { color: var(--ok) }
+.fit .w { color: var(--warn) } .fit .b { color: var(--bad); font-weight: 700 }
+.fit .w::before { content: "! " ; font-weight: 700 } .fit .b::before { content: "✕ " } .fit .okline::before { content: "✓ "; font-weight: 700 }
+.item-side { display: flex; flex-direction: column; align-items: flex-end; gap: 14px; min-width: 150px }
+.item-side .word { font-family: var(--font-display); font-weight: 800; font-stretch: 75%; font-size: 1.1rem; text-transform: uppercase; text-align: right }
+.item.out { opacity: .78 }
+details.more summary { cursor: pointer; font-family: var(--font-display); font-stretch: 100%; font-weight: 700; text-decoration: underline; text-underline-offset: 3px }
 details.more[open] summary { margin-bottom: 8px }
-.more-grid { display: grid; gap: 10px }
+.more-grid { display: grid; gap: 10px; font-size: .95rem }
 .more-grid ul { margin: 0; padding-left: 20px }
-.actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center }
-.btn { border: 1px solid var(--line); background: var(--surface); border-radius: 8px; padding: 8px 14px; cursor: pointer; font-weight: 700; font-size: .95rem; text-decoration: none; color: var(--fg); display: inline-flex; gap: 6px; align-items: center }
-.btn:hover { border-color: var(--accent) }
-.btn.primary { background: var(--accent); color: var(--accent-fg); border-color: var(--accent) }
-.btn[aria-pressed="true"].fav { color: var(--star); border-color: var(--star) }
-.btn[aria-pressed="true"].cmp { background: var(--accent-soft); border-color: var(--accent) }
-.out-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-top: 8px }
+.more-grid .kicker { display: block; margin-bottom: 2px; color: var(--ink-2) }
+.out-head { margin-top: 28px; border-bottom: 3px solid var(--rule); padding-bottom: 6px; display: flex; justify-content: space-between; gap: 12px; align-items: end; flex-wrap: wrap }
+.out-head h2 { font-size: 1.5rem; text-transform: uppercase }
+@media (max-width: 700px) {
+  .item { grid-template-columns: 120px minmax(0, 1fr); gap: 14px }
+  .item .photo { width: 120px }
+  .item-side { grid-column: 1 / -1; flex-direction: row; flex-wrap: wrap; align-items: center; justify-content: space-between; min-width: 0 }
+  .item-side .word { text-align: left }
+  .item h3 { font-size: 1.3rem }
+}
 
-/* Vergleich */
-section.block { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; display: flex; flex-direction: column; gap: 14px }
+/* Abschnitte */
+section.band { border-top: 3px solid var(--rule); padding-block: 22px; margin-top: 12px }
+section.band > .inner { display: flex; flex-direction: column; gap: 14px }
+.band-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: end; gap: 10px }
+.band-head h2 { font-size: 2rem; text-transform: uppercase }
 .table-wrap { overflow-x: auto }
-table.cmp { border-collapse: collapse; width: 100%; min-width: 520px; font-variant-numeric: tabular-nums }
-table.cmp th, table.cmp td { padding: 9px 10px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top }
-table.cmp thead th { font-family: var(--font-display); font-size: 1.02rem }
-table.cmp tbody th { color: var(--muted); font-weight: 400; width: 170px }
-table.cmp td.best { background: var(--ok-soft); color: var(--ok); font-weight: 700 }
+table.cmp { border-collapse: collapse; width: 100%; min-width: 560px; font-variant-numeric: tabular-nums }
+table.cmp th, table.cmp td { padding: 9px 10px; border-bottom: 1px solid var(--hair); text-align: left; vertical-align: top }
+table.cmp thead th { border-bottom: 3px solid var(--rule); font-family: var(--font-display); font-stretch: 85%; font-size: 1.05rem; text-transform: uppercase }
+table.cmp tbody th { color: var(--ink-2); font-weight: 400; width: 180px }
+table.cmp td.best { background: var(--tag); color: var(--tag-ink); font-weight: 700 }
+.favs { display: flex; flex-direction: column }
+.fav-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr); gap: 16px; padding-block: 14px; border-bottom: 1px solid var(--hair) }
+@media (max-width: 640px) { .fav-row { grid-template-columns: minmax(0, 1fr) } }
+.fav-row h3 { font-size: 1.2rem; text-transform: uppercase }
+.fav-row textarea { width: 100%; min-height: 70px; border: 2px solid var(--ink); padding: 8px; background: var(--paper) }
+.sync { font-size: .9rem; border-left: 4px solid var(--tag); padding: 4px 10px; background: var(--paper-2) }
+.checklist { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 10px 28px }
+.checklist label { display: grid; grid-template-columns: 26px minmax(0, 1fr); gap: 10px; cursor: pointer }
+.checklist input { width: 22px; height: 22px; accent-color: var(--red); margin-top: 2px }
+.checklist input:checked + span { color: var(--ink-2); text-decoration: line-through }
+.rel { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 6px; max-width: 80ch }
+footer { font-size: .85rem; color: var(--ink-2); padding-block: 20px }
+footer .inner { display: flex; flex-direction: column; gap: 6px }
+footer a { color: inherit }
 
-/* Merkliste */
-.favs { display: flex; flex-direction: column; gap: 12px }
-.fav-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); gap: 12px; align-items: start; padding-bottom: 12px; border-bottom: 1px solid var(--line) }
-@media (max-width: 600px) { .fav-row { grid-template-columns: minmax(0, 1fr) } }
-.fav-row textarea { width: 100%; min-height: 64px; border: 1px solid var(--line); border-radius: 8px; padding: 8px; background: var(--bg) }
-.sync { font-size: .88rem; padding: 6px 10px; border-radius: 8px; background: var(--surface-2) }
+/* Vergleichsleiste */
+.cmpbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 15; background: var(--ink); color: var(--paper); padding-top: 10px; padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 10px) }
+.cmpbar .inner { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap }
+.cmpbar .thumbs { display: flex; gap: 6px; align-items: center }
+.cmpbar .thumb { width: 36px; border-color: var(--ink-2) }
+.cmpbar b { font-family: var(--font-display); font-stretch: 85%; font-size: 1.15rem; text-transform: uppercase }
+.cmpbar .btn { background: var(--tag); color: var(--tag-ink); border-color: var(--tag) }
+.cmpbar .btn.ghost { background: transparent; color: var(--paper); border-color: var(--paper) }
+@media (max-width: 560px) { .cmpbar .thumbs, #cmpbar-clear { display: none } .cmpbar b { font-size: 1rem } .cmpbar .inner { flex-wrap: nowrap } }
 
-/* Kaufhinweise */
-.checklist { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 10px 24px }
-.checklist label { display: grid; grid-template-columns: 24px minmax(0,1fr); gap: 10px; cursor: pointer }
-.checklist input { width: 20px; height: 20px; accent-color: var(--accent); margin-top: 3px }
-.checklist input:checked + span { color: var(--muted); text-decoration: line-through }
-
-/* Skizze */
-dialog { border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); color: var(--fg); padding: 0; width: min(760px, calc(100vw - 24px)); max-height: calc(100vh - 24px) }
-dialog::backdrop { background: rgb(0 0 0 / .45) }
-.dlg { padding: 20px; display: flex; flex-direction: column; gap: 14px }
+/* Dialoge */
+dialog { border: 3px solid var(--rule); background: var(--paper); color: var(--ink); padding: 0; width: min(820px, calc(100vw - 16px)); max-height: calc(100vh - 16px) }
+dialog::backdrop { background: rgb(0 0 0 / .55) }
+.dlg { padding: 18px; display: flex; flex-direction: column; gap: 14px }
 .dlg-head { display: flex; justify-content: space-between; gap: 12px; align-items: start }
-.sketch { width: 100%; height: auto; display: block; background: var(--bg); border-radius: 8px; border: 1px solid var(--line) }
-.verdict { padding: 10px 14px; border-radius: 8px; font-weight: 700 }
-.verdict.ok { background: var(--ok-soft); color: var(--ok) }
-.verdict.warn { background: var(--warn-soft); color: var(--warn) }
-.verdict.bad { background: var(--bad-soft); color: var(--bad) }
-footer { color: var(--muted); font-size: .85rem; display: flex; flex-direction: column; gap: 6px; max-width: 80ch }
-footer a { color: var(--accent) }
-.toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(env(safe-area-inset-bottom, 0px) + 18px); background: var(--fg); color: var(--bg); padding: 10px 16px; border-radius: 8px; font-weight: 700; z-index: 20 }
-@media (prefers-reduced-motion: no-preference) { .card { transition: border-color .2s } }
+.dlg-head h2 { font-size: 1.7rem; text-transform: uppercase }
+.sketch { width: 100%; height: auto; display: block; background: var(--paper-2); border: 1px solid var(--hair) }
+.verdict { padding: 10px 14px; font-weight: 700; border-left: 6px solid }
+.verdict.ok { border-color: var(--ok); color: var(--ok); background: var(--paper-2) }
+.verdict.warn { border-color: var(--warn); color: var(--warn); background: var(--paper-2) }
+.verdict.bad { border-color: var(--bad); color: var(--bad); background: var(--paper-2) }
+.two { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 14px }
+@media (max-width: 640px) { .two { grid-template-columns: minmax(0, 1fr) } }
+#lb { width: min(1000px, calc(100vw - 16px)) }
+.lb-stage { position: relative; background: #fff; display: grid; place-items: center; height: min(66vh, 640px); touch-action: pan-y; user-select: none }
+.lb-stage img { max-width: 100%; max-height: 100%; object-fit: contain }
+.lb-stage .gal-nav { top: 50%; bottom: auto; transform: translateY(-50%); width: 54px; height: 54px; font-size: 1.9rem }
+.lb-stage .gal-nav.prev { left: 10px; right: auto } .lb-stage .gal-nav.next { right: 10px }
+.lb-thumbs { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px }
+.lb-thumbs button { flex: none; width: 74px; height: 74px; border: 2px solid var(--hair); background: #fff; padding: 2px; cursor: pointer }
+.lb-thumbs button[aria-current="true"] { border-color: var(--red); border-width: 3px }
+.lb-thumbs img { width: 100%; height: 100%; object-fit: contain }
+.toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(env(safe-area-inset-bottom, 0px) + 84px); background: var(--tag); color: var(--tag-ink); border: 2px solid var(--tag-ink); padding: 10px 16px; font-family: var(--font-display); font-weight: 700; z-index: 30 }
+@media (prefers-reduced-motion: reduce) { .tag, .stoerer { transform: none } }
 </style>
 
-<div class="wrap">
-  <header class="top">
-    <span class="label">Für die neue Küche</span>
-    <h1>Kühlschrank-Finder</h1>
-    <p>Stellen Sie links ein, was Ihnen wichtig ist. Die Liste sortiert sich sofort neu: oben steht das Gerät, das am besten passt. Mit ★ merken, mit „Vergleichen“ bis zu drei Geräte nebeneinanderstellen.</p>
-    <div class="spec-strip" aria-label="Eckdaten des Stellplatzes">
-      <span>Wand direkt links</span><span>alte Breite 90–92 cm</span><span>20 cm Überstand ok</span><span>kein Wasseranschluss</span><span>5 cm Wandabstand hinten</span>
+<header class="mast gutter">
+  <div class="inner">
+    <div>
+      <span class="kicker">Für die neue Küche</span>
+      <h1>Kühlschrank-Finder</h1>
     </div>
-  </header>
-
-  <div class="main">
-    <form class="panel" id="prefs" aria-label="Ihre Wünsche">
-      <div class="presets" role="group" aria-label="Fertige Einstellungen">
-        <button type="button" class="preset" data-preset="wunsch"><b>Unsere Wunschliste</b><small>Genau wie besprochen</small></button>
-        <button type="button" class="preset" data-preset="leise"><b>Leise &amp; sparsam</b><small>Ruhe und Strom zählen am meisten</small></button>
-        <button type="button" class="preset" data-preset="preis"><b>Günstig</b><small>Bis 2.000 €, Rest flexibel</small></button>
-        <button type="button" class="preset" data-preset="platz"><b>Viel Platz</b><small>Maximaler Inhalt</small></button>
-      </div>
-
-      <fieldset>
-        <legend>Bauform</legend>
-        <div class="seg">
-          <label><input type="checkbox" name="type" value="french" id="t-french"><span>French Door</span></label>
-          <label><input type="checkbox" name="type" value="multi" id="t-multi"><span>Multi-Door</span></label>
-          <label><input type="checkbox" name="type" value="sbs" id="t-sbs"><span>Side-by-Side</span></label>
-        </div>
-      </fieldset>
-
-      <fieldset>
-        <legend>Breite</legend>
-        <div class="seg">
-          <label><input type="radio" name="width" value="wide" id="w-wide"><span>90–92 cm</span></label>
-          <label><input type="radio" name="width" value="both" id="w-both"><span>90–92 oder 81–85 cm</span></label>
-        </div>
-      </fieldset>
-
-      <fieldset>
-        <div class="range-row"><legend>Höhe höchstens</legend><output id="o-height" class="num"></output></div>
-        <input type="range" id="height" min="175" max="195" step="1">
-      </fieldset>
-
-      <fieldset>
-        <legend>Eiswürfel</legend>
-        <div class="seg">
-          <label><input type="radio" name="ice" value="must" id="i-must"><span>Automatisch, Pflicht</span></label>
-          <label><input type="radio" name="ice" value="prefer" id="i-prefer"><span>Automatisch bevorzugt</span></label>
-          <label><input type="radio" name="ice" value="any" id="i-any"><span>Egal</span></label>
-        </div>
-        <p class="hint">Ohne Wasseranschluss klappt automatisches Eis nur mit eingebautem Wassertank zum Nachfüllen.</p>
-      </fieldset>
-
-      <fieldset>
-        <div class="range-row"><legend>Lautstärke höchstens</legend><output id="o-noise" class="num"></output></div>
-        <input type="range" id="noise" min="34" max="43" step="1">
-        <p class="hint">35–36 dB ist sehr leise, 39 dB noch gut. Jedes 3 dB klingt deutlich lauter.</p>
-      </fieldset>
-
-      <fieldset>
-        <div class="range-row"><legend>Budget</legend><output id="o-budget" class="num"></output></div>
-        <input type="range" id="budget" min="1000" max="4000" step="100">
-        <label class="hint" style="display:flex;gap:8px;align-items:center;cursor:pointer"><input type="checkbox" id="stretch" style="width:18px;height:18px;accent-color:var(--accent)"> Für ein Top-Gerät bis 3.000 € okay</label>
-      </fieldset>
-
-      <fieldset>
-        <div class="range-row"><legend>Inhalt mindestens</legend><output id="o-vol" class="num"></output></div>
-        <input type="range" id="vol" min="400" max="650" step="10">
-      </fieldset>
-
-      <fieldset>
-        <legend>Wie wichtig ist …</legend>
-        <div class="weights" id="weights"></div>
-      </fieldset>
-    </form>
-
-    <div class="results">
-      <div class="summary">
-        <h2 id="sum-title">…</h2>
-        <div class="sort"><label for="sort" class="muted">Sortieren:</label>
-          <select id="sort"><option value="score">Beste Passung</option><option value="price">Preis</option><option value="noise">Leiseste</option><option value="energy">Sparsamste</option><option value="vol">Größter Inhalt</option></select>
-        </div>
-      </div>
-      <div class="list" id="list"></div>
-      <div class="out-head" id="out-head"></div>
-      <div class="list" id="list-out"></div>
+    <div style="display:flex;flex-direction:column;gap:10px;align-items:flex-start">
+      <p>Wünsche einstellen, die Liste sortiert sich sofort. Auf Fotos tippen zum Blättern.</p>
+      <div class="mast-tools"><button type="button" id="bigtext" aria-pressed="false">A+ Größere Schrift</button></div>
     </div>
   </div>
+</header>
+<div class="facts-strip gutter"><div class="inner">
+  <span><b>Stellplatz</b>Wand direkt links</span><span><b>Breite alt</b>90–92 cm</span><span><b>Überstand</b>bis ca. 20 cm ok</span><span><b>Wasser</b>kein Anschluss</span>
+</div></div>
 
-  <section class="block" id="compare" aria-labelledby="cmp-h">
-    <div class="summary"><h2 id="cmp-h">Vergleich</h2><button type="button" class="btn" id="cmp-clear">Auswahl leeren</button></div>
-    <div id="cmp-body"></div>
-  </section>
+<section class="hero gutter" aria-labelledby="hero-h"><div class="inner" id="hero"></div></section>
 
-  <section class="block" id="favorites" aria-labelledby="fav-h">
-    <div class="summary"><h2 id="fav-h">★ Merkliste</h2><button type="button" class="btn" id="fav-copy">Merkliste als Text kopieren</button></div>
-    <p class="sync" id="sync">Merkliste wird geladen …</p>
-    <div class="favs" id="fav-body"></div>
-    <textarea id="fav-text" hidden readonly style="width:100%;min-height:120px"></textarea>
-  </section>
+<div class="gutter"><div class="inner main">
+  <details class="wishes" id="wishes" open>
+    <summary>Wünsche anpassen</summary>
+    <form class="wish-body" id="prefs" aria-label="Ihre Wünsche">
+      <div class="presets" role="group" aria-label="Fertige Einstellungen">
+        <button type="button" class="preset" data-preset="wunsch"><b>Unsere Wunschliste</b><small>Genau wie besprochen</small></button>
+        <button type="button" class="preset" data-preset="leise"><b>Leise &amp; sparsam</b><small>Ruhe und Strom zuerst</small></button>
+        <button type="button" class="preset" data-preset="preis"><b>Günstig</b><small>Bis 2.000 €</small></button>
+        <button type="button" class="preset" data-preset="platz"><b>Viel Platz</b><small>Größter Inhalt</small></button>
+      </div>
+      <fieldset><legend>Bauform</legend><div class="seg">
+        <label><input type="checkbox" name="type" value="french" id="t-french"><span>French Door</span></label>
+        <label><input type="checkbox" name="type" value="multi" id="t-multi"><span>Multi-Door</span></label>
+        <label><input type="checkbox" name="type" value="sbs" id="t-sbs"><span>Side-by-Side</span></label>
+      </div></fieldset>
+      <fieldset><legend>Breite</legend><div class="seg">
+        <label><input type="radio" name="width" value="wide" id="w-wide"><span>90–92 cm</span></label>
+        <label><input type="radio" name="width" value="both" id="w-both"><span>auch 81–85 cm</span></label>
+      </div></fieldset>
+      <fieldset><div class="range-row"><legend>Höhe höchstens</legend><output id="o-height"></output></div><input type="range" id="height" min="175" max="195" step="1"></fieldset>
+      <fieldset><legend>Eiswürfel</legend><div class="seg">
+        <label><input type="radio" name="ice" value="must" id="i-must"><span>Automatisch, Pflicht</span></label>
+        <label><input type="radio" name="ice" value="prefer" id="i-prefer"><span>Automatisch bevorzugt</span></label>
+        <label><input type="radio" name="ice" value="any" id="i-any"><span>Egal</span></label>
+      </div><p class="hint">Ohne Wasseranschluss gibt es automatisches Eis nur mit eingebautem Tank zum Nachfüllen.</p></fieldset>
+      <fieldset><div class="range-row"><legend>Lautstärke höchstens</legend><output id="o-noise"></output></div><input type="range" id="noise" min="34" max="43" step="1"><p class="hint">35–36 dB ist sehr leise, 39 dB noch gut.</p></fieldset>
+      <fieldset><div class="range-row"><legend>Budget</legend><output id="o-budget"></output></div><input type="range" id="budget" min="1000" max="4000" step="100">
+        <label class="hint" style="display:flex;gap:8px;align-items:center;cursor:pointer"><input type="checkbox" id="stretch" style="width:20px;height:20px;accent-color:var(--red)"> Für ein Top-Gerät bis 3.000 € okay</label></fieldset>
+      <fieldset><div class="range-row"><legend>Inhalt mindestens</legend><output id="o-vol"></output></div><input type="range" id="vol" min="400" max="650" step="10"></fieldset>
+      <fieldset><legend>Wie wichtig ist …</legend><div class="weights" id="weights"></div></fieldset>
+    </form>
+  </details>
 
-  <section class="block" aria-labelledby="buy-h">
-    <h2 id="buy-h">Vor dem Kauf</h2>
-    <ul class="checklist" id="checklist"></ul>
-  </section>
+  <div class="results">
+    <div class="list-head">
+      <h2 id="sum-title">…</h2>
+      <div class="sort"><label for="sort">Sortieren</label>
+        <select id="sort"><option value="score">Beste Passung</option><option value="price">Preis</option><option value="noise">Leiseste</option><option value="energy">Sparsamste</option><option value="vol">Größter Inhalt</option></select></div>
+    </div>
+    <div id="list"></div>
+    <div class="out-head" id="out-head"></div>
+    <div id="list-out"></div>
+  </div>
+</div></div>
 
-  <section class="block" aria-labelledby="rel-h" id="rel-sec">
-    <h2 id="rel-h">Wie zuverlässig sind die Marken?</h2>
-    <ul id="rel" style="margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;max-width:80ch"></ul>
-  </section>
+<section class="band gutter" id="compare" aria-labelledby="cmp-h"><div class="inner">
+  <div class="band-head"><h2 id="cmp-h">Vergleich</h2><button type="button" class="btn" id="cmp-clear">Auswahl leeren</button></div>
+  <div id="cmp-body"></div>
+</div></section>
 
-  <footer id="foot"></footer>
-</div>
+<section class="band gutter" id="favorites" aria-labelledby="fav-h"><div class="inner">
+  <div class="band-head"><h2 id="fav-h">Merkliste ★</h2><button type="button" class="btn" id="fav-copy">Als Text kopieren</button></div>
+  <p class="sync" id="sync">Merkliste wird geladen …</p>
+  <div class="favs" id="fav-body"></div>
+  <textarea id="fav-text" hidden readonly style="width:100%;min-height:120px"></textarea>
+</div></section>
+
+<section class="band gutter" aria-labelledby="buy-h"><div class="inner">
+  <h2 id="buy-h" style="font-size:2rem;text-transform:uppercase">Vor dem Kauf</h2>
+  <ul class="checklist" id="checklist"></ul>
+</div></section>
+
+<section class="band gutter" aria-labelledby="rel-h" id="rel-sec"><div class="inner">
+  <h2 id="rel-h" style="font-size:2rem;text-transform:uppercase">Wie zuverlässig sind die Marken?</h2>
+  <ul class="rel" id="rel"></ul>
+</div></section>
+
+<footer class="gutter"><div class="inner" id="foot"></div></footer>
+
+<div class="cmpbar gutter" id="cmpbar" hidden><div class="inner">
+  <div class="thumbs" id="cmpbar-thumbs"></div>
+  <b id="cmpbar-text"></b>
+  <div class="actions"><button type="button" class="btn ghost" id="cmpbar-clear">Leeren</button><a class="btn" href="#compare" id="cmpbar-go">Vergleich ansehen ↓</a></div>
+</div></div>
 
 <dialog id="dlg" aria-labelledby="dlg-title">
   <div class="dlg">
-    <div class="dlg-head">
-      <div><span class="label">Draufsicht, vereinfacht</span><h2 id="dlg-title">Passt die Tür?</h2></div>
-      <button type="button" class="btn" id="dlg-close">Schließen</button>
+    <div class="dlg-head"><div><span class="kicker muted">Vereinfachte Skizze</span><h2 id="dlg-title">Passt er hin?</h2></div><button type="button" class="btn" id="dlg-close">Schließen</button></div>
+    <div class="two">
+      <div><span class="kicker">Von vorn: neu gegen alt</span><svg class="sketch" id="front" viewBox="0 0 360 300" role="img" aria-label="Vorderansicht: neues Gerät über dem Umriss des alten"></svg></div>
+      <div><span class="kicker">Von oben: linke Tür an der Wand</span><svg class="sketch" id="sketch" viewBox="0 0 520 400" role="img" aria-label="Draufsicht: Wand links, Kühlschrank, Arbeitsplatte rechts"></svg></div>
     </div>
-    <svg class="sketch" id="sketch" viewBox="0 0 520 400" role="img" aria-label="Draufsicht: Wand links, Kühlschrank, Arbeitsplatte rechts"></svg>
-    <fieldset>
-      <div class="range-row"><legend>Abstand Gerät zur linken Wand</legend><output id="o-gap" class="num"></output></div>
-      <input type="range" id="gap" min="0" max="15" step="0.5">
-      <p class="hint">Am besten beim jetzigen Kühlschrank nachmessen. Griff-Tiefe angenommen: 6 cm.</p>
-    </fieldset>
+    <div class="two">
+      <fieldset><div class="range-row"><legend>Höhe altes Gerät</legend><output id="o-oldh"></output></div><input type="range" id="oldh" min="165" max="195" step="0.5"></fieldset>
+      <fieldset><div class="range-row"><legend>Abstand zur linken Wand</legend><output id="o-gap"></output></div><input type="range" id="gap" min="0" max="15" step="0.5"></fieldset>
+    </div>
+    <p class="hint">Beides am jetzigen Kühlschrank nachmessen. Die Skizze rechnet mit 7 cm Türdicke und 6 cm Griff.</p>
+    <div class="verdict" id="size-verdict"></div>
     <div class="verdict" id="verdict"></div>
     <p class="hint" id="door-note"></p>
   </div>
@@ -321,10 +343,7 @@ footer a { color: var(--accent) }
 
 <dialog id="lb" aria-labelledby="lb-title">
   <div class="dlg">
-    <div class="dlg-head">
-      <div><span class="label">Bilder</span><h2 id="lb-title">Bilder</h2></div>
-      <button type="button" class="btn" id="lb-close">Schließen</button>
-    </div>
+    <div class="dlg-head"><div><span class="kicker muted">Bilder</span><h2 id="lb-title">Bilder</h2></div><button type="button" class="btn" id="lb-close">Schließen</button></div>
     <div class="lb-stage" id="lb-stage"></div>
     <p class="hint" id="lb-cap"></p>
     <div class="lb-thumbs" id="lb-thumbs"></div>
@@ -343,12 +362,20 @@ const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt
 const fmtEur = n => n == null ? "–" : n.toLocaleString("de-DE") + " €";
 const fmt = (n, u) => n == null ? "–" : String(n).replace(".", ",") + (u ? " " + u : "");
 const TYPE_NAME = { french: "French Door", multi: "Multi-Door", sbs: "Side-by-Side" };
-const ICE_NAME = { auto_tank: "Automatisch (Tank)", auto_plumbed_only: "Nur mit Wasseranschluss", trays: "Eiswürfelschalen", none: "Kein Eisfach-Zubehör" };
-
+const ICE_NAME = { auto_tank: "automatisch aus dem Tank", auto_plumbed_only: "nur mit Wasseranschluss", trays: "Eiswürfelschalen", none: "keins" };
 const store = {
   get(k, d) { try { const v = localStorage.getItem("kf:" + k); return v == null ? d : JSON.parse(v) } catch { return d } },
   set(k, v) { try { localStorage.setItem("kf:" + k, JSON.stringify(v)) } catch {} }
 };
+const shortName = m => (m.name || "").split(/ mit | – | - |,|\(/)[0].trim() || m.model;
+
+/* ---------- Schriftgröße ---------- */
+function applyBig(on) { document.documentElement.classList.toggle("big", on); $("#bigtext").setAttribute("aria-pressed", String(on)) }
+applyBig(!!store.get("big", false));
+$("#bigtext").addEventListener("click", () => { const on = !document.documentElement.classList.contains("big"); applyBig(on); store.set("big", on) });
+
+/* ---------- Wünsche auf dem Handy einklappen ---------- */
+try { if (window.matchMedia("(max-width: 900px)").matches) $("#wishes").open = false } catch {}
 
 /* ---------- Einstellungen ---------- */
 const PRESETS = {
@@ -370,13 +397,7 @@ function writeForm() {
   $("#height").value = S.height; $("#noise").value = S.noise; $("#budget").value = S.budget; $("#vol").value = S.vol; $("#stretch").checked = S.stretch;
   WEIGHTS.forEach(([k]) => { const el = document.getElementById(`w-${k}-${S.w[k]}`); if (el) el.checked = true });
   document.querySelectorAll(".preset").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.preset === S.preset)));
-  outputs();
-}
-function outputs() {
-  $("#o-height").textContent = S.height + " cm";
-  $("#o-noise").textContent = S.noise + " dB";
-  $("#o-budget").textContent = fmtEur(S.budget);
-  $("#o-vol").textContent = S.vol + " l";
+  $("#o-height").textContent = S.height + " cm"; $("#o-noise").textContent = S.noise + " dB"; $("#o-budget").textContent = fmtEur(S.budget); $("#o-vol").textContent = S.vol + " l";
 }
 function readForm() {
   S.types = [...document.querySelectorAll('input[name=type]:checked')].map(i => i.value);
@@ -395,53 +416,41 @@ function save() { const { preset, ...p } = S; store.set("prefs", p); store.set("
 const clamp01 = x => Math.max(0, Math.min(1, x));
 function evaluate(m) {
   const checks = []; let fail = false;
-  const add = (lvl, text) => { checks.push({ lvl, text }); if (lvl === "bad") fail = true };
-  // Bauform
+  const add = (lvl, text, short) => { checks.push({ lvl, text, short: short || text }); if (lvl === "bad") fail = true };
   if (!S.types.includes(m.type)) add("bad", `${TYPE_NAME[m.type]} abgewählt`);
-  // Breite
   const w = m.width_cm;
   if (w == null) add("warn", "Breite unbekannt");
-  else if (w >= 89.5 && w <= 92.5) add("ok", `Breite ${fmt(w)} cm`);
-  else if (w >= 80.5 && w <= 85.5) add(S.width === "both" ? "warn" : "bad", `Schmaler: ${fmt(w)} cm`);
+  else if (w >= 89.5 && w <= 92.5) add("ok", `Breite ${fmt(w)} cm`, "Breite");
+  else if (w >= 80.5 && w <= 85.5) add(S.width === "both" ? "warn" : "bad", `Schmaler als das alte Gerät: ${fmt(w)} cm`);
   else if (w > 92.5) add("bad", `Zu breit: ${fmt(w)} cm`);
   else add("bad", `Zu schmal: ${fmt(w)} cm`);
-  // Höhe
   const h = m.height_cm;
   if (h == null) add("warn", "Höhe unbekannt");
-  else if (h <= S.height) add("ok", `Höhe ${fmt(h)} cm`);
+  else if (h <= S.height) add("ok", `Höhe ${fmt(h)} cm`, "Höhe");
   else if (h <= S.height + 2) add("warn", `Knapp: ${fmt(h)} cm hoch`);
   else add("bad", `Zu hoch: ${fmt(h)} cm`);
-  // No-Frost
   if (m.no_frost === false) add("bad", "Kein No-Frost");
   else if (m.no_frost == null) add("warn", "No-Frost unklar");
-  // Eis
-  if (m.ice === "auto_tank") add("ok", `Eis automatisch${m.water_tank_l ? `, Tank ${fmt(m.water_tank_l)} l` : ""}`);
+  else add("ok", "No-Frost", "No-Frost");
+  if (m.ice === "auto_tank") add("ok", `Eiswürfel automatisch aus dem Tank${m.water_tank_l ? ` (${fmt(m.water_tank_l)} l)` : ""}`, "Eis aus dem Tank");
   else if (m.ice === "auto_plumbed_only") add(S.ice === "must" ? "bad" : "warn", "Eisbereiter braucht Wasseranschluss");
-  else add(S.ice === "must" ? "bad" : (S.ice === "prefer" ? "warn" : "ok"), "Eis nur per Schale");
-  // Lautstärke
+  else add(S.ice === "must" ? "bad" : (S.ice === "prefer" ? "warn" : "ok"), "Eis nur per Eiswürfelschale", "Eisschale");
   const n = m.noise_db;
   if (n == null) add("warn", "Lautstärke unbekannt");
-  else if (n <= Math.min(S.noise, 36)) add("ok", `Sehr leise: ${n} dB`);
-  else if (n <= S.noise) add("ok", `${n} dB`);
+  else if (n <= Math.min(S.noise, 36)) add("ok", `Sehr leise: ${n} dB`, "sehr leise");
+  else if (n <= S.noise) add("ok", `${n} dB`, "leise genug");
   else if (n <= S.noise + 1) add("warn", `Etwas lauter: ${n} dB`);
   else add("bad", `Zu laut: ${n} dB`);
-  // Preis
   const p = m.price_eur, cap = S.stretch ? Math.max(S.budget, 3000) : S.budget;
   if (p == null) add("warn", "Preis unbekannt");
-  else if (p <= S.budget) add("ok", `Im Budget`);
+  else if (p <= S.budget) add("ok", "Im Budget", "im Budget");
   else if (p <= cap) add("warn", `Über Budget: ${fmtEur(p)}`);
   else add("bad", `Zu teuer: ${fmtEur(p)}`);
-  // Inhalt
   const v = m.total_l;
   if (v != null && v < S.vol) add("warn", `Nur ${v} l Inhalt`);
-  if (m.fridge_l && m.freezer_l) {
-    const share = m.freezer_l / (m.fridge_l + m.freezer_l);
-    if (share < 0.3) add("warn", `Kleines Gefrierfach (${m.freezer_l} l)`);
-  }
+  if (m.fridge_l && m.freezer_l && m.freezer_l / (m.fridge_l + m.freezer_l) < 0.3) add("warn", `Kleines Gefrierteil (${m.freezer_l} l)`);
   if (m.color && !/edelstahl|silber|inox|steel/i.test(m.color.split("(")[0])) add("warn", `Farbe: ${m.color.split("(")[0].trim()}`);
-  if (m.availability && /^(unsicher|auslauf)|discontinued|eingestellt/i.test(m.availability)) add("warn", "Schwer erhältlich");
-
-  // Punkte
+  if (m.availability && /^(unsicher|auslauf)|discontinued|eingestellt/i.test(m.availability)) add("warn", "Schwer zu bekommen");
   const parts = [
     [S.w.leise,   n == null ? .4 : clamp01((42 - n) / 7)],
     [S.w.sparsam, m.kwh_year == null ? .4 : clamp01((460 - m.kwh_year) / 200)],
@@ -456,86 +465,51 @@ function evaluate(m) {
   score = Math.round(Math.max(1, Math.min(99, score)));
   return { checks, fail, score };
 }
+const word = ev => ev.fail ? "Passt nicht" : ev.score >= 80 ? "Passt sehr gut" : ev.score >= 65 ? "Passt gut" : ev.score >= 50 ? "Mit Abstrichen" : "Passt kaum";
+function reasons(m) {
+  const r = [];
+  if (m.noise_db != null && m.noise_db <= 36) r.push(`Sehr leise: ${m.noise_db} dB`); else if (m.noise_db != null) r.push(`${m.noise_db} dB Betriebsgeräusch`);
+  if (m.ice === "auto_tank") r.push("Eiswürfel automatisch, ohne Wasseranschluss");
+  if (m.kwh_year) r.push(`Stromkosten ca. ${Math.round(m.kwh_year * 0.35)} € im Jahr (${m.kwh_year} kWh)`);
+  if (m.total_l) r.push(`${m.total_l} Liter${m.fridge_l ? `: ${m.fridge_l} l Kühlen, ${m.freezer_l} l Gefrieren` : ""}`);
+  return r.slice(0, 4);
+}
 
-/* ---------- Vergleich & Merkliste: Zustand ---------- */
+/* ---------- Zustand ---------- */
 let cmp = store.get("cmp", []).filter(id => byId[id]);
-let favs = store.get("favs", {});   // id -> {fav, note}
-let remote = null;                   // db-Anbindung, falls verfügbar
+let favs = store.get("favs", {});
+let remote = null;
+let lastEval = {};
 
-/* ---------- Liste ---------- */
-function ring(score, fail) {
-  const r = 34, c = 2 * Math.PI * r, col = fail ? "var(--bad)" : score >= 70 ? "var(--ok)" : score >= 50 ? "var(--warn)" : "var(--muted)";
-  return `<svg viewBox="0 0 76 76" aria-hidden="true"><circle cx="38" cy="38" r="${r}" fill="none" stroke="var(--surface-2)" stroke-width="6"/><circle cx="38" cy="38" r="${r}" fill="none" stroke="${col}" stroke-width="6" stroke-linecap="round" stroke-dasharray="${c * score / 100} ${c}" transform="rotate(-90 38 38)"/></svg>`;
-}
-function card(m, ev, rank) {
-  const f = favs[m.id] || {};
-  const dims = [m.width_cm, m.height_cm, m.depth_cm].map(x => x == null ? "?" : fmt(x)).join(" × ");
-  const idealo = "https://www.idealo.de/preisvergleich/MainSearchProductCategory.html?q=" + encodeURIComponent(m.model);
-  const chips = ev.checks.slice().sort((a, b) => ({ bad: 0, warn: 1, ok: 2 }[a.lvl] - { bad: 0, warn: 1, ok: 2 }[b.lvl]));
-  return `<article class="card${rank === 1 && !ev.fail ? " top1" : ""}${ev.fail ? " out" : ""}" data-id="${esc(m.id)}">
-    <div class="side">${gallery(m)}<div class="score" title="Passung ${ev.score} von 100">${ring(ev.score, ev.fail)}<b>${ev.score}</b><small>Passung</small></div></div>
-    <div class="card-body">
-      <div class="card-head">
-        <div class="name">
-          <div class="badges">${rank && !ev.fail ? `<span class="badge rank">Platz ${rank}</span>` : ""}<span class="badge">${TYPE_NAME[m.type] || esc(m.type)}</span>${m.energy_class ? `<span class="badge">Energie ${esc(m.energy_class)}</span>` : ""}</div>
-          <h3>${esc(m.brand)} ${esc(m.name || "")}</h3>
-          <span class="model">${esc(m.model)}</span>
-        </div>
-        <div class="price"><b>${p(m)}</b><small>${esc(m.price_range || "")}</small></div>
-      </div>
-      <div class="facts">
-        <div class="fact"><span class="label">B × H × T (cm)</span><b>${dims}</b></div>
-        <div class="fact"><span class="label">Inhalt</span><b>${fmt(m.total_l, "l")}</b><span class="muted" style="font-size:.8rem">${m.fridge_l ? `${m.fridge_l} kühl / ${m.freezer_l ?? "?"} gefr.` : ""}</span></div>
-        <div class="fact"><span class="label">Lautstärke</span><b>${fmt(m.noise_db, "dB")}</b></div>
-        <div class="fact"><span class="label">Strom pro Jahr</span><b>${fmt(m.kwh_year, "kWh")}</b><span class="muted" style="font-size:.8rem">${m.kwh_year ? `≈ ${Math.round(m.kwh_year * 0.35)} € bei 35 ct` : ""}</span></div>
-        <div class="fact"><span class="label">Eis</span><b>${ICE_NAME[m.ice] || "–"}</b></div>
-      </div>
-      <div class="checks">${chips.map(c => `<span class="chk ${c.lvl}">${esc(c.text)}</span>`).join("")}</div>
-      <details class="more"><summary>Mehr zu diesem Gerät</summary><div class="more-grid">
-        ${m.interior_highlights?.length ? `<div><span class="label">Innenausstattung</span><ul>${m.interior_highlights.map(x => `<li>${esc(x)}</li>`).join("")}</ul></div>` : ""}
-        ${m.reliability_notes ? `<div><span class="label">Haltbarkeit &amp; Garantie</span><p>${esc(m.reliability_notes)}</p></div>` : ""}
-        ${m.door_open_notes ? `<div><span class="label">Türen</span><p>${esc(m.door_open_notes)}</p></div>` : ""}
-        ${m.notes ? `<div><span class="label">Hinweis</span><p>${esc(m.notes)}</p></div>` : ""}
-      </div></details>
-      <div class="actions">
-        <button type="button" class="btn fav" data-act="fav" aria-pressed="${!!f.fav}">${f.fav ? "★ Gemerkt" : "☆ Merken"}</button>
-        <button type="button" class="btn cmp" data-act="cmp" aria-pressed="${cmp.includes(m.id)}">${cmp.includes(m.id) ? "✓ Im Vergleich" : "Vergleichen"}</button>
-        <button type="button" class="btn" data-act="door">Passt die Tür?</button>
-        <a class="btn" href="${idealo}" target="_blank" rel="noopener">Preise ansehen ↗</a>
-        ${m.product_url ? `<a class="btn" href="${esc(m.product_url)}" target="_blank" rel="noopener">Hersteller ↗</a>` : ""}
-      </div>
-    </div></article>`;
-}
-const FRIDGE_ICON = `<svg viewBox="0 0 40 70" aria-hidden="true"><rect x="2" y="2" width="36" height="66" rx="3" fill="none" stroke="#8a979c" stroke-width="3"/><line x1="20" y1="2" x2="20" y2="44" stroke="#8a979c" stroke-width="2.5"/><line x1="2" y1="44" x2="38" y2="44" stroke="#8a979c" stroke-width="2.5"/></svg>`;
-function photo(m, cls) {
-  return m.image ? `<div class="${cls}"><img src="${esc(m.image)}" alt="${esc(m.brand + " " + m.model)}" loading="lazy"></div>`
-    : `<div class="${cls} none" title="Kein Bild gefunden">${FRIDGE_ICON}</div>`;
-}
-document.addEventListener("error", e => { const img = e.target; if (img.tagName === "IMG" && img.parentNode) { img.parentNode.classList.add("none"); img.outerHTML = FRIDGE_ICON } }, true);
+/* ---------- Fotos & Galerie ---------- */
+const FRIDGE_ICON = `<svg viewBox="0 0 40 70" aria-hidden="true"><rect x="2" y="2" width="36" height="66" fill="none" stroke="#8a8a85" stroke-width="3"/><line x1="20" y1="2" x2="20" y2="44" stroke="#8a8a85" stroke-width="2.5"/><line x1="2" y1="44" x2="38" y2="44" stroke="#8a8a85" stroke-width="2.5"/></svg>`;
 const pics = m => m.gallery?.length ? m.gallery : (m.image ? [{ src: m.image, cap: "Außen" }] : []);
+function photo(m, cls) {
+  const g = pics(m);
+  return g.length ? `<div class="${cls}"><img src="${esc(g[0].src)}" alt="" loading="lazy"></div>` : `<div class="${cls} none">${FRIDGE_ICON}</div>`;
+}
 const galIdx = {};
-function gallery(m) {
-  const g = pics(m); if (!g.length) return photo(m, "photo");
+function gallery(m, extra = "") {
+  const g = pics(m); if (!g.length) return `<div class="photo none ${extra}" title="Kein Foto gefunden">${FRIDGE_ICON}</div>`;
   const i = galIdx[m.id] || 0, multi = g.length > 1;
-  return `<div class="photo gal" data-gal="${esc(m.id)}" role="button" tabindex="0" aria-label="Bilder von ${esc(m.brand + " " + m.model)} groß ansehen">
+  return `<div class="photo gal ${extra}" data-gal="${esc(m.id)}" data-extra="${esc(extra)}" role="button" tabindex="0" aria-label="Fotos von ${esc(m.brand + " " + m.model)} groß ansehen">
     <img src="${esc(g[i].src)}" alt="${esc(m.brand + " " + m.model + ": " + g[i].cap)}" loading="lazy">
-    ${multi ? `<button type="button" class="gal-nav prev" data-step="-1" aria-label="Vorheriges Bild">‹</button><button type="button" class="gal-nav next" data-step="1" aria-label="Nächstes Bild">›</button>` : ""}
-    <span class="gal-count">${multi ? `${i + 1}/${g.length} · ` : ""}${esc(g[i].cap)}</span></div>`;
+    ${multi ? `<button type="button" class="gal-nav prev" data-step="-1" aria-label="Vorheriges Foto">‹</button><button type="button" class="gal-nav next" data-step="1" aria-label="Nächstes Foto">›</button>` : ""}
+    <span class="gal-count">${extra.includes("sm") ? (multi ? `${i + 1}/${g.length}` : esc(g[i].cap)) : `${multi ? `${i + 1}/${g.length} · ` : ""}${esc(g[i].cap)}`}</span></div>`;
 }
 function stepGal(id, step) {
   const g = pics(byId[id]); galIdx[id] = ((galIdx[id] || 0) + step + g.length) % g.length;
-  document.querySelectorAll(`[data-gal="${CSS.escape(id)}"]`).forEach(el => el.outerHTML = gallery(byId[id]));
+  document.querySelectorAll(`[data-gal="${CSS.escape(id)}"]`).forEach(el => el.outerHTML = gallery(byId[id], el.dataset.extra));
   if (lbId === id && lb.open) drawLb();
 }
-let lbId = null; const lb = document.getElementById("lb");
+let lbId = null; const lb = $("#lb");
 function openLb(id) { lbId = id; drawLb(); try { lb.showModal() } catch { lb.setAttribute("open", "") } }
 function drawLb() {
   const m = byId[lbId], g = pics(m), i = galIdx[lbId] || 0;
-  document.getElementById("lb-title").textContent = `${m.brand} ${m.name || m.model}`;
-  document.getElementById("lb-cap").textContent = `Bild ${i + 1} von ${g.length}: ${g[i].cap}`;
-  const st = document.getElementById("lb-stage");
-  st.innerHTML = `<img src="${esc(g[i].src)}" alt="${esc(g[i].cap)}">${g.length > 1 ? `<button type="button" class="gal-nav prev" data-lbstep="-1" aria-label="Vorheriges Bild">‹</button><button type="button" class="gal-nav next" data-lbstep="1" aria-label="Nächstes Bild">›</button>` : ""}`;
-  document.getElementById("lb-thumbs").innerHTML = g.length > 1 ? g.map((x, k) => `<button type="button" data-lbgo="${k}" aria-label="${esc(x.cap)}" aria-current="${k === i}"><img src="${esc(x.src)}" alt=""></button>`).join("") : "";
+  $("#lb-title").textContent = `${m.brand} ${shortName(m)}`;
+  $("#lb-cap").textContent = `Foto ${i + 1} von ${g.length}: ${g[i].cap}`;
+  $("#lb-stage").innerHTML = `<img src="${esc(g[i].src)}" alt="${esc(g[i].cap)}">${g.length > 1 ? `<button type="button" class="gal-nav prev" data-lbstep="-1" aria-label="Vorheriges Foto">‹</button><button type="button" class="gal-nav next" data-lbstep="1" aria-label="Nächstes Foto">›</button>` : ""}`;
+  $("#lb-thumbs").innerHTML = g.length > 1 ? g.map((x, k) => `<button type="button" data-lbgo="${k}" aria-label="${esc(x.cap)}" aria-current="${k === i}"><img src="${esc(x.src)}" alt=""></button>`).join("") : "";
 }
 document.addEventListener("click", e => {
   const nav = e.target.closest(".gal .gal-nav"); if (nav) { e.stopPropagation(); stepGal(nav.closest("[data-gal]").dataset.gal, +nav.dataset.step); return }
@@ -549,17 +523,81 @@ document.addEventListener("keydown", e => {
   if (lb.open && (e.key === "ArrowRight" || e.key === "ArrowLeft")) stepGal(lbId, e.key === "ArrowRight" ? 1 : -1);
 });
 let swipeX = null;
-document.getElementById("lb-stage").addEventListener("pointerdown", e => { swipeX = e.clientX });
-document.getElementById("lb-stage").addEventListener("pointerup", e => { if (swipeX != null && Math.abs(e.clientX - swipeX) > 40) stepGal(lbId, e.clientX < swipeX ? 1 : -1); swipeX = null });
-document.getElementById("lb-close").addEventListener("click", () => lb.close ? lb.close() : lb.removeAttribute("open"));
+$("#lb-stage").addEventListener("pointerdown", e => { swipeX = e.clientX });
+$("#lb-stage").addEventListener("pointerup", e => { if (swipeX != null && Math.abs(e.clientX - swipeX) > 40) stepGal(lbId, e.clientX < swipeX ? 1 : -1); swipeX = null });
+$("#lb-close").addEventListener("click", () => lb.close ? lb.close() : lb.removeAttribute("open"));
 lb.addEventListener("click", e => { if (e.target === lb) lb.close() });
-const p = m => m.price_eur == null ? "Preis ?" : "ab " + fmtEur(m.price_eur);
 
-let lastEval = {};
+/* ---------- Bausteine ---------- */
+const priceTag = (m, big) => m.price_eur == null ? `<div class="tag none${big ? " big" : ""}"><b>Preis ?</b></div>`
+  : `<div class="tag${big ? " big" : ""}"><small>ab</small><b>${m.price_eur.toLocaleString("de-DE")},–</b></div>`;
+function actions(m, withLinks) {
+  const f = favs[m.id] || {};
+  const idealo = "https://www.idealo.de/preisvergleich/MainSearchProductCategory.html?q=" + encodeURIComponent(m.model);
+  return `<div class="actions">
+    <button type="button" class="btn fav" data-act="fav" aria-pressed="${!!f.fav}">${f.fav ? "★ Gemerkt" : "☆ Merken"}</button>
+    <button type="button" class="btn" data-act="cmp" aria-pressed="${cmp.includes(m.id)}">${cmp.includes(m.id) ? "✓ Im Vergleich" : "Vergleichen"}</button>
+    <button type="button" class="btn" data-act="door">Passt er hin?</button>
+    ${withLinks ? `<a class="btn" href="${idealo}" target="_blank" rel="noopener">Preise ↗</a>` : ""}
+  </div>`;
+}
+function specs(m) {
+  return `<div class="specs">
+    <div class="spec"><span>B × H × T</span><b>${[m.width_cm, m.height_cm, m.depth_cm].map(x => x == null ? "?" : fmt(x)).join(" × ")}</b></div>
+    <div class="spec"><span>Inhalt</span><b>${fmt(m.total_l, "l")}</b></div>
+    <div class="spec"><span>Lautstärke</span><b>${fmt(m.noise_db, "dB")}</b></div>
+    <div class="spec"><span>Strom/Jahr</span><b>${m.kwh_year ? "≈ " + Math.round(m.kwh_year * 0.35) + " €" : "–"}</b></div>
+  </div>`;
+}
+function fitList(ev) {
+  const ok = ev.checks.filter(c => c.lvl === "ok").map(c => c.short);
+  const rest = ev.checks.filter(c => c.lvl !== "ok").sort((a, b) => (a.lvl === "bad" ? 0 : 1) - (b.lvl === "bad" ? 0 : 1));
+  return `<div class="fit">${rest.map(c => `<span class="${c.lvl === "bad" ? "b" : "w"}">${esc(c.text)}</span>`).join("")}${ok.length ? `<span class="okline">${esc(ok.join(" · "))}</span>` : ""}</div>`;
+}
+function more(m) {
+  const idealo = "https://www.idealo.de/preisvergleich/MainSearchProductCategory.html?q=" + encodeURIComponent(m.model);
+  return `<details class="more"><summary>Mehr zu diesem Gerät</summary><div class="more-grid">
+    <div><span class="kicker">Genaue Bezeichnung</span><p>${esc(m.brand)} ${esc(m.name || "")} (${esc(m.model)})</p></div>
+    ${m.price_range ? `<div><span class="kicker">Preise</span><p>${esc(m.price_range)}</p></div>` : ""}
+    <div><span class="kicker">Ausstattung</span><p>${TYPE_NAME[m.type]} · ${m.fridge_l ? `${m.fridge_l} l Kühlen / ${m.freezer_l ?? "?"} l Gefrieren` : ""} · Eis: ${ICE_NAME[m.ice] || "–"}${m.energy_class ? ` · Energieklasse ${esc(m.energy_class)}, ${m.kwh_year} kWh/Jahr` : ""}</p></div>
+    ${m.interior_highlights?.length ? `<div><span class="kicker">Innenausstattung</span><ul>${m.interior_highlights.map(x => `<li>${esc(x)}</li>`).join("")}</ul></div>` : ""}
+    ${m.reliability_notes ? `<div><span class="kicker">Haltbarkeit &amp; Garantie</span><p>${esc(m.reliability_notes)}</p></div>` : ""}
+    ${m.notes ? `<div><span class="kicker">Hinweis</span><p>${esc(m.notes)}</p></div>` : ""}
+    <div class="actions"><a class="btn" href="${idealo}" target="_blank" rel="noopener">Preise vergleichen ↗</a>${m.product_url ? `<a class="btn" href="${esc(m.product_url)}" target="_blank" rel="noopener">Herstellerseite ↗</a>` : ""}</div>
+  </div></details>`;
+}
+
+/* ---------- Ansicht ---------- */
+function heroHtml(m, ev) {
+  return `<div class="hero-photo"><div class="stoerer" aria-hidden="true">Unsere<br>Empfehlung</div>${gallery(m)}</div>
+  <div class="hero-body">
+    <span class="kicker" style="color:var(--red)">Nr. 1 nach Ihren Wünschen · ${TYPE_NAME[m.type]}</span>
+    <h2 id="hero-h">${esc(m.brand)} ${esc(shortName(m))}</h2>
+    <span class="model">${esc(m.model)}</span>
+    <ul class="reasons">${reasons(m).map(r => `<li>${esc(r)}</li>`).join("")}</ul>
+    ${specs(m)}
+    ${ev.checks.some(c => c.lvl !== "ok") ? fitList({ checks: ev.checks.filter(c => c.lvl !== "ok") }) : ""}
+    <div class="hero-row">${priceTag(m, true)}<span class="verdict-word">${word(ev)}<span class="muted" style="font-size:.9rem"> · ${ev.score}/100</span></span></div>
+    <div data-id="${esc(m.id)}">${actions(m, true)}</div>
+    ${more(m)}
+  </div>`;
+}
+function itemHtml(m, ev, nr) {
+  return `<article class="item${ev.fail ? " out" : ""}" data-id="${esc(m.id)}">
+    ${gallery(m, "sm")}
+    <div class="item-body">
+      <div class="sub">${nr ? `<span class="nr">Nr. ${nr}</span>` : ""}<span>${TYPE_NAME[m.type]}</span><span>${esc(m.model)}</span></div>
+      <h3>${esc(m.brand)} ${esc(shortName(m))}</h3>
+      ${specs(m)}
+      ${fitList(ev)}
+      ${more(m)}
+    </div>
+    <div class="item-side">${priceTag(m)}<span class="word">${word(ev)}<br><span class="muted" style="font-size:.85rem">${ev.score}/100</span></span>${actions(m)}</div>
+  </article>`;
+}
 function render() {
   const rows = MODELS.map(m => ({ m, ev: evaluate(m) }));
   rows.forEach(r => lastEval[r.m.id] = r.ev);
-  const key = $("#sort").value;
   const sorters = {
     score: (a, b) => b.ev.score - a.ev.score,
     price: (a, b) => (a.m.price_eur ?? 1e9) - (b.m.price_eur ?? 1e9),
@@ -567,15 +605,17 @@ function render() {
     energy: (a, b) => (a.m.kwh_year ?? 1e9) - (b.m.kwh_year ?? 1e9),
     vol: (a, b) => (b.m.total_l ?? 0) - (a.m.total_l ?? 0),
   };
-  rows.sort(sorters[key]);
-  const fit = rows.filter(r => !r.ev.fail), out = rows.filter(r => r.ev.fail);
+  const fit = rows.filter(r => !r.ev.fail), out = rows.filter(r => r.ev.fail).sort(sorters.score);
   const ranked = fit.slice().sort(sorters.score);
-  $("#sum-title").textContent = fit.length ? `${fit.length} von ${MODELS.length} Geräten passen` : "Kein Gerät erfüllt alle Wünsche";
-  $("#list").innerHTML = fit.length ? fit.map(r => card(r.m, r.ev, ranked.indexOf(r) + 1)).join("")
-    : `<p class="block" style="padding:18px">Lockern Sie eine Einstellung, zum Beispiel Lautstärke oder Budget. Unten sehen Sie, woran es bei jedem Gerät scheitert.</p>`;
-  $("#out-head").innerHTML = out.length ? `<h2 style="font-size:1.2rem">Passt nicht ganz (${out.length})</h2><span class="muted">Rot markiert: der Grund</span>` : "";
-  $("#list-out").innerHTML = out.map(r => card(r.m, r.ev, 0)).join("");
-  renderCompare(); renderFavs();
+  const top = ranked[0];
+  $("#hero").innerHTML = top ? heroHtml(top.m, top.ev)
+    : `<div class="hero-body"><h2 id="hero-h">Kein Gerät erfüllt alle Wünsche</h2><p>Lockern Sie eine Einstellung, zum Beispiel Lautstärke oder Budget. Unten steht bei jedem Gerät der Grund in Rot.</p></div>`;
+  const rest = fit.filter(r => r !== top).sort(sorters[$("#sort").value]);
+  $("#sum-title").textContent = top ? `${rest.length} weitere passende Geräte` : "Keine passenden Geräte";
+  $("#list").innerHTML = rest.map(r => itemHtml(r.m, r.ev, ranked.indexOf(r) + 1)).join("");
+  $("#out-head").innerHTML = out.length ? `<h2>Passt nicht (${out.length})</h2><span class="muted">Der Grund steht in Rot</span>` : "";
+  $("#list-out").innerHTML = out.map(r => itemHtml(r.m, r.ev, 0)).join("");
+  renderCompare(); renderFavs(); renderBar();
 }
 $("#sort").addEventListener("change", render);
 
@@ -583,64 +623,64 @@ document.addEventListener("click", e => {
   const b = e.target.closest("[data-act]"); if (!b) return;
   const id = b.closest("[data-id]").dataset.id;
   if (b.dataset.act === "fav") toggleFav(id);
-  if (b.dataset.act === "cmp") toggleCmp(id);
+  if (b.dataset.act === "cmp" || b.dataset.act === "uncmp") toggleCmp(id);
   if (b.dataset.act === "door") openDoor(id);
-  if (b.dataset.act === "uncmp") toggleCmp(id);
 });
-
-function toast(t) { const el = document.createElement("div"); el.className = "toast"; el.setAttribute("role", "status"); el.textContent = t; document.body.append(el); setTimeout(() => el.remove(), 2400) }
-
-function toggleCmp(id) {
-  if (cmp.includes(id)) cmp = cmp.filter(x => x !== id);
-  else { if (cmp.length >= 3) { toast("Höchstens 3 Geräte im Vergleich"); return } cmp.push(id); toast("Zum Vergleich hinzugefügt, unten ansehen") }
-  store.set("cmp", cmp); render();
-}
-$("#cmp-clear").addEventListener("click", () => { cmp = []; store.set("cmp", cmp); render() });
+function toast(t) { const el = document.createElement("div"); el.className = "toast"; el.setAttribute("role", "status"); el.textContent = t; document.body.append(el); setTimeout(() => el.remove(), 2200) }
 
 /* ---------- Vergleich ---------- */
+function toggleCmp(id) {
+  if (cmp.includes(id)) cmp = cmp.filter(x => x !== id);
+  else { if (cmp.length >= 3) { toast("Höchstens 3 Geräte im Vergleich"); return } cmp.push(id) }
+  store.set("cmp", cmp); render();
+}
+function clearCmp() { cmp = []; store.set("cmp", cmp); render() }
+$("#cmp-clear").addEventListener("click", clearCmp);
+$("#cmpbar-clear").addEventListener("click", clearCmp);
+function renderBar() {
+  const bar = $("#cmpbar"); bar.hidden = !cmp.length; if (!cmp.length) return;
+  $("#cmpbar-thumbs").innerHTML = cmp.map(id => photo(byId[id], "thumb")).join("");
+  $("#cmpbar-text").textContent = cmp.length === 1 ? "1 Gerät gewählt, noch eins dazu" : `${cmp.length} Geräte im Vergleich`;
+}
 function renderCompare() {
   const ms = cmp.map(id => byId[id]);
-  if (!ms.length) { $("#cmp-body").innerHTML = `<p class="muted">Noch nichts ausgewählt. Tippen Sie bei bis zu drei Geräten auf „Vergleichen“.</p>`; $("#cmp-clear").hidden = true; return }
+  if (!ms.length) { $("#cmp-body").innerHTML = `<p class="muted">Noch nichts gewählt. Bei bis zu drei Geräten auf „Vergleichen“ tippen.</p>`; $("#cmp-clear").hidden = true; return }
   $("#cmp-clear").hidden = false;
   const rows = [
     ["Passung", m => lastEval[m.id].score, "max", v => v + " / 100"],
     ["Preis ab", m => m.price_eur, "min", fmtEur],
     ["Bauform", m => TYPE_NAME[m.type]],
     ["Breite", m => m.width_cm, null, v => fmt(v, "cm")],
-    ["Höhe", m => m.height_cm, "min", v => fmt(v, "cm")],
+    ["Höhe", m => m.height_cm, null, v => fmt(v, "cm")],
     ["Tiefe", m => m.depth_cm, null, v => fmt(v, "cm")],
-    ["Überstand über 60-cm-Arbeitsplatte", m => m.depth_cm == null ? null : Math.round(m.depth_cm + 5 - 60), null, v => v == null ? "–" : v + " cm"],
+    ["Überstand über Arbeitsplatte", m => m.depth_cm == null ? null : Math.round(m.depth_cm + 5 - 60), "min", v => v + " cm"],
     ["Inhalt gesamt", m => m.total_l, "max", v => fmt(v, "l")],
-    ["Kühlteil / Gefrierteil", m => m.fridge_l ? `${m.fridge_l} / ${m.freezer_l ?? "?"} l` : null],
+    ["Kühlen / Gefrieren", m => m.fridge_l ? `${m.fridge_l} / ${m.freezer_l ?? "?"} l` : null],
     ["Lautstärke", m => m.noise_db, "min", v => fmt(v, "dB")],
-    ["Strom pro Jahr", m => m.kwh_year, "min", v => fmt(v, "kWh")],
-    ["Energieklasse", m => m.energy_class],
+    ["Strom pro Jahr", m => m.kwh_year, "min", v => `${fmt(v, "kWh")} (≈ ${Math.round(v * 0.35)} €)`],
     ["Eiswürfel", m => ICE_NAME[m.ice]],
     ["Wassertank", m => m.water_tank_l, null, v => fmt(v, "l")],
-    ["Wasserspender", m => m.water_dispenser == null ? null : (m.water_dispenser ? "ja" : "nein")],
-    ["No-Frost", m => m.no_frost == null ? null : (m.no_frost ? "ja" : "nein")],
     ["Seitenabstand Tür (Hersteller)", m => m.hinge_clearance_cm, null, v => fmt(v, "cm")],
     ["Garantie & Haltbarkeit", m => m.reliability_notes],
   ];
-  const cell = (v, f) => v == null || v === "" ? "–" : (f ? f(v) : esc(v));
-  $("#cmp-body").innerHTML = `<div class="table-wrap"><table class="cmp"><thead><tr><th></th>${ms.map(m => `<th data-id="${esc(m.id)}">${photo(m, "thumb")}${esc(m.brand)} ${esc(m.name || m.model)}<br><button type="button" class="btn" style="margin-top:6px;padding:4px 10px;font-size:.8rem" data-act="uncmp">Entfernen</button></th>`).join("")}</tr></thead><tbody>${
+  const cell = (v, f) => v == null || v === "" ? "–" : (f ? esc(f(v)) : esc(v));
+  $("#cmp-body").innerHTML = `<div class="table-wrap"><table class="cmp"><thead><tr><th></th>${ms.map(m => `<th data-id="${esc(m.id)}"><div style="display:flex;gap:10px;align-items:flex-start">${photo(m, "thumb")}<div>${esc(m.brand)} ${esc(shortName(m))}<br><button type="button" class="btn" style="margin-top:6px;min-height:32px;padding:2px 10px;font-size:.8rem" data-act="uncmp">Entfernen</button></div></div></th>`).join("")}</tr></thead><tbody>${
     rows.map(([label, get, best, f]) => {
-      const vals = ms.map(get);
-      let bi = -1;
-      if (best && ms.length > 1) { const nums = vals.map(v => typeof v === "number" ? v : null); const valid = nums.filter(v => v != null);
+      const vals = ms.map(get); let bi = -1;
+      if (best && ms.length > 1) { const nums = vals.map(v => typeof v === "number" ? v : null), valid = nums.filter(v => v != null);
         if (valid.length > 1) { const t = best === "max" ? Math.max(...valid) : Math.min(...valid); if (valid.filter(v => v === t).length === 1) bi = nums.indexOf(t) } }
       return `<tr><th scope="row">${label}</th>${vals.map((v, i) => `<td class="${i === bi ? "best" : ""}">${cell(v, f)}</td>`).join("")}</tr>`;
-    }).join("")}</tbody></table></div><p class="hint">Grün = bester Wert in der Zeile. Überstand: Gerätetiefe plus 5 cm Wandabstand hinten, minus 60 cm Arbeitsplatte.</p>`;
+    }).join("")}</tbody></table></div><p class="hint">Gelb = bester Wert in der Zeile. Überstand = Gerätetiefe + 5 cm Wandabstand − 60 cm Arbeitsplatte.</p>`;
 }
 
-/* ---------- Merkliste (geteilt über db, sonst nur dieses Gerät) ---------- */
+/* ---------- Merkliste ---------- */
 function renderFavs() {
   const ids = Object.keys(favs).filter(id => favs[id]?.fav && byId[id]);
   $("#fav-body").innerHTML = ids.length ? ids.map(id => { const m = byId[id];
-    return `<div class="fav-row" data-id="${esc(id)}"><div style="display:flex;gap:12px"><div>${photo(m, "thumb")}</div><div><h3>${esc(m.brand)} ${esc(m.name || "")}</h3><span class="muted">${esc(m.model)} · ${p(m)} · Passung ${lastEval[id]?.score ?? "–"}</span>
-      <div class="actions" style="margin-top:8px"><button type="button" class="btn fav" data-act="fav" aria-pressed="true">★ Entfernen</button><button type="button" class="btn" data-act="cmp" aria-pressed="${cmp.includes(id)}">${cmp.includes(id) ? "✓ Im Vergleich" : "Vergleichen"}</button></div></div></div>
-      <label><span class="label">Notiz</span><textarea id="note-${esc(id)}" data-note="${esc(id)}" placeholder="z. B. im Laden angesehen, Türen gefallen">${esc(favs[id].note || "")}</textarea></label></div>` }).join("")
-    : `<p class="muted">Noch nichts gemerkt. Tippen Sie bei einem Gerät auf „☆ Merken“.</p>`;
+    return `<div class="fav-row" data-id="${esc(id)}"><div style="display:flex;gap:12px">${photo(m, "thumb")}<div style="display:flex;flex-direction:column;gap:6px"><h3>${esc(m.brand)} ${esc(shortName(m))}</h3><span class="muted">${esc(m.model)} · ${m.price_eur ? "ab " + fmtEur(m.price_eur) : "Preis ?"} · ${word(lastEval[id])}</span>
+      <div class="actions"><button type="button" class="btn" data-act="fav" aria-pressed="false">Entfernen</button><button type="button" class="btn" data-act="cmp" aria-pressed="${cmp.includes(id)}">${cmp.includes(id) ? "✓ Im Vergleich" : "Vergleichen"}</button></div></div></div>
+      <label><span class="kicker">Notiz</span><textarea id="note-${esc(id)}" data-note="${esc(id)}" placeholder="z. B. im Laden angesehen, Türen gefallen">${esc(favs[id].note || "")}</textarea></label></div>` }).join("")
+    : `<p class="muted">Noch nichts gemerkt. Bei einem Gerät auf „☆ Merken“ tippen.</p>`;
   $("#fav-copy").hidden = !ids.length;
 }
 const noteTimers = {};
@@ -663,18 +703,17 @@ async function pushFav(id) {
   const again = writing[id] === "again"; writing[id] = false; if (again) pushFav(id);
 }
 function setSync(mode) {
-  $("#sync").textContent = mode === "shared" ? "Die Merkliste wird geteilt: Alle, die diesen Link angemeldet öffnen, sehen dieselbe Liste und Notizen."
+  $("#sync").textContent = mode === "shared" ? "Die Merkliste ist geteilt: Alle, die diese Seite angemeldet öffnen, sehen dieselbe Liste."
     : mode === "loading" ? "Merkliste wird geladen …"
-    : "Die Merkliste wird nur auf diesem Gerät gespeichert. Zum Weitergeben: „Merkliste als Text kopieren“ und per Nachricht schicken.";
+    : "Die Merkliste bleibt auf diesem Gerät. Zum Weitergeben „Als Text kopieren“ und per Nachricht schicken.";
 }
 $("#fav-copy").addEventListener("click", async () => {
   const ids = Object.keys(favs).filter(id => favs[id]?.fav && byId[id]);
   const text = "Unsere Kühlschrank-Merkliste:\n\n" + ids.map(id => { const m = byId[id];
-    return `★ ${m.brand} ${m.name || ""} (${m.model})\n  ${p(m)} · ${fmt(m.width_cm)}×${fmt(m.height_cm)}×${fmt(m.depth_cm)} cm · ${fmt(m.noise_db, "dB")} · ${fmt(m.total_l, "l")}${favs[id].note ? "\n  Notiz: " + favs[id].note : ""}` }).join("\n\n");
+    return `★ ${m.brand} ${shortName(m)} (${m.model})\n  ${m.price_eur ? "ab " + fmtEur(m.price_eur) : "Preis ?"} · ${fmt(m.width_cm)}×${fmt(m.height_cm)}×${fmt(m.depth_cm)} cm · ${fmt(m.noise_db, "dB")} · ${fmt(m.total_l, "l")}${favs[id].note ? "\n  Notiz: " + favs[id].note : ""}` }).join("\n\n");
   try { await navigator.clipboard.writeText(text); toast("Kopiert. Jetzt in eine Nachricht einfügen.") }
   catch { const t = $("#fav-text"); t.hidden = false; t.value = text; t.focus(); t.select(); toast("Text markiert. Bitte kopieren.") }
 });
-
 async function connectDb() {
   setSync("loading");
   const timer = setTimeout(() => setSync("local"), 10000);
@@ -685,111 +724,130 @@ async function connectDb() {
     const canWrite = u ? await u.can("data.write") : null;
     db.collection("favs").onSnapshot(snap => {
       clearTimeout(timer);
-      if (!snap.metadata.fromCache) {
-        // Geteilten Stand übernehmen; lokale Einträge, die noch nicht geteilt sind, dazuschreiben
-        const shared = {}; snap.docs.forEach(d => { const x = d.data(); shared[d.id] = { fav: !!x.fav, note: x.note || "" } });
-        const localOnly = Object.keys(favs).filter(id => !(id in shared) && favs[id]?.fav);
-        favs = { ...shared }; localOnly.forEach(id => favs[id] = store.get("favs", {})[id]);
-        store.set("favs", favs);
-        if (canWrite !== false) { remote = db; setSync("shared"); localOnly.forEach(pushFav) } else setSync("local");
-        const active = document.activeElement?.dataset?.note; if (!active) render();
-      }
+      if (snap.metadata.fromCache) return;
+      const shared = {}; snap.docs.forEach(d => { const x = d.data(); shared[d.id] = { fav: !!x.fav, note: x.note || "" } });
+      const before = store.get("favs", {});
+      const localOnly = Object.keys(before).filter(id => !(id in shared) && before[id]?.fav);
+      favs = { ...shared }; localOnly.forEach(id => favs[id] = before[id]);
+      store.set("favs", favs);
+      if (canWrite !== false) { remote = db; setSync("shared"); localOnly.forEach(pushFav) } else setSync("local");
+      if (!document.activeElement?.dataset?.note) render();
     }, () => { clearTimeout(timer); remote = null; setSync("local") });
   } catch { clearTimeout(timer); setSync("local") }
 }
 
-/* ---------- Türskizze ---------- */
+/* ---------- Passt er hin? ---------- */
 let doorId = null;
 const dlg = $("#dlg");
 $("#gap").value = store.get("gap", 3);
+$("#oldh").value = store.get("oldh", 180);
 function openDoor(id) { doorId = id; drawDoor(); try { dlg.showModal() } catch { dlg.setAttribute("open", "") } }
 $("#dlg-close").addEventListener("click", () => dlg.close ? dlg.close() : dlg.removeAttribute("open"));
 dlg.addEventListener("click", e => { if (e.target === dlg) dlg.close() });
 $("#gap").addEventListener("input", () => { store.set("gap", +$("#gap").value); drawDoor() });
-
+$("#oldh").addEventListener("input", () => { store.set("oldh", +$("#oldh").value); drawDoor() });
 function maxAngle(gap, w, t, h) {
-  // Drehpunkt vorne links am Gehäuse. Tür: Breite w, Dicke t (hinter der Front), Griff h vor der Front, kurz vor dem Türende.
   const pts = [[0, -t], [w, -t], [w, 0], [w - 6, h], [w - 16, h]];
   let best = 0;
-  for (let a = 0; a <= 180; a += 1) {
-    const r = a * Math.PI / 180, ok = pts.every(([x, y]) => gap + x * Math.cos(r) - y * Math.sin(r) >= -0.01);
-    if (ok) best = a; else break;
+  for (let a = 0; a <= 180; a++) {
+    const r = a * Math.PI / 180;
+    if (pts.every(([x, y]) => gap + x * Math.cos(r) - y * Math.sin(r) >= -0.01)) best = a; else break;
   }
   return best;
 }
+function drawFront(m) {
+  const oldW = 91, oldH = +$("#oldh").value, W = m.width_cm ?? 91, H = m.height_cm ?? 180;
+  const sc = 1.35, base = 280, x0 = 70;
+  const X = x => x0 + x * sc, Y = y => base - y * sc;
+  let doors = "";
+  if (m.type === "sbs") doors = `<line x1="${X(W * 0.42)}" y1="${Y(H)}" x2="${X(W * 0.42)}" y2="${Y(4)}" stroke="var(--ink)" stroke-width="1.5"/>`;
+  else {
+    const split = m.type === "french" && m.id.includes("haier-hfr") ? H * 0.42 : H * 0.36;
+    doors = `<line x1="${X(0)}" y1="${Y(split)}" x2="${X(W)}" y2="${Y(split)}" stroke="var(--ink)" stroke-width="1.5"/><line x1="${X(W / 2)}" y1="${Y(H)}" x2="${X(W / 2)}" y2="${Y(split)}" stroke="var(--ink)" stroke-width="1.5"/>${m.type === "multi" || m.type === "french" ? `<line x1="${X(W / 2)}" y1="${Y(split)}" x2="${X(W / 2)}" y2="${Y(4)}" stroke="var(--ink)" stroke-width="1.5"/>` : ""}`;
+  }
+  const dh = Math.round((H - oldH) * 10) / 10, dw = Math.round((W - oldW) * 10) / 10;
+  $("#front").innerHTML = `
+    <rect x="0" y="0" width="${X(0) - 4}" height="${base}" fill="var(--hair)" opacity=".6"/>
+    <line x1="10" y1="${base}" x2="350" y2="${base}" stroke="var(--ink)" stroke-width="2"/>
+    <rect x="${X(W + 2)}" y="${Y(90)}" width="${350 - X(W + 2)}" height="${90 * sc}" fill="var(--hair)"/>
+    <text x="${X(W + 6)}" y="${Y(90) + 16}" font-size="11" fill="var(--ink-2)">Arbeitsplatte 90 cm</text>
+    <line x1="${X(-4)}" y1="${Y(S.height)}" x2="${X(W + 30)}" y2="${Y(S.height)}" stroke="var(--red)" stroke-dasharray="6 4"/>
+    <text x="${X(-4)}" y="${Y(S.height) - 5}" font-size="11" fill="var(--red)" font-weight="700">Ihre Grenze ${S.height} cm</text>
+    <rect x="${X(0)}" y="${Y(H)}" width="${W * sc}" height="${H * sc}" fill="var(--paper)" stroke="var(--ink)" stroke-width="2.5"/>
+    ${doors}
+    <rect x="${X(0)}" y="${Y(oldH)}" width="${oldW * sc}" height="${oldH * sc}" fill="none" stroke="var(--red)" stroke-width="2" stroke-dasharray="3 3"/>
+    <text x="${X(W / 2)}" y="${Y(H / 2)}" text-anchor="middle" font-size="13" font-weight="700" fill="var(--ink)">${esc(m.brand)}</text>
+    <text x="${X(W / 2)}" y="${Y(H / 2) + 16}" text-anchor="middle" font-size="11" fill="var(--ink-2)">${fmt(W)} × ${fmt(H)} cm</text>
+    <text x="14" y="${Y(H / 2)}" font-size="11" fill="var(--ink-2)" transform="rotate(-90 14 ${Y(H / 2)})">Wand</text>`;
+  const v = $("#size-verdict");
+  const tx = `Gegenüber dem alten Gerät (rot gestrichelt, ${fmt(oldW)} × ${fmt(oldH)} cm): ${dh === 0 ? "gleich hoch" : dh > 0 ? `${fmt(dh)} cm höher` : `${fmt(-dh)} cm niedriger`}, ${dw === 0 ? "gleich breit" : dw > 0 ? `${fmt(dw)} cm breiter` : `${fmt(-dw)} cm schmaler`}.`;
+  v.className = "verdict " + (H > S.height ? "bad" : dw > 1.5 ? "warn" : "ok"); v.textContent = tx;
+}
 function drawDoor() {
   const m = byId[doorId]; if (!m) return;
-  const gap = +$("#gap").value; $("#o-gap").textContent = fmt(gap, "cm");
+  drawFront(m);
+  const gap = +$("#gap").value; $("#o-gap").textContent = fmt(gap, "cm"); $("#o-oldh").textContent = fmt(+$("#oldh").value, "cm");
   const W = m.width_cm ?? 91, D = m.depth_cm ?? 72, backGap = 5, counter = 60;
   const doorW = m.type === "sbs" ? W * 0.42 : W / 2, t = 7, hnd = 6;
   const ang = maxAngle(gap, doorW, t, hnd);
-  const S2 = 2.45, ox = 60, oy = 26; // Maßstab px/cm
+  const S2 = 2.45, ox = 60, oy = 26;
   const X = x => ox + x * S2, Y = y => oy + y * S2;
-  const front = backGap + D;
-  const showAng = Math.min(ang, 100), r = showAng * Math.PI / 180;
+  const front = backGap + D, showAng = Math.min(ang, 100), r = showAng * Math.PI / 180;
   const rot = ([x, y]) => [gap + x * Math.cos(r) - y * Math.sin(r), front + x * Math.sin(r) + y * Math.cos(r)];
   const door = [[0, -t], [doorW, -t], [doorW, 0], [0, 0]].map(rot);
   const handle = [[doorW - 16, 0], [doorW - 16, hnd], [doorW - 6, hnd], [doorW - 6, 0]].map(rot);
   const poly = pts => pts.map(([x, y]) => `${X(x).toFixed(1)},${Y(y).toFixed(1)}`).join(" ");
-  const arcR = doorW * S2;
-  const need = m.hinge_clearance_cm;
-  const svg = `
-    <defs><pattern id="hatch" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="8" height="8" fill="var(--surface-2)"/><line x1="0" y1="0" x2="0" y2="8" stroke="var(--wall)" stroke-width="3"/></pattern></defs>
+  const arcR = doorW * S2, need = m.hinge_clearance_cm;
+  $("#sketch").innerHTML = `
+    <defs><pattern id="hatch" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="8" height="8" fill="var(--paper-2)"/><line x1="0" y1="0" x2="0" y2="8" stroke="var(--ink-2)" stroke-width="2"/></pattern></defs>
     <rect x="${X(-18)}" y="0" width="${18 * S2}" height="400" fill="url(#hatch)"/>
     <rect x="${X(-18)}" y="0" width="520" height="${oy}" fill="url(#hatch)"/>
-    <text x="${X(-16)}" y="${Y(150)}" fill="var(--fg)" font-size="13" font-weight="700" transform="rotate(-90 ${X(-11)} ${Y(150)})">Wand</text>
-    <rect x="${X(gap + W)}" y="${Y(0)}" width="${(170 - gap - W) * S2}" height="${counter * S2}" fill="var(--surface-2)" stroke="var(--line)"/>
-    <text x="${X(gap + W + 6)}" y="${Y(30)}" fill="var(--muted)" font-size="13">Arbeitsplatte 60 cm</text>
-    <line x1="${X(gap + W)}" y1="${Y(counter)}" x2="${X(gap + W + 40)}" y2="${Y(counter)}" stroke="var(--muted)" stroke-dasharray="4 4"/>
-    <rect x="${X(gap)}" y="${Y(backGap)}" width="${W * S2}" height="${(D - t) * S2}" fill="var(--surface)" stroke="var(--fg)" stroke-width="2"/>
-    <text x="${X(gap + W / 2)}" y="${Y(backGap + D / 2 - 4)}" text-anchor="middle" fill="var(--fg)" font-size="14" font-weight="700">${esc(m.brand)}</text>
-    <text x="${X(gap + W / 2)}" y="${Y(backGap + D / 2 + 4)}" text-anchor="middle" fill="var(--muted)" font-size="12">${fmt(W)} × ${fmt(D)} cm</text>
-    <rect x="${X(gap + doorW)}" y="${Y(front - t)}" width="${(W - doorW) * S2}" height="${t * S2}" fill="var(--surface)" stroke="var(--fg)" stroke-width="1.5"/>
-    <path d="M ${X(gap + doorW)} ${Y(front)} A ${arcR} ${arcR} 0 0 1 ${X(gap)} ${Y(front + doorW)}" fill="none" stroke="var(--muted)" stroke-dasharray="3 5"/>
-    <polygon points="${poly(door)}" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="2"/>
-    <polygon points="${poly(handle)}" fill="var(--accent)"/>
-    <circle cx="${X(gap)}" cy="${Y(front)}" r="4" fill="var(--fg)"/>
-    <text x="${X(gap) + 10}" y="${Y(front) + 34}" fill="var(--accent)" font-size="15" font-weight="700">${ang >= 180 ? "180°+" : ang + "°"}</text>
-    <line x1="${X(gap + W + 2)}" y1="${Y(counter)}" x2="${X(gap + W + 2)}" y2="${Y(front)}" stroke="var(--fg)"/>
-    <text x="${X(gap + W + 5)}" y="${Y((counter + front) / 2) + 4}" fill="var(--fg)" font-size="12">${Math.round(front - counter)} cm Überstand</text>
-    ${gap > 0 ? `<text x="${X(gap) + 4}" y="${Y(backGap) - 4}" fill="var(--fg)" font-size="11">← ${fmt(gap)} cm</text>` : ""}`;
-  $("#sketch").innerHTML = svg;
-  $("#dlg-title").textContent = `${m.brand} ${m.name || m.model}: Passt die Tür?`;
-  const v = $("#verdict");
-  const needOk = need == null || gap >= need;
-  if (ang >= 90 && needOk) { v.className = "verdict ok"; v.textContent = `Die linke Tür öffnet bis ca. ${ang >= 180 ? "180" : ang}°. Schubladen sollten sich herausziehen lassen.` }
-  else if (ang >= 90) { v.className = "verdict warn"; v.textContent = `Rechnerisch ${ang}°, aber der Hersteller verlangt ${fmt(need)} cm Seitenabstand. Lieber mehr Platz lassen.` }
-  else if (ang >= 80) { v.className = "verdict warn"; v.textContent = `Die Tür öffnet nur ca. ${ang}°. Schubladen gehen eventuell nicht ganz heraus. Etwas mehr Wandabstand hilft.` }
+    <rect x="${X(gap + W)}" y="${Y(0)}" width="${Math.max(0, (170 - gap - W) * S2)}" height="${counter * S2}" fill="var(--hair)"/>
+    <text x="${X(gap + W + 6)}" y="${Y(30)}" fill="var(--ink-2)" font-size="13">Arbeitsplatte 60 cm</text>
+    <rect x="${X(gap)}" y="${Y(backGap)}" width="${W * S2}" height="${(D - t) * S2}" fill="var(--paper)" stroke="var(--ink)" stroke-width="2.5"/>
+    <text x="${X(gap + W / 2)}" y="${Y(backGap + D / 2 - 4)}" text-anchor="middle" fill="var(--ink)" font-size="14" font-weight="700">${esc(m.brand)}</text>
+    <text x="${X(gap + W / 2)}" y="${Y(backGap + D / 2 + 4)}" text-anchor="middle" fill="var(--ink-2)" font-size="12">${fmt(W)} × ${fmt(D)} cm</text>
+    <rect x="${X(gap + doorW)}" y="${Y(front - t)}" width="${(W - doorW) * S2}" height="${t * S2}" fill="var(--paper)" stroke="var(--ink)" stroke-width="1.5"/>
+    <path d="M ${X(gap + doorW)} ${Y(front)} A ${arcR} ${arcR} 0 0 1 ${X(gap)} ${Y(front + doorW)}" fill="none" stroke="var(--ink-2)" stroke-dasharray="3 5"/>
+    <polygon points="${poly(door)}" fill="var(--tag)" stroke="var(--ink)" stroke-width="2"/>
+    <polygon points="${poly(handle)}" fill="var(--ink)"/>
+    <circle cx="${X(gap)}" cy="${Y(front)}" r="4" fill="var(--red)"/>
+    <text x="${X(gap) + 12}" y="${Y(front) + 36}" fill="var(--red)" font-size="17" font-weight="800">${ang >= 180 ? "180°+" : ang + "°"}</text>
+    <line x1="${X(gap + W + 2)}" y1="${Y(counter)}" x2="${X(gap + W + 2)}" y2="${Y(front)}" stroke="var(--ink)"/>
+    <text x="${X(gap + W + 5)}" y="${Y((counter + front) / 2) + 4}" fill="var(--ink)" font-size="12">${Math.round(front - counter)} cm Überstand</text>
+    ${gap > 0 ? `<text x="${X(gap) + 4}" y="${Y(backGap) - 4}" fill="var(--ink)" font-size="11">← ${fmt(gap)} cm</text>` : ""}`;
+  $("#dlg-title").textContent = `${m.brand} ${shortName(m)}: Passt er hin?`;
+  const v = $("#verdict"), needOk = need == null || gap >= need;
+  if (ang >= 90 && needOk) { v.className = "verdict ok"; v.textContent = `Linke Tür öffnet bis ca. ${ang >= 180 ? "180" : ang}°. Schubladen sollten herausgehen.` }
+  else if (ang >= 90) { v.className = "verdict warn"; v.textContent = `Rechnerisch ${ang}°, aber der Hersteller verlangt ${fmt(need)} cm Seitenabstand.` }
+  else if (ang >= 80) { v.className = "verdict warn"; v.textContent = `Die Tür öffnet nur ca. ${ang}°. Schubladen gehen eventuell nicht ganz heraus.` }
   else { v.className = "verdict bad"; v.textContent = `Die Tür stößt bei ca. ${ang}° an die Wand. Schubladen lassen sich so nicht herausnehmen.` }
   $("#door-note").textContent = [
-    need != null ? `Herstellerangabe Seitenabstand: ${fmt(need)} cm.` : "Herstellerangabe zum Seitenabstand nicht gefunden: in der Aufstellanleitung nachsehen.",
+    need != null ? `Hersteller: ${fmt(need)} cm Seitenabstand.` : "Seitenabstand vom Hersteller nicht gefunden: in der Aufstellanleitung nachsehen.",
     m.door_open_notes || "",
-    m.type === "sbs" ? "Bei Side-by-Side ist links das Gefrierteil: dessen Tür ist schmal, die Schubladen dahinter brauchen meist volle 90°." : "",
-    "Die Skizze rechnet mit 7 cm Türdicke und 6 cm Griff. Sie ersetzt nicht das Nachmessen."
+    m.type === "sbs" ? "Bei Side-by-Side ist links das Gefrierteil, dessen Schubladen brauchen meist volle 90°." : "",
   ].filter(Boolean).join(" ");
 }
 
-/* ---------- Statische Teile ---------- */
+/* ---------- Statisches ---------- */
 const CHECK = [
   "Nische messen: Breite an drei Höhen, Höhe bis zum Hängeschrank, Tiefe bis zur Wand.",
-  "Abstand zur linken Wand beim alten Gerät messen und mit „Passt die Tür?“ prüfen.",
+  "Abstand zur linken Wand und Höhe des alten Geräts messen und bei „Passt er hin?“ eintragen.",
   "Weg ins Haus messen: Haustür, Flur, Küchentür. Viele Geräte sind ohne Türen 70–75 cm tief.",
   "Steckdose hinter dem Gerät: frei erreichbar, kein Mehrfachstecker.",
   "Lieferung bis in die Küche, Aufstellen und Altgerät-Mitnahme mitbestellen.",
-  "Garantie prüfen: 2 Jahre gesetzlich, Kompressor oft 10–20 Jahre beim Hersteller registrieren.",
-  "Nach Lieferung 2–4 Stunden stehen lassen, bevor der Stecker rein kommt.",
-  "Wassertank fürs Eis: wöchentlich nachfüllen, Wasserfilter je nach Modell alle 6 Monate.",
-  "Preis kurz vor dem Kauf bei idealo vergleichen: Preise ändern sich oft wöchentlich.",
+  "Garantie: 2 Jahre gesetzlich, Kompressor oft 10 Jahre, dafür beim Hersteller registrieren.",
+  "Nach der Lieferung 2–4 Stunden stehen lassen, dann erst einstecken.",
+  "Wassertank fürs Eis: regelmäßig nachfüllen, Filter je nach Modell alle 6 Monate.",
+  "Preis kurz vor dem Kauf bei idealo vergleichen.",
 ];
 let done = store.get("check", []);
 $("#checklist").innerHTML = CHECK.map((c, i) => `<li><label><input type="checkbox" id="c-${i}" data-i="${i}" ${done.includes(i) ? "checked" : ""}><span>${esc(c)}</span></label></li>`).join("");
 $("#checklist").addEventListener("change", e => { const i = +e.target.dataset.i; done = e.target.checked ? [...new Set([...done, i])] : done.filter(x => x !== i); store.set("check", done) });
-
 const rel = DATA.brand_reliability || [];
 if (rel.length) $("#rel").innerHTML = rel.map(x => `<li>${esc(x)}</li>`).join(""); else $("#rel-sec").hidden = true;
-
-$("#foot").innerHTML = `<p>Stand der Daten: ${esc(DATA.meta?.stand ? new Date(DATA.meta.stand).toLocaleDateString("de-DE") : "")}. Preise schwanken; „ab“ ist der niedrigste gefundene Preis. „–“ heißt: Wert nicht sicher belegt. Produktbilder: Hersteller bzw. Händler, nur zur Ansicht. Alle Angaben ohne Gewähr, vor dem Kauf im Datenblatt prüfen.</p>${
-  DATA.sources?.length ? `<p>Quellen: ${DATA.sources.slice(0, 30).map((s, i) => `<a href="${esc(s)}" target="_blank" rel="noopener">[${i + 1}]</a>`).join(" ")}</p>` : ""}`;
+$("#foot").innerHTML = `<p>Stand der Daten: ${esc(DATA.meta?.stand ? new Date(DATA.meta.stand).toLocaleDateString("de-DE") : "")}. Preise schwanken, „ab“ ist der niedrigste gefundene Preis. „–“ heißt: nicht sicher belegt. Fotos: Hersteller bzw. Händler, nur zur Ansicht. Alle Angaben ohne Gewähr, vor dem Kauf im Datenblatt prüfen.</p>${
+  DATA.sources?.length ? `<p>Quellen: ${DATA.sources.slice(0, 40).map((s, i) => `<a href="${esc(s)}" target="_blank" rel="noopener">[${i + 1}]</a>`).join(" ")}</p>` : ""}`;
 
 writeForm(); render(); connectDb();
 })();
