@@ -6,28 +6,29 @@
 <style>
 /* Layout: Prospekt. Roter Kopf, große Empfehlungsseite, darunter Katalogzeilen mit schwarzen Linien; Wünsche als Seitenspalte (Handy: eingeklappt). */
 :root {
-  --paper: #ffffff;
-  --paper-2: #f3f2ee;
-  --ink: #111111;
-  --ink-2: #4a4a48;
-  --rule: #111111;
-  --hair: #d6d4cd;
-  --red: #d7141a;          /* Prospekt-Rot */
+  --paper: #f7f6f3;        /* warmes Papier */
+  --paper-2: #edebe6;
+  --card: #ffffff;
+  --ink: #1f1e1c;
+  --ink-2: #5d5a54;
+  --rule: #3b3a37;
+  --hair: #dcd9d2;
+  --red: #8c2f2f;          /* Weinrot */
   --red-fg: #ffffff;
-  --tag: #ffd60a;          /* Preisschild */
-  --tag-ink: #111111;
-  --ok: #17803d; --warn: #a15c00; --bad: #c41218;
+  --tag: #f3e3a6;          /* Preisschild, Sand */
+  --tag-ink: #2b2515;
+  --ok: #2f6f45; --warn: #8a5a12; --bad: #a3322b;
   --photo: #ffffff;
   --font-display: "Archivo", "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
   --font-body: "Atkinson Hyperlegible", "Segoe UI", Arial, sans-serif;
   --base: 17px;
 }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
-  --paper: #141414; --paper-2: #1f1f1d; --ink: #f2f1ec; --ink-2: #b9b7af; --rule: #f2f1ec; --hair: #3a3936;
-  --red: #e2272d; --tag: #ffd60a; --tag-ink: #111111; --ok: #5fd389; --warn: #f2b443; --bad: #ff6b6b; --photo: #ffffff; color-scheme: dark } }
+  --paper: #171614; --paper-2: #211f1d; --card: #1d1c1a; --ink: #ecebe6; --ink-2: #aaa79f; --rule: #8f8c84; --hair: #34322f;
+  --red: #c96a63; --tag: #e6d49a; --tag-ink: #2b2515; --ok: #7cc28f; --warn: #e0b060; --bad: #e88a82; --photo: #ffffff; color-scheme: dark } }
 :root[data-theme="dark"] {
-  --paper: #141414; --paper-2: #1f1f1d; --ink: #f2f1ec; --ink-2: #b9b7af; --rule: #f2f1ec; --hair: #3a3936;
-  --red: #e2272d; --tag: #ffd60a; --tag-ink: #111111; --ok: #5fd389; --warn: #f2b443; --bad: #ff6b6b; --photo: #ffffff; color-scheme: dark }
+  --paper: #171614; --paper-2: #211f1d; --card: #1d1c1a; --ink: #ecebe6; --ink-2: #aaa79f; --rule: #8f8c84; --hair: #34322f;
+  --red: #c96a63; --tag: #e6d49a; --tag-ink: #2b2515; --ok: #7cc28f; --warn: #e0b060; --bad: #e88a82; --photo: #ffffff; color-scheme: dark }
 
 * { box-sizing: border-box }
 html.big { --base: 20px }
@@ -43,14 +44,15 @@ button, input, select, textarea { font: inherit; color: inherit }
 .muted { color: var(--ink-2) }
 
 /* Kopf */
-.mast { background: var(--red); color: var(--red-fg); margin-top: calc(-1 * env(safe-area-inset-top, 0px)); padding-top: calc(env(safe-area-inset-top, 0px) + 18px); padding-bottom: 16px }
+.mast { background: var(--paper); color: var(--ink); border-bottom: 4px solid var(--red); margin-top: calc(-1 * env(safe-area-inset-top, 0px)); padding-top: calc(env(safe-area-inset-top, 0px) + 18px); padding-bottom: 16px }
 .mast .inner { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: end; gap: 12px 24px }
-.mast h1 { font-size: clamp(2.6rem, 8vw, 4.6rem); font-weight: 900; font-stretch: 62%; text-transform: uppercase; letter-spacing: -0.01em }
-.mast p { max-width: 46ch; font-size: .95rem; opacity: .95 }
+.mast h1 { font-size: clamp(2.6rem, 8vw, 4.4rem); font-weight: 900; color: var(--ink); font-stretch: 62%; text-transform: uppercase; letter-spacing: -0.01em }
+.mast p { max-width: 46ch; font-size: .95rem; color: var(--ink-2) }
+.mast .kicker { color: var(--red) }
 .mast-tools { display: flex; gap: 8px; align-items: center }
-.mast button { background: transparent; color: var(--red-fg); border: 2px solid var(--red-fg); padding: 6px 12px; font-family: var(--font-display); font-weight: 700; cursor: pointer }
-.mast button[aria-pressed="true"] { background: var(--red-fg); color: var(--red) }
-.facts-strip { border-bottom: 3px solid var(--rule); padding-block: 10px }
+.mast button { background: transparent; color: var(--ink); border: 2px solid var(--ink); padding: 6px 12px; font-family: var(--font-display); font-weight: 700; cursor: pointer }
+.mast button[aria-pressed="true"] { background: var(--ink); color: var(--paper) }
+.facts-strip { border-bottom: 2px solid var(--rule); padding-block: 10px }
 .facts-strip .inner { display: flex; flex-wrap: wrap; gap: 4px 22px; font-size: .88rem }
 .facts-strip b { font-family: var(--font-display); font-stretch: 100%; text-transform: uppercase; letter-spacing: .06em; font-size: .78rem; margin-right: 4px }
 
@@ -59,18 +61,18 @@ button, input, select, textarea { font: inherit; color: inherit }
 .btn:hover { background: var(--paper-2) }
 .btn.red { background: var(--red); border-color: var(--red); color: var(--red-fg) }
 .btn[aria-pressed="true"] { background: var(--ink); color: var(--paper) }
-.btn[aria-pressed="true"].fav { background: var(--tag); color: var(--tag-ink); border-color: var(--tag-ink) }
+.btn[aria-pressed="true"].fav { background: var(--tag); color: var(--tag-ink); border-color: var(--rule) }
 .actions { display: flex; flex-wrap: wrap; gap: 8px }
 
 /* Preisschild */
-.tag { display: inline-flex; flex-direction: column; align-items: flex-end; background: var(--tag); color: var(--tag-ink); padding: 6px 14px 8px; transform: rotate(-2deg); box-shadow: 3px 3px 0 var(--tag-ink); line-height: 1 }
+.tag { display: inline-flex; flex-direction: column; align-items: flex-end; background: var(--tag); color: var(--tag-ink); padding: 6px 14px 8px; transform: rotate(-2deg); box-shadow: 2px 2px 0 rgb(0 0 0 / .18); line-height: 1; border: 1px solid rgb(0 0 0 / .08) }
 .tag small { font-family: var(--font-display); font-weight: 700; font-size: .8rem }
 .tag b { font-family: var(--font-display); font-weight: 900; font-stretch: 62%; font-size: 2.4rem; font-variant-numeric: tabular-nums; letter-spacing: -0.01em }
 .tag.big b { font-size: 3.6rem }
 .tag.none b { font-size: 1.4rem }
 
 /* Empfehlung */
-.hero { border-bottom: 3px solid var(--rule); padding-block: 22px 28px }
+.hero { border-bottom: 2px solid var(--rule); padding-block: 22px 28px }
 .hero .inner { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: 28px; align-items: start; position: relative }
 .hero-photo { position: relative }
 .hero .photo { aspect-ratio: 1 / 1; max-height: 70vh; margin-inline: auto }
@@ -102,9 +104,9 @@ button, input, select, textarea { font: inherit; color: inherit }
 @media (max-width: 900px) { .main { grid-template-columns: minmax(0, 1fr); gap: 16px } }
 
 /* Wünsche */
-details.wishes { border: 3px solid var(--rule); background: var(--paper) }
+details.wishes { border: 2px solid var(--rule); background: var(--card) }
 @media (min-width: 901px) { details.wishes { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 12px); max-height: calc(100vh - 24px); overflow: auto } }
-details.wishes > summary { list-style: none; cursor: pointer; padding: 12px 16px; background: var(--ink); color: var(--paper); font-family: var(--font-display); font-weight: 800; font-stretch: 75%; font-size: 1.3rem; text-transform: uppercase; display: flex; justify-content: space-between; align-items: center }
+details.wishes > summary { list-style: none; cursor: pointer; padding: 12px 16px; background: var(--paper-2); color: var(--ink); border-bottom: 2px solid var(--rule); font-family: var(--font-display); font-weight: 800; font-stretch: 75%; font-size: 1.3rem; text-transform: uppercase; display: flex; justify-content: space-between; align-items: center }
 details.wishes > summary::-webkit-details-marker { display: none }
 details.wishes > summary::after { content: "＋"; font-size: 1.2rem }
 details.wishes[open] > summary::after { content: "−" }
@@ -132,7 +134,7 @@ input[type=range] { width: 100%; accent-color: var(--red); height: 30px }
 
 /* Katalog */
 .results { min-width: 0; display: flex; flex-direction: column }
-.list-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: end; gap: 8px 16px; border-bottom: 3px solid var(--rule); padding-bottom: 8px }
+.list-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: end; gap: 8px 16px; border-bottom: 2px solid var(--rule); padding-bottom: 8px }
 .list-head h2 { font-size: 2rem; text-transform: uppercase }
 .sort { display: flex; gap: 8px; align-items: center; font-size: .92rem }
 .sort select { border: 2px solid var(--ink); background: var(--paper); padding: 6px 8px }
@@ -158,7 +160,7 @@ details.more[open] summary { margin-bottom: 8px }
 .more-grid { display: grid; gap: 10px; font-size: .95rem }
 .more-grid ul { margin: 0; padding-left: 20px }
 .more-grid .kicker { display: block; margin-bottom: 2px; color: var(--ink-2) }
-.out-head { margin-top: 28px; border-bottom: 3px solid var(--rule); padding-bottom: 6px; display: flex; justify-content: space-between; gap: 12px; align-items: end; flex-wrap: wrap }
+.out-head { margin-top: 28px; border-bottom: 2px solid var(--rule); padding-bottom: 6px; display: flex; justify-content: space-between; gap: 12px; align-items: end; flex-wrap: wrap }
 .out-head h2 { font-size: 1.5rem; text-transform: uppercase }
 @media (max-width: 700px) {
   .item { grid-template-columns: 120px minmax(0, 1fr); gap: 14px }
@@ -169,14 +171,14 @@ details.more[open] summary { margin-bottom: 8px }
 }
 
 /* Abschnitte */
-section.band { border-top: 3px solid var(--rule); padding-block: 22px; margin-top: 12px }
+section.band { border-top: 2px solid var(--rule); padding-block: 22px; margin-top: 12px }
 section.band > .inner { display: flex; flex-direction: column; gap: 14px }
 .band-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: end; gap: 10px }
 .band-head h2 { font-size: 2rem; text-transform: uppercase }
 .table-wrap { overflow-x: auto }
 table.cmp { border-collapse: collapse; width: 100%; min-width: 560px; font-variant-numeric: tabular-nums }
 table.cmp th, table.cmp td { padding: 9px 10px; border-bottom: 1px solid var(--hair); text-align: left; vertical-align: top }
-table.cmp thead th { border-bottom: 3px solid var(--rule); font-family: var(--font-display); font-stretch: 85%; font-size: 1.05rem; text-transform: uppercase }
+table.cmp thead th { border-bottom: 2px solid var(--rule); font-family: var(--font-display); font-stretch: 85%; font-size: 1.05rem; text-transform: uppercase }
 table.cmp tbody th { color: var(--ink-2); font-weight: 400; width: 180px }
 table.cmp td.best { background: var(--tag); color: var(--tag-ink); font-weight: 700 }
 .favs { display: flex; flex-direction: column }
@@ -195,14 +197,46 @@ footer .inner { display: flex; flex-direction: column; gap: 6px }
 footer a { color: inherit }
 
 /* Vergleichsleiste */
-.cmpbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 15; background: var(--ink); color: var(--paper); padding-top: 10px; padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 10px) }
-.cmpbar .inner { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap }
-.cmpbar .thumbs { display: flex; gap: 6px; align-items: center }
-.cmpbar .thumb { width: 36px; border-color: var(--ink-2) }
-.cmpbar b { font-family: var(--font-display); font-stretch: 85%; font-size: 1.15rem; text-transform: uppercase }
-.cmpbar .btn { background: var(--tag); color: var(--tag-ink); border-color: var(--tag) }
-.cmpbar .btn.ghost { background: transparent; color: var(--paper); border-color: var(--paper) }
-@media (max-width: 560px) { .cmpbar .thumbs, #cmpbar-clear { display: none } .cmpbar b { font-size: 1rem } .cmpbar .inner { flex-wrap: nowrap } }
+.cmpbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 15; background: var(--card); color: var(--ink); border-top: 3px solid var(--red); box-shadow: 0 -6px 20px rgb(0 0 0 / .08); padding-top: 10px; padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 10px) }
+.cmpbar .inner { display: flex; align-items: center; gap: 12px }
+.cmpbar .label { font-family: var(--font-display); font-stretch: 85%; font-weight: 800; text-transform: uppercase; white-space: nowrap }
+.cmp-chips { display: flex; gap: 8px; flex: 1; min-width: 0; overflow-x: auto }
+.cmp-chip { display: flex; align-items: center; gap: 8px; border: 1px solid var(--hair); background: var(--paper); padding: 4px; flex: none; max-width: 250px }
+.cmp-chip .thumb { width: 30px }
+.cmp-chip span { font-size: .88rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+.cmp-chip button { border: 0; background: transparent; width: 34px; height: 34px; cursor: pointer; font-size: 1.1rem; color: var(--ink-2); flex: none }
+.cmp-chip button:hover { color: var(--bad) }
+.cmp-empty { border: 1px dashed var(--ink-2); color: var(--ink-2); padding: 0 12px; font-size: .85rem; display: flex; align-items: center; flex: none }
+.cmpbar .btn.go { background: var(--red); border-color: var(--red); color: var(--red-fg); white-space: nowrap }
+@media (max-width: 620px) { .cmp-chip span, .cmp-empty, .cmpbar .label { display: none } .cmp-chip { padding: 2px } }
+
+/* Vergleichsfenster */
+#cmpdlg { width: min(1100px, calc(100vw - 12px)); max-height: calc(100vh - 12px) }
+#cmpdlg .dlg { gap: 10px }
+.cmp-tools { display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: center; justify-content: space-between }
+.cmp-tools label { display: flex; gap: 8px; align-items: center; cursor: pointer; font-weight: 700 }
+.cmp-tools input { width: 22px; height: 22px; accent-color: var(--red) }
+.cmp-grid { overflow-x: auto; border-top: 2px solid var(--rule) }
+table.cmp { --lab: 190px; --colw: 220px; border-collapse: separate; border-spacing: 0; width: 100%; min-width: calc(var(--lab) + var(--n, 2) * var(--colw)); font-variant-numeric: tabular-nums; table-layout: fixed }
+table.cmp col.lab { width: var(--lab) }
+table.cmp th, table.cmp td { padding: 10px 12px; border-bottom: 1px solid var(--hair); text-align: left; vertical-align: top; background: var(--card) }
+table.cmp th[scope=row] { position: sticky; left: 0; z-index: 1; color: var(--ink-2); font-weight: 400; background: var(--paper) }
+table.cmp thead th { vertical-align: bottom; border-bottom: 2px solid var(--rule); background: var(--card) }
+table.cmp thead th.corner { position: sticky; left: 0; z-index: 2; background: var(--paper) }
+.cmp-head { display: flex; flex-direction: column; gap: 8px; align-items: flex-start }
+.cmp-head .photo { width: 100%; max-width: 170px; aspect-ratio: 4 / 5 }
+.cmp-head h3 { font-size: 1.25rem; text-transform: uppercase; overflow-wrap: anywhere }
+.cmp-head .word { font-family: var(--font-display); font-weight: 800; font-stretch: 75%; text-transform: uppercase }
+.cmp-head .tag b { font-size: 1.8rem }
+table.cmp tr.group th { color: var(--red); background: var(--paper-2); font-family: var(--font-display); font-stretch: 100%; font-weight: 700; font-size: .78rem; letter-spacing: .1em; text-transform: uppercase; padding-top: 14px; border-bottom: 1px solid var(--rule) }
+table.cmp tr.group td { background: var(--paper-2); border-bottom: 1px solid var(--rule) }
+table.cmp td.best { background: var(--tag); color: var(--tag-ink); font-weight: 700 }
+table.cmp td.best::after { content: " ★"; font-size: .8em }
+table.cmp tr.same td { color: var(--ink-2) }
+.cmp-only-diff table.cmp tr.same { display: none }
+.cmp-suggest { display: flex; flex-wrap: wrap; gap: 8px; align-items: center }
+.cmp-suggest .btn { min-height: 40px }
+@media (max-width: 620px) { #cmpdlg { width: calc(100vw - 8px) } #cmpdlg .dlg { padding: 12px 10px } .cmp-head .word { font-size: .9rem } table.cmp { --lab: 84px; --colw: 116px; font-size: .88rem } table.cmp th, table.cmp td { padding: 8px 6px } .cmp-head .photo { max-width: 96px } .cmp-head .tag b { font-size: 1.3rem } .cmp-head h3 { font-size: .95rem } .cmp-head .actions .btn { font-size: .78rem !important; padding: 2px 6px !important } .corner span { font-size: .72rem !important } }
 
 /* Dialoge */
 dialog { border: 3px solid var(--rule); background: var(--paper); color: var(--ink); padding: 0; width: min(820px, calc(100vw - 16px)); max-height: calc(100vh - 16px) }
@@ -226,7 +260,7 @@ dialog::backdrop { background: rgb(0 0 0 / .55) }
 .lb-thumbs button { flex: none; width: 74px; height: 74px; border: 2px solid var(--hair); background: #fff; padding: 2px; cursor: pointer }
 .lb-thumbs button[aria-current="true"] { border-color: var(--red); border-width: 3px }
 .lb-thumbs img { width: 100%; height: 100%; object-fit: contain }
-.toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(env(safe-area-inset-bottom, 0px) + 84px); background: var(--tag); color: var(--tag-ink); border: 2px solid var(--tag-ink); padding: 10px 16px; font-family: var(--font-display); font-weight: 700; z-index: 30 }
+.toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(env(safe-area-inset-bottom, 0px) + 96px); background: var(--ink); color: var(--paper); border: 0; padding: 10px 16px; font-family: var(--font-display); font-weight: 700; z-index: 30 }
 @media (prefers-reduced-motion: reduce) { .tag, .stoerer { transform: none } }
 </style>
 
@@ -294,8 +328,8 @@ dialog::backdrop { background: rgb(0 0 0 / .55) }
 </div></div>
 
 <section class="band gutter" id="compare" aria-labelledby="cmp-h"><div class="inner">
-  <div class="band-head"><h2 id="cmp-h">Vergleich</h2><button type="button" class="btn" id="cmp-clear">Auswahl leeren</button></div>
-  <div id="cmp-body"></div>
+  <div class="band-head"><h2 id="cmp-h">Vergleich</h2></div>
+  <div id="cmp-section"></div>
 </div></section>
 
 <section class="band gutter" id="favorites" aria-labelledby="fav-h"><div class="inner">
@@ -318,10 +352,21 @@ dialog::backdrop { background: rgb(0 0 0 / .55) }
 <footer class="gutter"><div class="inner" id="foot"></div></footer>
 
 <div class="cmpbar gutter" id="cmpbar" hidden><div class="inner">
-  <div class="thumbs" id="cmpbar-thumbs"></div>
-  <b id="cmpbar-text"></b>
-  <div class="actions"><button type="button" class="btn ghost" id="cmpbar-clear">Leeren</button><a class="btn" href="#compare" id="cmpbar-go">Vergleich ansehen ↓</a></div>
+  <span class="label">Vergleich</span>
+  <div class="cmp-chips" id="cmp-chips"></div>
+  <button type="button" class="btn go" id="cmpbar-go">Vergleichen →</button>
 </div></div>
+
+<dialog id="cmpdlg" aria-labelledby="cmpdlg-title">
+  <div class="dlg">
+    <div class="dlg-head"><div><span class="kicker muted">Bis zu 3 Geräte</span><h2 id="cmpdlg-title">Vergleich</h2></div><button type="button" class="btn" id="cmpdlg-close">Schließen</button></div>
+    <div class="cmp-tools">
+      <label><input type="checkbox" id="only-diff"> Nur Unterschiede zeigen</label>
+      <div class="actions"><button type="button" class="btn" id="cmp-clear">Alle entfernen</button></div>
+    </div>
+    <div id="cmp-body"></div>
+  </div>
+</dialog>
 
 <dialog id="dlg" aria-labelledby="dlg-title">
   <div class="dlg">
@@ -634,43 +679,79 @@ function toggleCmp(id) {
   else { if (cmp.length >= 3) { toast("Höchstens 3 Geräte im Vergleich"); return } cmp.push(id) }
   store.set("cmp", cmp); render();
 }
-function clearCmp() { cmp = []; store.set("cmp", cmp); render() }
+function clearCmp() { cmp = []; store.set("cmp", cmp); render(); if (cmpdlg.open) cmpdlg.close() }
+const cmpdlg = $("#cmpdlg");
 $("#cmp-clear").addEventListener("click", clearCmp);
-$("#cmpbar-clear").addEventListener("click", clearCmp);
+function openCmp() { renderCompare(); try { cmpdlg.showModal() } catch { cmpdlg.setAttribute("open", "") } }
+$("#cmpbar-go").addEventListener("click", openCmp);
+$("#cmpdlg-close").addEventListener("click", () => cmpdlg.close ? cmpdlg.close() : cmpdlg.removeAttribute("open"));
+cmpdlg.addEventListener("click", e => { if (e.target === cmpdlg) cmpdlg.close() });
+$("#only-diff").checked = !!store.get("onlyDiff", false);
+$("#only-diff").addEventListener("change", e => { store.set("onlyDiff", e.target.checked); renderCompare() });
+document.addEventListener("click", e => { if (e.target.closest("[data-opencmp]")) openCmp() });
 function renderBar() {
   const bar = $("#cmpbar"); bar.hidden = !cmp.length; if (!cmp.length) return;
-  $("#cmpbar-thumbs").innerHTML = cmp.map(id => photo(byId[id], "thumb")).join("");
-  $("#cmpbar-text").textContent = cmp.length === 1 ? "1 Gerät gewählt, noch eins dazu" : `${cmp.length} Geräte im Vergleich`;
+  $("#cmp-chips").innerHTML = cmp.map(id => { const m = byId[id];
+    return `<div class="cmp-chip" data-id="${esc(id)}">${photo(m, "thumb")}<span>${esc(m.brand)} ${esc(shortName(m))}</span><button type="button" data-act="uncmp" aria-label="${esc(m.brand + " " + shortName(m))} aus dem Vergleich nehmen">✕</button></div>` }).join("")
+    + (cmp.length < 3 ? `<span class="cmp-empty">+ ${cmp.length === 1 ? "noch ein Gerät wählen" : "Platz für ein drittes"}</span>` : "");
+  $("#cmpbar-go").textContent = `Vergleichen (${cmp.length}) →`;
+}
+function suggestions() {
+  if (cmp.length >= 3) return "";
+  const ranked = MODELS.filter(m => !cmp.includes(m.id) && !lastEval[m.id].fail).sort((a, b) => lastEval[b.id].score - lastEval[a.id].score).slice(0, 3);
+  return ranked.length ? `<div class="cmp-suggest"><span class="muted">Dazunehmen:</span>${ranked.map(m => `<span data-id="${esc(m.id)}"><button type="button" class="btn" data-act="cmp">+ ${esc(m.brand)} ${esc(shortName(m))}</button></span>`).join("")}</div>` : "";
 }
 function renderCompare() {
   const ms = cmp.map(id => byId[id]);
-  if (!ms.length) { $("#cmp-body").innerHTML = `<p class="muted">Noch nichts gewählt. Bei bis zu drei Geräten auf „Vergleichen“ tippen.</p>`; $("#cmp-clear").hidden = true; return }
-  $("#cmp-clear").hidden = false;
-  const rows = [
-    ["Passung", m => lastEval[m.id].score, "max", v => v + " / 100"],
-    ["Preis ab", m => m.price_eur, "min", fmtEur],
-    ["Bauform", m => TYPE_NAME[m.type]],
-    ["Breite", m => m.width_cm, null, v => fmt(v, "cm")],
-    ["Höhe", m => m.height_cm, null, v => fmt(v, "cm")],
-    ["Tiefe", m => m.depth_cm, null, v => fmt(v, "cm")],
-    ["Überstand über Arbeitsplatte", m => m.depth_cm == null ? null : Math.round(m.depth_cm + 5 - 60), "min", v => v + " cm"],
-    ["Inhalt gesamt", m => m.total_l, "max", v => fmt(v, "l")],
-    ["Kühlen / Gefrieren", m => m.fridge_l ? `${m.fridge_l} / ${m.freezer_l ?? "?"} l` : null],
-    ["Lautstärke", m => m.noise_db, "min", v => fmt(v, "dB")],
-    ["Strom pro Jahr", m => m.kwh_year, "min", v => `${fmt(v, "kWh")} (≈ ${Math.round(v * 0.35)} €)`],
-    ["Eiswürfel", m => ICE_NAME[m.ice]],
-    ["Wassertank", m => m.water_tank_l, null, v => fmt(v, "l")],
-    ["Seitenabstand Tür (Hersteller)", m => m.hinge_clearance_cm, null, v => fmt(v, "cm")],
-    ["Garantie & Haltbarkeit", m => m.reliability_notes],
+  $("#cmp-section").innerHTML = ms.length
+    ? `<p>${ms.map(m => `<b>${esc(m.brand)} ${esc(shortName(m))}</b>`).join(", ")} ${ms.length === 1 ? "ist" : "sind"} ausgewählt.</p><div class="actions"><button type="button" class="btn" data-opencmp style="background:var(--red);border-color:var(--red);color:var(--red-fg)">Vergleich öffnen</button></div>`
+    : `<p class="muted">Bei bis zu drei Geräten auf „Vergleichen“ tippen. Dann erscheint unten eine Leiste, und der Vergleich öffnet sich als eigenes Fenster.</p>`;
+  const body = $("#cmp-body");
+  if (!ms.length) { body.className = ""; body.innerHTML = `<p class="muted">Nichts ausgewählt.</p>${suggestions()}`; return }
+  const groups = [
+    ["Preis & Passung", [
+      ["Passung", m => lastEval[m.id].score, "max", v => `${v} / 100`],
+      ["Preis ab", m => m.price_eur, "min", fmtEur],
+      ["Strom pro Jahr", m => m.kwh_year, "min", v => `${fmt(v, "kWh")} ≈ ${Math.round(v * 0.35)} €`],
+    ]],
+    ["Maße & Stellplatz", [
+      ["Bauform", m => TYPE_NAME[m.type]],
+      ["Breite", m => m.width_cm, null, v => fmt(v, "cm")],
+      ["Höhe", m => m.height_cm, "min", v => fmt(v, "cm")],
+      ["Tiefe", m => m.depth_cm, null, v => fmt(v, "cm")],
+      ["Überstand über Arbeitsplatte", m => m.depth_cm == null ? null : Math.round(m.depth_cm + 5 - 60), "min", v => `${v} cm`],
+      ["Seitenabstand Tür (Hersteller)", m => m.hinge_clearance_cm, null, v => fmt(v, "cm")],
+    ]],
+    ["Platz & Leistung", [
+      ["Inhalt gesamt", m => m.total_l, "max", v => fmt(v, "l")],
+      ["Kühlen", m => m.fridge_l, "max", v => fmt(v, "l")],
+      ["Gefrieren", m => m.freezer_l, "max", v => fmt(v, "l")],
+      ["Lautstärke", m => m.noise_db, "min", v => fmt(v, "dB")],
+      ["Energieklasse", m => m.energy_class],
+    ]],
+    ["Eis & Wasser", [
+      ["Eiswürfel", m => ICE_NAME[m.ice]],
+      ["Wassertank", m => m.water_tank_l, null, v => fmt(v, "l")],
+      ["Wasserspender außen", m => m.water_dispenser == null ? null : (m.water_dispenser ? "ja" : "nein")],
+    ]],
+    ["Haltbarkeit", [
+      ["Garantie & Hinweise", m => m.reliability_notes],
+      ["Lieferbar", m => m.availability],
+    ]],
   ];
   const cell = (v, f) => v == null || v === "" ? "–" : (f ? esc(f(v)) : esc(v));
-  $("#cmp-body").innerHTML = `<div class="table-wrap"><table class="cmp"><thead><tr><th></th>${ms.map(m => `<th data-id="${esc(m.id)}"><div style="display:flex;gap:10px;align-items:flex-start">${photo(m, "thumb")}<div>${esc(m.brand)} ${esc(shortName(m))}<br><button type="button" class="btn" style="margin-top:6px;min-height:32px;padding:2px 10px;font-size:.8rem" data-act="uncmp">Entfernen</button></div></div></th>`).join("")}</tr></thead><tbody>${
-    rows.map(([label, get, best, f]) => {
-      const vals = ms.map(get); let bi = -1;
-      if (best && ms.length > 1) { const nums = vals.map(v => typeof v === "number" ? v : null), valid = nums.filter(v => v != null);
-        if (valid.length > 1) { const t = best === "max" ? Math.max(...valid) : Math.min(...valid); if (valid.filter(v => v === t).length === 1) bi = nums.indexOf(t) } }
-      return `<tr><th scope="row">${label}</th>${vals.map((v, i) => `<td class="${i === bi ? "best" : ""}">${cell(v, f)}</td>`).join("")}</tr>`;
-    }).join("")}</tbody></table></div><p class="hint">Gelb = bester Wert in der Zeile. Überstand = Gerätetiefe + 5 cm Wandabstand − 60 cm Arbeitsplatte.</p>`;
+  const small = 'style="min-height:36px;padding:4px 10px;font-size:.85rem"';
+  const head = `<tr><th class="corner" scope="col"><span class="muted" style="font-weight:400;font-size:.85rem">Gelb ★ = bester Wert</span></th>${ms.map(m => `<th scope="col" data-id="${esc(m.id)}"><div class="cmp-head">${photo(m, "photo")}<h3>${esc(m.brand)} ${esc(shortName(m))}</h3>${priceTag(m)}<span class="word">${word(lastEval[m.id])}</span><div class="actions"><button type="button" class="btn" data-act="uncmp" ${small}>✕ Entfernen</button><button type="button" class="btn" data-act="door" ${small}>Passt er hin?</button></div></div></th>`).join("")}</tr>`;
+  const rowsHtml = groups.map(([g, rows]) => `<tr class="group"><th scope="row">${g}</th>${ms.map(() => "<td></td>").join("")}</tr>` + rows.map(([label, get, best, f]) => {
+    const vals = ms.map(get), shown = vals.map(v => cell(v, f));
+    const same = ms.length > 1 && shown.every(x => x === shown[0]);
+    let bi = -1;
+    if (best && ms.length > 1) { const nums = vals.map(v => typeof v === "number" ? v : null), valid = nums.filter(v => v != null);
+      if (valid.length > 1) { const t = best === "max" ? Math.max(...valid) : Math.min(...valid); if (valid.filter(v => v === t).length === 1) bi = nums.indexOf(t) } }
+    return `<tr class="${same ? "same" : ""}"><th scope="row">${label}</th>${shown.map((v, i) => `<td class="${i === bi ? "best" : ""}">${v}</td>`).join("")}</tr>`;
+  }).join("")).join("");
+  body.className = $("#only-diff").checked ? "cmp-only-diff" : "";
+  body.innerHTML = `<div class="cmp-grid"><table class="cmp" style="--n:${ms.length}"><colgroup><col class="lab">${ms.map(() => "<col>").join("")}</colgroup><thead>${head}</thead><tbody>${rowsHtml}</tbody></table></div>${suggestions()}<p class="hint">Überstand = Gerätetiefe + 5 cm Wandabstand − 60 cm Arbeitsplatte.</p>`;
 }
 
 /* ---------- Merkliste ---------- */
