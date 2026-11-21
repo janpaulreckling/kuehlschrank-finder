@@ -311,6 +311,7 @@ dialog::backdrop { background: rgb(0 0 0 / .55) }
       <fieldset><div class="range-row"><legend>Budget</legend><output id="o-budget"></output></div><input type="range" id="budget" min="1000" max="4000" step="100">
         <label class="hint" style="display:flex;gap:8px;align-items:center;cursor:pointer"><input type="checkbox" id="stretch" style="width:20px;height:20px;accent-color:var(--red)"> Für ein Top-Gerät bis 3.000 € okay</label></fieldset>
       <fieldset><div class="range-row"><legend>Inhalt mindestens</legend><output id="o-vol"></output></div><input type="range" id="vol" min="400" max="650" step="10"></fieldset>
+      <fieldset><div class="range-row"><legend>Abstand zur linken Wand</legend><output id="o-wallgap"></output></div><input type="range" id="wallgap" min="0" max="15" step="0.5"><p class="hint">Am jetzigen Kühlschrank nachmessen. Davon hängt ab, wie weit die linke Tür aufgeht.</p></fieldset>
       <fieldset><legend>Wie wichtig ist …</legend><div class="weights" id="weights"></div></fieldset>
     </form>
   </details>
@@ -443,6 +444,7 @@ function writeForm() {
   WEIGHTS.forEach(([k]) => { const el = document.getElementById(`w-${k}-${S.w[k]}`); if (el) el.checked = true });
   document.querySelectorAll(".preset").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.preset === S.preset)));
   $("#o-height").textContent = S.height + " cm"; $("#o-noise").textContent = S.noise + " dB"; $("#o-budget").textContent = fmtEur(S.budget); $("#o-vol").textContent = S.vol + " l";
+  $("#wallgap").value = GAP; $("#o-wallgap").textContent = fmt(GAP, "cm");
 }
 function readForm() {
   S.types = [...document.querySelectorAll('input[name=type]:checked')].map(i => i.value);
@@ -451,7 +453,13 @@ function readForm() {
   S.height = +$("#height").value; S.noise = +$("#noise").value; S.budget = +$("#budget").value; S.vol = +$("#vol").value; S.stretch = $("#stretch").checked;
   WEIGHTS.forEach(([k]) => { const el = document.querySelector(`input[name=w-${k}]:checked`); if (el) S.w[k] = +el.value });
 }
-$("#prefs").addEventListener("input", () => { readForm(); S.preset = null; save(); writeForm(); render() });
+let GAP = store.get("gap", 3);
+function setGap(v) {
+  GAP = v; store.set("gap", v);
+  $("#wallgap").value = v; $("#gap").value = v; $("#o-wallgap").textContent = fmt(v, "cm");
+  render(); if (doorId) drawDoor();
+}
+$("#prefs").addEventListener("input", e => { if (e.target.id === "wallgap") { setGap(+e.target.value); return } readForm(); S.preset = null; save(); writeForm(); render() });
 document.querySelectorAll(".preset").forEach(b => b.addEventListener("click", () => {
   S = Object.assign(structuredClone(PRESETS[b.dataset.preset]), { preset: b.dataset.preset }); save(); writeForm(); render();
 }));
@@ -459,9 +467,20 @@ function save() { const { preset, ...p } = S; store.set("prefs", p); store.set("
 
 /* ---------- Bewertung ---------- */
 const clamp01 = x => Math.max(0, Math.min(1, x));
+function leftDoorAngle(m, gap) {
+  const W = m.width_cm ?? 91;
+  return maxAngle(gap, m.type === "sbs" ? W * 0.42 : W / 2, 7, 6);
+}
 function evaluate(m) {
   const checks = []; let fail = false;
   const add = (lvl, text, short) => { checks.push({ lvl, text, short: short || text }); if (lvl === "bad") fail = true };
+  // Linke Wand: Wie weit geht die linke Tür auf? (gleiche Rechnung wie die Skizze)
+  const ang = leftDoorAngle(m, GAP), need = m.hinge_clearance_cm;
+  if (ang >= 90) add("ok", `Linke Tür öffnet ca. ${ang}°`, "Tür an der Wand");
+  else if (ang >= 80) add("warn", `Linke Tür öffnet nur ca. ${ang}° (bei ${fmt(GAP)} cm Wandabstand)`);
+  else add("warn", `Linke Tür stößt bei ca. ${ang}° an die Wand (bei ${fmt(GAP)} cm Wandabstand)`);
+  if (need != null && GAP < need) add("warn", `Hersteller verlangt ${fmt(need)} cm Abstand zur Wand`);
+  else if (need == null) add("warn", "Wandabstand vom Hersteller unbekannt");
   if (!S.types.includes(m.type)) add("bad", `${TYPE_NAME[m.type]} abgewählt`);
   const w = m.width_cm;
   if (w == null) add("warn", "Breite unbekannt");
@@ -507,6 +526,7 @@ function evaluate(m) {
   const tw = parts.reduce((a, [w]) => a + w, 0);
   let score = parts.reduce((a, [w, x]) => a + w * x, 0) / tw * 100;
   score -= checks.filter(c => c.lvl === "warn").length * 5;
+  if (ang < 80) score -= 10;
   score = Math.round(Math.max(1, Math.min(99, score)));
   return { checks, fail, score };
 }
@@ -820,12 +840,12 @@ async function connectDb() {
 /* ---------- Passt er hin? ---------- */
 let doorId = null;
 const dlg = $("#dlg");
-$("#gap").value = store.get("gap", 3);
+$("#gap").value = GAP;
 $("#oldh").value = store.get("oldh", 180);
 function openDoor(id) { doorId = id; drawDoor(); try { dlg.showModal() } catch { dlg.setAttribute("open", "") } }
 $("#dlg-close").addEventListener("click", () => dlg.close ? dlg.close() : dlg.removeAttribute("open"));
 dlg.addEventListener("click", e => { if (e.target === dlg) dlg.close() });
-$("#gap").addEventListener("input", () => { store.set("gap", +$("#gap").value); drawDoor() });
+$("#gap").addEventListener("input", () => setGap(+$("#gap").value));
 $("#oldh").addEventListener("input", () => { store.set("oldh", +$("#oldh").value); drawDoor() });
 function maxAngle(gap, w, t, h) {
   const pts = [[0, -t], [w, -t], [w, 0], [w - 6, h], [w - 16, h]];
@@ -899,7 +919,8 @@ function drawDoor() {
     ${gap > 0 ? `<text x="${X(gap) + 4}" y="${Y(backGap) - 4}" fill="var(--ink)" font-size="11">← ${fmt(gap)} cm</text>` : ""}`;
   $("#dlg-title").textContent = `${m.brand} ${shortName(m)}: Passt er hin?`;
   const v = $("#verdict"), needOk = need == null || gap >= need;
-  if (ang >= 90 && needOk) { v.className = "verdict ok"; v.textContent = `Linke Tür öffnet bis ca. ${ang >= 180 ? "180" : ang}°. Schubladen sollten herausgehen.` }
+  if (ang >= 105 && needOk) { v.className = "verdict ok"; v.textContent = `Linke Tür öffnet bis ca. ${ang >= 180 ? "180" : ang}°. Schubladen sollten herausgehen.` }
+  else if (ang >= 90 && needOk) { v.className = "verdict warn"; v.textContent = `Linke Tür öffnet ca. ${ang}°. Schubladen gehen bei French Doors oft erst ab gut 90° ganz heraus: im Laden ausprobieren.` }
   else if (ang >= 90) { v.className = "verdict warn"; v.textContent = `Rechnerisch ${ang}°, aber der Hersteller verlangt ${fmt(need)} cm Seitenabstand.` }
   else if (ang >= 80) { v.className = "verdict warn"; v.textContent = `Die Tür öffnet nur ca. ${ang}°. Schubladen gehen eventuell nicht ganz heraus.` }
   else { v.className = "verdict bad"; v.textContent = `Die Tür stößt bei ca. ${ang}° an die Wand. Schubladen lassen sich so nicht herausnehmen.` }
