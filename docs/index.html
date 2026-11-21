@@ -1,0 +1,797 @@
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="robots" content="noindex,nofollow"><style>:root{color-scheme:light}body{margin:0;font:14px system-ui}img{max-width:100%}[hidden]{display:none!important}</style></head><body><title>Kühlschrank-Finder</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&display=swap">
+<style>
+/* Layout: Wunsch-Panel links (auf dem Handy oben), Rangliste rechts; Vergleich + Merkliste + Kaufhinweise darunter. */
+:root {
+  --bg: #f3f5f6;          /* gebürsteter Stahl, hell */
+  --surface: #ffffff;
+  --surface-2: #e8edef;
+  --line: #cfd8dc;
+  --fg: #172226;
+  --muted: #52646b;
+  --accent: #0b6a85;      /* Eisblau */
+  --accent-fg: #ffffff;
+  --accent-soft: #d6eef4;
+  --ok: #1f7a43;  --ok-soft: #dcf1e3;
+  --warn: #9a6200; --warn-soft: #fbedd0;
+  --bad: #b3261e; --bad-soft: #f9dedc;
+  --star: #c98a00;
+  --wall: #8a979c;
+  --font-display: "Bricolage Grotesque", "Avenir Next", system-ui, sans-serif;
+  --font-body: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --radius: 10px;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #11181b; --surface: #182327; --surface-2: #213036; --line: #33454c;
+  --fg: #e6eef0; --muted: #9db0b6; --accent: #5cc4e0; --accent-fg: #06222b; --accent-soft: #163a45;
+  --ok: #6fd391; --ok-soft: #173826; --warn: #f0b84d; --warn-soft: #3a2c10; --bad: #ff8a80; --bad-soft: #3d1a18;
+  --star: #f2c14e; --wall: #5d6d73; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #11181b; --surface: #182327; --surface-2: #213036; --line: #33454c;
+  --fg: #e6eef0; --muted: #9db0b6; --accent: #5cc4e0; --accent-fg: #06222b; --accent-soft: #163a45;
+  --ok: #6fd391; --ok-soft: #173826; --warn: #f0b84d; --warn-soft: #3a2c10; --bad: #ff8a80; --bad-soft: #3d1a18;
+  --star: #f2c14e; --wall: #5d6d73; color-scheme: dark }
+
+* { box-sizing: border-box }
+body { background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 17px; line-height: 1.5;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 0 48px }
+h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; line-height: 1.15; margin: 0 }
+h1 { font-size: clamp(2rem, 5vw, 2.9rem); letter-spacing: -0.01em }
+h2 { font-size: 1.45rem }
+h3 { font-size: 1.15rem }
+p { margin: 0 }
+button, input, select, textarea { font: inherit; color: inherit }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px }
+.wrap { max-width: 1240px; margin: 0 auto; display: flex; flex-direction: column; gap: 28px }
+.num { font-variant-numeric: tabular-nums }
+.muted { color: var(--muted) }
+.label { font-size: .78rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); font-weight: 700 }
+
+/* Kopf */
+header.top { padding-block: 28px 4px; display: flex; flex-direction: column; gap: 10px }
+header.top p { max-width: 62ch; color: var(--muted); font-size: 1.05rem }
+.spec-strip { display: flex; flex-wrap: wrap; gap: 8px }
+.spec-strip span { background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 4px 12px; font-size: .9rem }
+
+/* Hauptbereich */
+.main { display: grid; grid-template-columns: minmax(280px, 340px) minmax(0, 1fr); gap: 24px; align-items: start }
+@media (max-width: 860px) { .main { grid-template-columns: minmax(0, 1fr) } }
+
+/* Wünsche */
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px; display: flex; flex-direction: column; gap: 20px }
+@media (min-width: 861px) { .panel { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 12px); max-height: calc(100vh - 24px); overflow: auto } }
+.presets { display: grid; grid-template-columns: 1fr 1fr; gap: 8px }
+.preset { border: 1px solid var(--line); background: var(--surface-2); border-radius: 8px; padding: 10px; text-align: left; cursor: pointer; display: flex; flex-direction: column; gap: 2px }
+.preset b { font-size: .95rem }
+.preset small { color: var(--muted); font-size: .8rem; line-height: 1.3 }
+.preset[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); box-shadow: inset 0 0 0 1px var(--accent) }
+fieldset { border: 0; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px }
+legend { font-weight: 700; padding: 0; margin-bottom: 6px }
+.seg { display: flex; flex-wrap: wrap; gap: 6px }
+.seg label { cursor: pointer }
+.seg input { position: absolute; opacity: 0; pointer-events: none }
+.seg span { display: inline-block; border: 1px solid var(--line); border-radius: 999px; padding: 6px 12px; font-size: .92rem; background: var(--surface) }
+.seg input:checked + span { background: var(--accent); color: var(--accent-fg); border-color: var(--accent) }
+.seg input:focus-visible + span { outline: 3px solid var(--accent); outline-offset: 2px }
+.range-row { display: flex; justify-content: space-between; align-items: baseline; gap: 8px }
+.range-row output { font-weight: 700; font-variant-numeric: tabular-nums }
+input[type=range] { width: 100%; accent-color: var(--accent); height: 28px }
+.hint { font-size: .85rem; color: var(--muted) }
+.weights { display: grid; grid-template-columns: auto 1fr; gap: 8px 10px; align-items: center }
+.weights .seg span { padding: 4px 10px; font-size: .85rem }
+
+/* Ergebnisse */
+.results { display: flex; flex-direction: column; gap: 16px; min-width: 0 }
+.summary { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 16px; align-items: baseline }
+.summary h2 { font-size: 1.6rem }
+.sort { display: flex; gap: 8px; align-items: center }
+.sort select { border: 1px solid var(--line); background: var(--surface); border-radius: 8px; padding: 6px 10px }
+.list { display: flex; flex-direction: column; gap: 14px }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px; display: grid; grid-template-columns: 130px minmax(0, 1fr); gap: 18px }
+.side { display: flex; flex-direction: column; align-items: center; gap: 14px }
+.photo { width: 130px; aspect-ratio: 3 / 4; max-width: 100%; border-radius: 8px; background: #fff; display: grid; place-items: center; overflow: hidden; border: 1px solid var(--line) }
+.photo img { width: 100%; height: 100%; object-fit: contain }
+.photo.none svg { width: 46%; height: auto }
+.photo-cap { font-size: .7rem; color: var(--muted); text-align: center; margin-top: -8px }
+@media (max-width: 520px) { .card { grid-template-columns: minmax(0, 1fr); gap: 12px; padding: 14px } .side { flex-direction: row; justify-content: flex-start; gap: 24px } .photo { width: 96px } .score small { bottom: -18px } }
+.gal { position: relative; cursor: zoom-in }
+.gal-nav { position: absolute; top: 50%; transform: translateY(-50%); width: 34px; height: 34px; border-radius: 50%; border: 1px solid #cfd8dc; background: rgb(255 255 255 / .92); color: #172226; font-size: 1.3rem; line-height: 1; cursor: pointer; display: grid; place-items: center; padding: 0 }
+.gal-nav.prev { left: 4px } .gal-nav.next { right: 4px }
+.gal-count { position: absolute; left: 0; right: 0; bottom: 0; background: rgb(23 34 38 / .72); color: #fff; font-size: .72rem; text-align: center; padding: 3px 4px; line-height: 1.25 }
+#lb { width: min(980px, calc(100vw - 16px)) }
+.lb-stage { position: relative; background: #fff; border-radius: 8px; display: grid; place-items: center; height: min(68vh, 640px); touch-action: pan-y; user-select: none }
+.lb-stage img { max-width: 100%; max-height: 100%; object-fit: contain }
+.lb-stage .gal-nav { width: 52px; height: 52px; font-size: 1.8rem }
+.lb-stage .gal-nav.prev { left: 10px } .lb-stage .gal-nav.next { right: 10px }
+.lb-thumbs { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px }
+.lb-thumbs button { flex: none; width: 72px; height: 72px; border: 2px solid var(--line); border-radius: 6px; background: #fff; padding: 2px; cursor: pointer }
+.lb-thumbs button[aria-current="true"] { border-color: var(--accent) }
+.lb-thumbs img { width: 100%; height: 100%; object-fit: contain }
+.thumb { width: 64px; aspect-ratio: 3 / 4; border-radius: 6px; background: #fff; border: 1px solid var(--line); overflow: hidden; display: grid; place-items: center; flex: none }
+.thumb img { width: 100%; height: 100%; object-fit: contain }
+.card.top1 { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent) }
+.card.out { opacity: .82 }
+.score { width: 76px; height: 76px; border-radius: 50%; display: grid; place-items: center; position: relative }
+.score svg { position: absolute; inset: 0 }
+.score b { font-family: var(--font-display); font-size: 1.5rem; font-variant-numeric: tabular-nums }
+.score small { position: absolute; bottom: -20px; left: 0; right: 0; text-align: center; font-size: .72rem; color: var(--muted) }
+.card-body { display: flex; flex-direction: column; gap: 12px; min-width: 0 }
+.card-head { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px 16px; align-items: start }
+
+.card-head .name { display: flex; flex-direction: column; gap: 2px; min-width: 0 }
+.card-head .model { color: var(--muted); font-size: .9rem; overflow-wrap: anywhere }
+.price { text-align: right }
+.price b { font-family: var(--font-display); font-size: 1.4rem; font-variant-numeric: tabular-nums }
+.price small { display: block; color: var(--muted); font-size: .8rem; max-width: 26ch; margin-left: auto }
+@media (max-width: 600px) { .card-head { grid-template-columns: minmax(0, 1fr) } .price { text-align: left } .price small { margin-left: 0 } }
+.badges { display: flex; flex-wrap: wrap; gap: 6px }
+.badge { font-size: .78rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; padding: 2px 8px; border-radius: 4px; background: var(--surface-2); color: var(--muted) }
+.badge.rank { background: var(--accent); color: var(--accent-fg) }
+.facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(118px, 40%), 1fr)); gap: 8px }
+.fact { background: var(--surface-2); border-radius: 8px; padding: 8px 10px; display: flex; flex-direction: column; gap: 1px }
+.fact .label { font-size: .7rem }
+.fact b { font-variant-numeric: tabular-nums; font-size: 1rem }
+.checks { display: flex; flex-wrap: wrap; gap: 6px }
+.chk { font-size: .88rem; padding: 3px 10px; border-radius: 999px; display: inline-flex; gap: 6px; align-items: center }
+.chk::before { font-weight: 700 }
+.chk.ok { background: var(--ok-soft); color: var(--ok) } .chk.ok::before { content: "✓" }
+.chk.warn { background: var(--warn-soft); color: var(--warn) } .chk.warn::before { content: "!" }
+.chk.bad { background: var(--bad-soft); color: var(--bad) } .chk.bad::before { content: "✕" }
+details.more summary { cursor: pointer; color: var(--accent); font-weight: 700 }
+details.more[open] summary { margin-bottom: 8px }
+.more-grid { display: grid; gap: 10px }
+.more-grid ul { margin: 0; padding-left: 20px }
+.actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center }
+.btn { border: 1px solid var(--line); background: var(--surface); border-radius: 8px; padding: 8px 14px; cursor: pointer; font-weight: 700; font-size: .95rem; text-decoration: none; color: var(--fg); display: inline-flex; gap: 6px; align-items: center }
+.btn:hover { border-color: var(--accent) }
+.btn.primary { background: var(--accent); color: var(--accent-fg); border-color: var(--accent) }
+.btn[aria-pressed="true"].fav { color: var(--star); border-color: var(--star) }
+.btn[aria-pressed="true"].cmp { background: var(--accent-soft); border-color: var(--accent) }
+.out-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-top: 8px }
+
+/* Vergleich */
+section.block { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; display: flex; flex-direction: column; gap: 14px }
+.table-wrap { overflow-x: auto }
+table.cmp { border-collapse: collapse; width: 100%; min-width: 520px; font-variant-numeric: tabular-nums }
+table.cmp th, table.cmp td { padding: 9px 10px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top }
+table.cmp thead th { font-family: var(--font-display); font-size: 1.02rem }
+table.cmp tbody th { color: var(--muted); font-weight: 400; width: 170px }
+table.cmp td.best { background: var(--ok-soft); color: var(--ok); font-weight: 700 }
+
+/* Merkliste */
+.favs { display: flex; flex-direction: column; gap: 12px }
+.fav-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); gap: 12px; align-items: start; padding-bottom: 12px; border-bottom: 1px solid var(--line) }
+@media (max-width: 600px) { .fav-row { grid-template-columns: minmax(0, 1fr) } }
+.fav-row textarea { width: 100%; min-height: 64px; border: 1px solid var(--line); border-radius: 8px; padding: 8px; background: var(--bg) }
+.sync { font-size: .88rem; padding: 6px 10px; border-radius: 8px; background: var(--surface-2) }
+
+/* Kaufhinweise */
+.checklist { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 10px 24px }
+.checklist label { display: grid; grid-template-columns: 24px minmax(0,1fr); gap: 10px; cursor: pointer }
+.checklist input { width: 20px; height: 20px; accent-color: var(--accent); margin-top: 3px }
+.checklist input:checked + span { color: var(--muted); text-decoration: line-through }
+
+/* Skizze */
+dialog { border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); color: var(--fg); padding: 0; width: min(760px, calc(100vw - 24px)); max-height: calc(100vh - 24px) }
+dialog::backdrop { background: rgb(0 0 0 / .45) }
+.dlg { padding: 20px; display: flex; flex-direction: column; gap: 14px }
+.dlg-head { display: flex; justify-content: space-between; gap: 12px; align-items: start }
+.sketch { width: 100%; height: auto; display: block; background: var(--bg); border-radius: 8px; border: 1px solid var(--line) }
+.verdict { padding: 10px 14px; border-radius: 8px; font-weight: 700 }
+.verdict.ok { background: var(--ok-soft); color: var(--ok) }
+.verdict.warn { background: var(--warn-soft); color: var(--warn) }
+.verdict.bad { background: var(--bad-soft); color: var(--bad) }
+footer { color: var(--muted); font-size: .85rem; display: flex; flex-direction: column; gap: 6px; max-width: 80ch }
+footer a { color: var(--accent) }
+.toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(env(safe-area-inset-bottom, 0px) + 18px); background: var(--fg); color: var(--bg); padding: 10px 16px; border-radius: 8px; font-weight: 700; z-index: 20 }
+@media (prefers-reduced-motion: no-preference) { .card { transition: border-color .2s } }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <span class="label">Für die neue Küche</span>
+    <h1>Kühlschrank-Finder</h1>
+    <p>Stellen Sie links ein, was Ihnen wichtig ist. Die Liste sortiert sich sofort neu: oben steht das Gerät, das am besten passt. Mit ★ merken, mit „Vergleichen“ bis zu drei Geräte nebeneinanderstellen.</p>
+    <div class="spec-strip" aria-label="Eckdaten des Stellplatzes">
+      <span>Wand direkt links</span><span>alte Breite 90–92 cm</span><span>20 cm Überstand ok</span><span>kein Wasseranschluss</span><span>5 cm Wandabstand hinten</span>
+    </div>
+  </header>
+
+  <div class="main">
+    <form class="panel" id="prefs" aria-label="Ihre Wünsche">
+      <div class="presets" role="group" aria-label="Fertige Einstellungen">
+        <button type="button" class="preset" data-preset="wunsch"><b>Unsere Wunschliste</b><small>Genau wie besprochen</small></button>
+        <button type="button" class="preset" data-preset="leise"><b>Leise &amp; sparsam</b><small>Ruhe und Strom zählen am meisten</small></button>
+        <button type="button" class="preset" data-preset="preis"><b>Günstig</b><small>Bis 2.000 €, Rest flexibel</small></button>
+        <button type="button" class="preset" data-preset="platz"><b>Viel Platz</b><small>Maximaler Inhalt</small></button>
+      </div>
+
+      <fieldset>
+        <legend>Bauform</legend>
+        <div class="seg">
+          <label><input type="checkbox" name="type" value="french" id="t-french"><span>French Door</span></label>
+          <label><input type="checkbox" name="type" value="multi" id="t-multi"><span>Multi-Door</span></label>
+          <label><input type="checkbox" name="type" value="sbs" id="t-sbs"><span>Side-by-Side</span></label>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Breite</legend>
+        <div class="seg">
+          <label><input type="radio" name="width" value="wide" id="w-wide"><span>90–92 cm</span></label>
+          <label><input type="radio" name="width" value="both" id="w-both"><span>90–92 oder 81–85 cm</span></label>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <div class="range-row"><legend>Höhe höchstens</legend><output id="o-height" class="num"></output></div>
+        <input type="range" id="height" min="175" max="195" step="1">
+      </fieldset>
+
+      <fieldset>
+        <legend>Eiswürfel</legend>
+        <div class="seg">
+          <label><input type="radio" name="ice" value="must" id="i-must"><span>Automatisch, Pflicht</span></label>
+          <label><input type="radio" name="ice" value="prefer" id="i-prefer"><span>Automatisch bevorzugt</span></label>
+          <label><input type="radio" name="ice" value="any" id="i-any"><span>Egal</span></label>
+        </div>
+        <p class="hint">Ohne Wasseranschluss klappt automatisches Eis nur mit eingebautem Wassertank zum Nachfüllen.</p>
+      </fieldset>
+
+      <fieldset>
+        <div class="range-row"><legend>Lautstärke höchstens</legend><output id="o-noise" class="num"></output></div>
+        <input type="range" id="noise" min="34" max="43" step="1">
+        <p class="hint">35–36 dB ist sehr leise, 39 dB noch gut. Jedes 3 dB klingt deutlich lauter.</p>
+      </fieldset>
+
+      <fieldset>
+        <div class="range-row"><legend>Budget</legend><output id="o-budget" class="num"></output></div>
+        <input type="range" id="budget" min="1000" max="4000" step="100">
+        <label class="hint" style="display:flex;gap:8px;align-items:center;cursor:pointer"><input type="checkbox" id="stretch" style="width:18px;height:18px;accent-color:var(--accent)"> Für ein Top-Gerät bis 3.000 € okay</label>
+      </fieldset>
+
+      <fieldset>
+        <div class="range-row"><legend>Inhalt mindestens</legend><output id="o-vol" class="num"></output></div>
+        <input type="range" id="vol" min="400" max="650" step="10">
+      </fieldset>
+
+      <fieldset>
+        <legend>Wie wichtig ist …</legend>
+        <div class="weights" id="weights"></div>
+      </fieldset>
+    </form>
+
+    <div class="results">
+      <div class="summary">
+        <h2 id="sum-title">…</h2>
+        <div class="sort"><label for="sort" class="muted">Sortieren:</label>
+          <select id="sort"><option value="score">Beste Passung</option><option value="price">Preis</option><option value="noise">Leiseste</option><option value="energy">Sparsamste</option><option value="vol">Größter Inhalt</option></select>
+        </div>
+      </div>
+      <div class="list" id="list"></div>
+      <div class="out-head" id="out-head"></div>
+      <div class="list" id="list-out"></div>
+    </div>
+  </div>
+
+  <section class="block" id="compare" aria-labelledby="cmp-h">
+    <div class="summary"><h2 id="cmp-h">Vergleich</h2><button type="button" class="btn" id="cmp-clear">Auswahl leeren</button></div>
+    <div id="cmp-body"></div>
+  </section>
+
+  <section class="block" id="favorites" aria-labelledby="fav-h">
+    <div class="summary"><h2 id="fav-h">★ Merkliste</h2><button type="button" class="btn" id="fav-copy">Merkliste als Text kopieren</button></div>
+    <p class="sync" id="sync">Merkliste wird geladen …</p>
+    <div class="favs" id="fav-body"></div>
+    <textarea id="fav-text" hidden readonly style="width:100%;min-height:120px"></textarea>
+  </section>
+
+  <section class="block" aria-labelledby="buy-h">
+    <h2 id="buy-h">Vor dem Kauf</h2>
+    <ul class="checklist" id="checklist"></ul>
+  </section>
+
+  <section class="block" aria-labelledby="rel-h" id="rel-sec">
+    <h2 id="rel-h">Wie zuverlässig sind die Marken?</h2>
+    <ul id="rel" style="margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;max-width:80ch"></ul>
+  </section>
+
+  <footer id="foot"></footer>
+</div>
+
+<dialog id="dlg" aria-labelledby="dlg-title">
+  <div class="dlg">
+    <div class="dlg-head">
+      <div><span class="label">Draufsicht, vereinfacht</span><h2 id="dlg-title">Passt die Tür?</h2></div>
+      <button type="button" class="btn" id="dlg-close">Schließen</button>
+    </div>
+    <svg class="sketch" id="sketch" viewBox="0 0 520 400" role="img" aria-label="Draufsicht: Wand links, Kühlschrank, Arbeitsplatte rechts"></svg>
+    <fieldset>
+      <div class="range-row"><legend>Abstand Gerät zur linken Wand</legend><output id="o-gap" class="num"></output></div>
+      <input type="range" id="gap" min="0" max="15" step="0.5">
+      <p class="hint">Am besten beim jetzigen Kühlschrank nachmessen. Griff-Tiefe angenommen: 6 cm.</p>
+    </fieldset>
+    <div class="verdict" id="verdict"></div>
+    <p class="hint" id="door-note"></p>
+  </div>
+</dialog>
+
+<dialog id="lb" aria-labelledby="lb-title">
+  <div class="dlg">
+    <div class="dlg-head">
+      <div><span class="label">Bilder</span><h2 id="lb-title">Bilder</h2></div>
+      <button type="button" class="btn" id="lb-close">Schließen</button>
+    </div>
+    <div class="lb-stage" id="lb-stage"></div>
+    <p class="hint" id="lb-cap"></p>
+    <div class="lb-thumbs" id="lb-thumbs"></div>
+  </div>
+</dialog>
+
+<script type="application/json" id="fridge-data">{"meta": {"stand": "2026-11-20", "hinweis": "Specs primär aus Herstellerseiten und EPREL-API (eprel.ec.europa.eu/api/products/refrigeratingappliances2019/<reg>). Preise sind Momentaufnahmen aus Suchtreffern (teils Aug 2026), nicht live geprüft - idealo/guenstiger/coolblue blockten automatisierte Abrufe."}, "models": [{"id": "samsung-rf59c700es9", "brand": "Samsung", "model": "RF59C700ES9/EG", "name": "RF7000 French Door mit Auto Ice Maker (Bespoke Design, non-plumbing)", "type": "french", "width_cm": 91.2, "height_cm": 177.9, "depth_cm": 72.3, "depth_open_door_cm": 109.3, "total_l": 649, "fridge_l": 390, "freezer_l": 259, "energy_class": "E", "kwh_year": 362, "noise_db": 36, "noise_class": "C", "no_frost": true, "ice": "auto_tank", "water_tank_l": 4.5, "water_dispenser": false, "color": "Silber / Edelstahl-Optik (Seitenwände Inox)", "price_eur": 1699, "price_range": "ca. 1.700-2.800 EUR (eBay neu 1.699 EUR; guenstiger.de 1.893-2.799 EUR, 5 Angebote; Datum der Snapshots unklar)", "price_source_url": "https://www.guenstiger.de/Produkt/Samsung/RF59C700ES9_EG.html", "product_url": "https://www.samsung.com/de/business/refrigerators/french-door/rf7000cc-french-door-bespoke-design-and-non-plumbing-649l-silver-rf59c700es9-eg", "hinge_clearance_cm": 5, "door_open_notes": "Handbuch RF59C7*: seitlicher Abstand 'Empfehlung: mehr als 50 mm', Türöffnungswinkel bis 125°, Breite bei geöffneten Türen 1488 mm (je ca. 29 cm seitlicher Überstand bei voller Öffnung), Tiefe bei offener Tür ca. 1093 mm (Interpretation der Maßzeichnung). Direkt an der Wand öffnet die linke Tür nur bis ca. 90°; ob die Gemüseschubladen dann vollständig herausnehmbar sind, nennt das Handbuch nicht - 5 cm Luft links einplanen.", "interior_highlights": ["Auto Ice Maker aus 4,5-l-Tank (kein Festwasser)", "No Frost+", "4 Türen: 2 French Doors + 2 Gefrierschubladen", "Digital Inverter Kompressor", "AI Energy Mode / SmartThings (WLAN)"], "reliability_notes": "Samsung DE: 2 Jahre Gewährleistung + 10 Jahre Teilegarantie auf den Digital Inverter Kompressor (nicht 20 Jahre wie in USA/teils UK beworben). Sammelklagen zu Eisbereitern betrafen US-Modelle mit Eisbereiter in der Kühlschranktür; hier sitzt der Eisbereiter im Gefrierbereich - kein direkter Beleg für EU-Probleme gefunden.", "availability": "lieferbar bei mehreren Händlern (Modell von 2023, ggf. Auslauf - Angebote prüfen)", "notes": "Beste Gesamtpassung: French Door, 91,2 cm, Tank + Auto-Eis, 36 dB, 649 l. Höhe: Samsung-Produktseite nennt 174,6 cm, Handbuch nennt 174,8 cm Gehäuse und 177,9 cm Gesamthöhe inkl. Scharnierabdeckung - mit 178 cm planen. Kühl/Gefrier-Split: Samsung-Seite listet 259 l Kühl/390 l Gefrier, Icecat/Händler 390/259 - vermutlich auf der Samsung-Seite vertauscht (Schätzung). Kein Wasserspender außen; Schwestermodell RF59C701ES9 hat zusätzlich Autofill-Wasserkrug. Energie E ist mäßig.", "gallery": [{"src": "img/gal/samsung-rf59c700es9-0.jpg", "cap": "Außen"}, {"src": "img/gal/samsung-rf59c700es9-1.jpg", "cap": "Innen leer"}, {"src": "img/gal/samsung-rf59c700es9-2.jpg", "cap": "Innen eingeräumt"}, {"src": "img/gal/samsung-rf59c700es9-3.jpg", "cap": "Türfächer"}, {"src": "img/gal/samsung-rf59c700es9-4.jpg", "cap": "Detail"}], "image": "img/samsung-rf59c700es9.jpg"}, {"id": "samsung-rs70f67kctef", "brand": "Samsung", "model": "RS70F67KCTEF", "name": "RS70F Side-by-Side mit Metal Cooling und Wassertank (EEK C)", "type": "sbs", "width_cm": 91.2, "height_cm": 178.4, "depth_cm": 72.6, "depth_open_door_cm": null, "total_l": 634, "fridge_l": 409, "freezer_l": 225, "energy_class": "C", "kwh_year": 226, "noise_db": 33, "noise_class": "B", "no_frost": true, "ice": "auto_tank", "water_tank_l": 4.5, "water_dispenser": true, "color": "Silber / Edelstahl-Optik", "price_eur": 1399, "price_range": "ca. 1.400-1.700 EUR (expert 1.399 EUR; UVP-nahe Angebote höher)", "price_source_url": "https://www.expert-technomarkt.de/Side-by-Side/Samsung-RS70F67KCT-Side-by-Side-K%C3%BChl-/-Gefrierkombination-409-l-/-225-l-226-kWh-NoFrost-1780-mm-x-912-mm-Edelstahl-Edelstahl.32625161743.html", "product_url": "https://www.samsung.com/de/refrigerators/side-by-side/refrigerator-sbs-rs90f-basic-634l-silver-rs70f67kctef", "hinge_clearance_cm": 5, "door_open_notes": "Kein modellspezifisches Maß gefunden; Samsung DE allgemein: 50 mm links/rechts/hinten, 100 mm oben. Side-by-Side: linke Tür = Gefrierteil (schmal, ca. 1/3 Breite), schwingt weniger weit aus als eine French-Door-Tür; Schubladen/Körbe im Gefrierteil brauchen i.d.R. >90° Öffnung zum Herausnehmen (nicht verifiziert).", "interior_highlights": ["Auto Ice Maker + Eis-/Wasserspender aus 4,5-l-Tank", "Metal Cooling (Metallrückwand)", "No Frost+", "EEK C / nur 226 kWh", "sehr leise: 33 dB (Klasse B)"], "reliability_notes": "Samsung DE: 2 Jahre + 10 Jahre Teilegarantie Digital Inverter Kompressor. Aktuelle Serie (EU-Marktstart 2025), Langzeiterfahrungen begrenzt.", "availability": "lieferbar (expert); Samsung-Shop zeitweise 'Out of Stock'", "notes": "Effizientester und leisester Tank+Auto-Eis-Kandidat - aber Side-by-Side statt French Door. EPREL 2244098 bestätigt 33 dB/B, 226 kWh, 1784 mm. Achtung Suffix: 'KCF' = Festwasseranschluss, 'KCT' = Tank. Schwestermodelle RS70F66KBT (EEK B, 180 kWh, 32 dB laut EPREL 2244094) - ob Tank/Farbe passen, nicht eindeutig belegt (Coolblue widersprüchlich).", "gallery": [{"src": "img/gal/samsung-rs70f67kctef-0.jpg", "cap": "Außen"}, {"src": "img/gal/samsung-rs70f67kctef-1.jpg", "cap": "Schräg von vorn"}, {"src": "img/gal/samsung-rs70f67kctef-2.jpg", "cap": "Innen leer"}, {"src": "img/gal/samsung-rs70f67kctef-3.jpg", "cap": "Innen eingeräumt"}, {"src": "img/gal/samsung-rs70f67kctef-4.jpg", "cap": "Detail"}], "image": "img/samsung-rs70f67kctef.jpg"}, {"id": "samsung-rs70f65kdtef", "brand": "Samsung", "model": "RS70F65KDTEF", "name": "RS70F Side-by-Side mit Metal Cooling und Wassertank (EEK D)", "type": "sbs", "width_cm": 91.2, "height_cm": 178.4, "depth_cm": 72.6, "depth_open_door_cm": null, "total_l": 640, "fridge_l": 420, "freezer_l": 220, "energy_class": "D", "kwh_year": 279, "noise_db": 36, "noise_class": "C", "no_frost": true, "ice": "auto_tank", "water_tank_l": 4.5, "water_dispenser": true, "color": "Silber / Edelstahl-Optik", "price_eur": 1399, "price_range": "ca. 1.399 EUR + Versand (Euronics, Stand Aug 2026)", "price_source_url": "https://www.testbericht.de/produkte/samsung-rs70f65kdtef", "product_url": "https://www.samsung.com/de/refrigerators/side-by-side/refrigerator-sbs-rs90f-basic-635l-silver-rs70f65kdtef", "hinge_clearance_cm": 5, "door_open_notes": "Wie RS70F67KCTEF: nur allgemeine Samsung-Angabe 50 mm seitlich; linke Tür = Gefrierteil.", "interior_highlights": ["Auto Ice Maker + Eis-/Wasserspender aus Tank", "Metal Cooling", "No Frost+", "640 l"], "reliability_notes": "Samsung DE: 2 Jahre + 10 Jahre Teilegarantie Digital Inverter Kompressor.", "availability": "gelistet; Preisstand Aug 2026", "notes": "Mittelweg: 36 dB, D-Klasse. Specs via EPREL 2244086 (1784 mm, 640 l, 279 kWh, 36 dB C). Tankgröße 4,5 l von Samsung-Seite der Baureihe übernommen (Schätzung für dieses Suffix).", "gallery": [{"src": "img/gal/samsung-rs70f65kdtef-0.jpg", "cap": "Außen"}, {"src": "img/gal/samsung-rs70f65kdtef-1.jpg", "cap": "Schräg von vorn"}, {"src": "img/gal/samsung-rs70f65kdtef-2.jpg", "cap": "Innen leer"}, {"src": "img/gal/samsung-rs70f65kdtef-3.jpg", "cap": "Innen eingeräumt"}, {"src": "img/gal/samsung-rs70f65kdtef-4.jpg", "cap": "Detail"}], "image": "img/samsung-rs70f65kdtef.jpg"}, {"id": "samsung-rs70f65ketef", "brand": "Samsung", "model": "RS70F65KETEF", "name": "RS70F Side-by-Side mit Metal Cooling und Wassertank (EEK E)", "type": "sbs", "width_cm": 91.2, "height_cm": 178.4, "depth_cm": 72.6, "depth_open_door_cm": null, "total_l": 640, "fridge_l": 420, "freezer_l": 220, "energy_class": "E", "kwh_year": 349, "noise_db": 36, "noise_class": "C", "no_frost": true, "ice": "auto_tank", "water_tank_l": 4.5, "water_dispenser": true, "color": "Silber / Edelstahl-Optik", "price_eur": 1111, "price_range": "ca. 1.050-1.400 EUR (guenstiger.de ab 1.111 EUR + 29 EUR Versand, 7 Angebote; moebel.de 1.049-1.399 EUR)", "price_source_url": "https://www.guenstiger.de/Produkt/Samsung/RS70F_RS70F65KETEF.html", "product_url": "https://www.samsung.com/de/refrigerators/side-by-side/refrigerator-sbs-rs90f-basic-640l-silver-rs70f65ketef", "hinge_clearance_cm": 5, "door_open_notes": "Nur allgemeine Samsung-Angabe 50 mm seitlich; linke Tür = Gefrierteil.", "interior_highlights": ["Auto Ice Maker + Eis-/Wasserspender aus 4,5-l-Tank", "Metal Cooling", "No Frost+"], "reliability_notes": "Samsung DE: 2 Jahre + 10 Jahre Teilegarantie Digital Inverter Kompressor.", "availability": "gut lieferbar, häufig im Angebot", "notes": "Budget-Variante; 36 dB ok, aber 349 kWh (ca. 70 EUR/Jahr mehr Strom als KCT bei 0,40 EUR/kWh). EPREL 2244088.", "gallery": [{"src": "img/gal/samsung-rs70f65ketef-0.jpg", "cap": "Außen"}, {"src": "img/gal/samsung-rs70f65ketef-1.jpg", "cap": "Schräg von vorn"}, {"src": "img/gal/samsung-rs70f65ketef-2.jpg", "cap": "Innen leer"}, {"src": "img/gal/samsung-rs70f65ketef-3.jpg", "cap": "Innen eingeräumt"}, {"src": "img/gal/samsung-rs70f65ketef-4.jpg", "cap": "Detail"}], "image": "img/samsung-rs70f65ketef.jpg"}, {"id": "lg-gsxv91bsae", "brand": "LG", "model": "GSXV91BSAE", "name": "InstaView Door-in-Door Side-by-Side mit Eis-/Crushed Ice-/Wasserspender & internem Wassertank", "type": "sbs", "width_cm": 91.3, "height_cm": 179.0, "depth_cm": 73.5, "depth_open_door_cm": null, "total_l": 635, "fridge_l": 416, "freezer_l": 219, "energy_class": "E", "kwh_year": 348, "noise_db": 36, "noise_class": "C", "no_frost": true, "ice": "auto_tank", "water_tank_l": 4, "water_dispenser": true, "color": "Brushed Steel (Edelstahl-Optik)", "price_eur": 1599, "price_range": "ca. 1.340-1.600 EUR (guenstiger.de ab 1.599 EUR - Snapshot evtl. alt; Deal-Blog 1.344 EUR undatiert)", "price_source_url": "https://www.guenstiger.de/Produkt/LG/GSXV91BSAE.html", "product_url": "https://www.lg.com/de/kuehlschraenke-gefrierschraenke/side-by-side-kuehlschraenke/gsxv91bsae/", "hinge_clearance_cm": null, "door_open_notes": "LG-Seite: Türanschlag nicht wechselbar. Keine Seitenabstandsangabe gefunden; LG allgemein: >50 mm hinten.", "interior_highlights": ["InstaView Door-in-Door", "Auto-Eisbereiter + Eis/Crushed/Wasser aus 4-l-Tank", "Inverter Linear Compressor", "Metal Fresh Rückwand"], "reliability_notes": "LG DE: 2 Jahre + 8 Jahre Materialgarantie = 10 Jahre auf Inverter Linear Compressor (nicht 20 Jahre). Consumer Reports (USA) meldete bei LG-Kühlschränken überdurchschnittlich Kompressorprobleme (US-Modelle, älterer Bericht).", "availability": "unsicher - Coolblue: 'nicht mehr verfügbar'; Restbestände; Schwester GSXV91PZAE (Platinum Silver) teils noch gelistet", "notes": "Specs von LG-Seite + EPREL 682134. Älteres Modell (ca. 2020) - nur bei gutem Restpreis interessant. Nachfolger GSXE91 (35 dB, EEK D, 4,3-l-Tank) gibt es mit Tank nur in Essence Black Steel / Metal Sorbet.", "gallery": [{"src": "img/gal/lg-gsxv91bsae-0.jpg", "cap": "Außen"}, {"src": "img/gal/lg-gsxv91bsae-1.jpg", "cap": "Innen leer"}, {"src": "img/gal/lg-gsxv91bsae-2.jpg", "cap": "Innen eingeräumt"}, {"src": "img/gal/lg-gsxv91bsae-3.jpg", "cap": "Gemüsefächer"}, {"src": "img/gal/lg-gsxv91bsae-4.jpg", "cap": "Getränkefach"}], "image": "img/lg-gsxv91bsae.jpg"}, {"id": "lg-gmg961mbke", "brand": "LG", "model": "GMG961MBKE", "name": "InstaView Multi-Door mit Eis-, Crushed Ice- und Wasserspender, interner Wassertank", "type": "multi", "width_cm": 91.4, "height_cm": 179.2, "depth_cm": 73.3, "depth_open_door_cm": null, "total_l": 637, "fridge_l": 363, "freezer_l": 246, "energy_class": "E", "kwh_year": 354, "noise_db": 40, "noise_class": "C", "no_frost": true, "ice": "auto_tank", "water_tank_l": 4, "water_dispenser": true, "color": "Metal Sorbet (dunkle Metall-Front, kein klassisches Edelstahl - optisch prüfen)", "price_eur": 1707, "price_range": "ca. 1.700-2.300 EUR (Kaufland-Marktplatz 1.706,89 EUR; expert 2.038-2.080 EUR; Baur 2.299 EUR)", "price_source_url": "https://www.kaufland.de/product/500856348/", "product_url": "https://www.lg.com/de/kuehlschraenke-gefrierschraenke/multi-door-kuehlschraenke/gmg961mbke", "hinge_clearance_cm": null, "door_open_notes": "Keine Wandabstandsangabe gefunden. Beim Schwestermodell GMG861 nennt das Handbuch Breite bei geöffneten Türen 1416 mm bei 835 mm Gehäuse (ca. 29 cm Überstand je Seite bei voller Öffnung) - ähnliche Geometrie zu erwarten.", "interior_highlights": ["InstaView (Klopfen = Licht an)", "Auto-Eisbereiter Slim SpacePlus (13 l Eisvolumen) aus 4-l-Tank", "Total No Frost", "Inverter Linear Compressor"], "reliability_notes": "LG DE: 10 Jahre (2+8) auf Inverter Linear Compressor. LG-Datenblatt widersprüchlich ('Eiswürfelbereiter: Nein' vs. 'Ice Maker automatisch: Ja') - vor Kauf klären.", "availability": "lieferbar", "notes": "Near-miss: 40 dB (über Wunsch 35-36) und Farbe Metal Sorbet statt Edelstahl. Sonst passend (91,4 cm, Tank, Auto-Eis, 179,2 cm inkl. Scharnier, Gehäuse 175,3 cm). Fridge/Freezer-Split laut LG 363/246 (expert: 363/274).", "gallery": [{"src": "img/gal/lg-gmg961mbke-0.jpg", "cap": "Außen"}, {"src": "img/gal/lg-gmg961mbke-1.jpg", "cap": "Innen leer"}, {"src": "img/gal/lg-gmg961mbke-2.jpg", "cap": "Innen eingeräumt"}, {"src": "img/gal/lg-gmg961mbke-3.jpg", "cap": "Getränkefach offen"}], "image": "img/lg-gmg961mbke.jpg"}, {"id": "haier-hfr79f19efgk", "brand": "Haier", "model": "HFR79F19EFGK", "name": "FD 90 Serie 7 Multi Door (French Door)", "type": "french", "width_cm": 90.5, "height_cm": 190.0, "depth_cm": 74.8, "depth_open_door_cm": null, "total_l": 703, "fridge_l": 449, "freezer_l": 254, "energy_class": "E", "kwh_year": 365, "noise_db": 37, "noise_class": "C", "no_frost": true, "ice": "auto_tank", "water_tank_l": null, "water_dispenser": true, "color": "Edelstahl", "price_eur": 1599, "price_range": "ca. 1.600-2.000 EUR (Baur 1.599 EUR, expert 1.809 EUR, eBay 1.699-1.999 EUR)", "price_source_url": "https://www.baur.de/p/AKLBB2042289536", "product_url": "https://www.haier-europe.com/de_DE/mehrturer/34005705/hfr79f19efgk/", "hinge_clearance_cm": 10, "door_open_notes": "Handbuch (FD 90 Serie 7): Abstand zur Wand an der Scharnierseite mindestens 10 cm, damit die Tür sich richtig öffnen lässt; >10 cm rundum empfohlen.", "interior_highlights": ["Wasserspender + automatischer Eisbereiter aus Wassertank", "My Zone Schublade mit 0°Fresh", "Saphirglas-Optik, Touch-Display, hOn-App", "703 l"], "reliability_notes": "expert listet 3 Jahre Garantie (Händlerangabe); EPREL nennt 24 Monate. Haier-Kompressorgarantie nicht verifiziert.", "availability": "lieferbar", "notes": "Near-miss Höhe: 190 cm (Grenze ~185 cm). Sonst sehr gut: French Door, Tank + Auto-Eis, 37 dB, 703 l. Tankvolumen nicht gefunden. Schwester HFR79F19DFGB (schwarz, EEK D, 293 kWh).", "gallery": [{"src": "img/gal/haier-hfr79f19efgk-0.jpg", "cap": "Außen"}], "image": "img/haier-hfr79f19efgk.jpg"}, {"id": "haier-hcr7918eimp", "brand": "Haier", "model": "HCR7918EIMP", "name": "Cube 90 Serie 7 Multi Door", "type": "multi", "width_cm": 90.8, "height_cm": 177.5, "depth_cm": 75.0, "depth_open_door_cm": null, "total_l": 601, "fridge_l": 323, "freezer_l": 278, "energy_class": "E", "kwh_year": 357, "noise_db": 38, "noise_class": "C", "no_frost": true, "ice": "auto_plumbed_only", "water_tank_l": null, "water_dispenser": true, "color": "Platinum Inox (Edelstahl)", "price_eur": 2508, "price_range": "ca. 2.500-2.800 EUR (Tiefstpreis 2.508 EUR, Amazon 2.805 EUR, Stand 03.08.2026)", "price_source_url": "https://www.guenstiger.de/Produkt/Haier/HCR7918EIMP.html", "product_url": "https://www.haier-europe.com/de_DE/cube-serie/", "hinge_clearance_cm": 10, "door_open_notes": "Handbuch Cube 90 Serie 7: Abstand an der Scharnierseite mindestens 10 cm, damit die Tür richtig öffnet.", "interior_highlights": ["Türeisbereiter + Wasserspender (Festwasser, Wasserfilter)", "Wechselzone (135 l, 0 bis -18 °C)", "4 Türen Cube-Layout"], "reliability_notes": "EPREL: 24 Monate. Keine belastbaren Zuverlässigkeitsdaten gefunden.", "availability": "lieferbar (Preis-Snapshot Aug 2026)", "notes": "Near-miss: Eisbereiter braucht Festwasseranschluss (Handbuch: Wasserzulauf/Filter für HCR7918EIMP/EIMB). Ohne Anschluss nur Kühlschrank ohne Eis. Zudem am oberen Budgetrand. Werte via EPREL 1114282 (Schwester EIMB, baugleich)."}, {"id": "liebherr-msdd9012", "brand": "Liebherr", "model": "Msdd 9012 Pure", "name": "Msdd 9012 Pure NoFrost French Door", "type": "french", "width_cm": 90.6, "height_cm": 180.5, "depth_cm": 74.5, "depth_open_door_cm": null, "total_l": 576, "fridge_l": 356, "freezer_l": 220, "energy_class": "D", "kwh_year": 269, "noise_db": 39, "noise_class": "C", "no_frost": true, "ice": "trays", "water_tank_l": null, "water_dispenser": false, "color": "Edelstahl-Tür (SmartSteel), Korpus silber", "price_eur": 1999, "price_range": "1.999-2.399 EUR (Coolblue/expert 1.999 EUR; MediaMarkt 2.199,99 EUR; Liebherr-Shop 2.399 EUR)", "price_source_url": "https://www.coolblue.de/produkt/978988/liebherr-msdd-9012-20.html", "product_url": "https://www.liebherr.com/de-de/p/msdd-9012-7028530", "hinge_clearance_cm": null, "door_open_notes": "Kein Wandabstand auf Produktseite; Liebherr verweist auf beiliegende Einbauanleitung. Mitgelieferte Abstandshalter vergrößern die Tiefe um ca. 1,5 cm (nötig für deklarierten Verbrauch).", "interior_highlights": ["EasyTwist-Ice (manuell, ohne Wasseranschluss)", "VarioTempZone", "EasyFresh", "DuoCooling (2 Kreisläufe)", "PowerCooling"], "reliability_notes": "Liebherr: 10 Jahre Herstellergarantie (laut Liebherr-Shop-Seite). Marke gilt in DE als sehr zuverlässig; konkrete Fehlerquoten nicht frei verfügbar.", "availability": "auf Lager", "notes": "Near-miss Eis (nur EasyTwist-Schalen) und 39 dB (am Limit). Dafür effizienteste French Door hier (EEK D, 269 kWh), 10 Jahre Garantie, Premiummarke. Neue Liebherr-French-Door-Reihe seit 2025. EPREL 2161513 (1805x906x745 mm, 39 dB C).", "gallery": [{"src": "img/gal/liebherr-msdd9012-0.jpg", "cap": "Außen"}, {"src": "img/gal/liebherr-msdd9012-1.jpg", "cap": "Innen leer"}, {"src": "img/gal/liebherr-msdd9012-2.jpg", "cap": "Innen eingeräumt"}, {"src": "img/gal/liebherr-msdd9012-3.jpg", "cap": "Türen offen"}, {"src": "img/gal/liebherr-msdd9012-4.jpg", "cap": "Eisschale"}], "image": "img/liebherr-msdd9012.jpg"}, {"id": "liebherr-mbsddi9024", "brand": "Liebherr", "model": "MBsddi 9024 Plus", "name": "MBsddi 9024 Plus BioFresh NoFrost French Door mit IceMaker", "type": "french", "width_cm": 90.6, "height_cm": 180.5, "depth_cm": 74.5, "depth_open_door_cm": null, "total_l": 572, "fridge_l": null, "freezer_l": null, "energy_class": "D", "kwh_year": null, "noise_db": 39, "noise_class": "C", "no_frost": true, "ice": "auto_plumbed_only", "water_tank_l": null, "water_dispenser": false, "color": "Edelstahl-Tür, Korpus silber", "price_eur": 2999, "price_range": "ca. 2.999 EUR (Liebherr-Shop)", "price_source_url": "https://www.liebherr.com/de-de/p/mbsddi-9024-7028530", "product_url": "https://www.liebherr.com/de-de/p/mbsddi-9024-7028530", "hinge_clearance_cm": null, "door_open_notes": "Siehe Msdd 9012 - gleiche Bauform; Maß aus Einbauanleitung nicht gefunden.", "interior_highlights": ["BioFresh-Safes", "IceMaker (Festwasseranschluss 3/4\")", "NoFrost"], "reliability_notes": "Liebherr: 10 Jahre Herstellergarantie.", "availability": "auf Lager", "notes": "Near-miss: IceMaker nur mit Festwasseranschluss, Preis am oberen Rand (3.000 EUR). Gezeigt als Upgrade-Option, falls doch ein Anschluss möglich wird. kWh nicht verifiziert.", "gallery": [{"src": "img/gal/liebherr-mbsddi9024-0.jpg", "cap": "Außen"}, {"src": "img/gal/liebherr-mbsddi9024-1.jpg", "cap": "Innen leer"}, {"src": "img/gal/liebherr-mbsddi9024-2.jpg", "cap": "Innen eingeräumt"}, {"src": "img/gal/liebherr-mbsddi9024-3.jpg", "cap": "Türen offen"}], "image": "img/liebherr-mbsddi9024.jpg"}, {"id": "bosch-kfn96apea", "brand": "Bosch", "model": "KFN96APEA", "name": "Serie 4 Kühl-Gefrier-Kombination, mehrtürig (French Door)", "type": "french", "width_cm": 90.5, "height_cm": 183.0, "depth_cm": 73.1, "depth_open_door_cm": null, "total_l": 605, "fridge_l": 405, "freezer_l": 200, "energy_class": "E", "kwh_year": 333, "noise_db": 38, "noise_class": "C", "no_frost": true, "ice": "trays", "water_tank_l": null, "water_dispenser": false, "color": "Edelstahl (Chrome Inox-metallic, Antifingerprint)", "price_eur": 1318, "price_range": "ca. 1.320-1.600 EUR (moebel.de 5 Angebote 1.318-1.599 EUR; Bosch-Shop 1.909 EUR)", "price_source_url": "https://www.moebel.de/p/89dce4c7d211cb2626e6702fb5361bce", "product_url": "https://www.bosch-home.com/de/de/product/kuehlen-gefrieren/kuehl-gefrier-kombinationen/freistehende-kuehl-gefrier-kombinationen-gefrierteil-unten/KFN96APEA", "hinge_clearance_cm": null, "door_open_notes": "Gebrauchsanleitung KFN96 verweist für Aufstellmaße auf separate Montageanleitung (nicht gefunden).", "interior_highlights": ["Eiswürfelschale", "Total No Frost", "0-Grad-Zone", "Schnellkühlen/-gefrieren", "LED"], "reliability_notes": "BSH: 2 Jahre gesetzlich; Bosch bietet teils Garantieverlängerung über MyBosch-Registrierung (Which? erwähnt 5 Jahre für ausgewählte Geräte). Kompressorgarantie nicht separat ausgewiesen.", "availability": "lieferbar (2-4 Wochen im Bosch-Shop)", "notes": "Solide, günstige French Door ohne Wasser-Schnickschnack: 38 dB, 605 l. Near-miss: nur Eiswürfelschale, 183 cm (ok, nahe Grenze). Bosch-Modelle mit Spender (KFF96PIEP, KFD96APEA) brauchen Festwasseranschluss.", "gallery": [{"src": "img/gal/bosch-kfn96apea-0.jpg", "cap": "Außen"}, {"src": "img/gal/bosch-kfn96apea-1.jpg", "cap": "Innen eingeräumt"}, {"src": "img/gal/bosch-kfn96apea-2.jpg", "cap": "In der Küche"}, {"src": "img/gal/bosch-kfn96apea-3.jpg", "cap": "Kühlteil"}, {"src": "img/gal/bosch-kfn96apea-4.jpg", "cap": "Gemüseschubladen"}, {"src": "img/gal/bosch-kfn96apea-5.jpg", "cap": "Gefrierteil"}], "image": "img/bosch-kfn96apea.jpg"}, {"id": "samsung-rf50c530es9", "brand": "Samsung", "model": "RF50C530ES9/EF", "name": "SLIM RF5000 French Door mit AI Energy Mode (Wassertank und Festwasseranschluss)", "type": "french", "width_cm": 81.7, "height_cm": 177.6, "depth_cm": 71.5, "depth_open_door_cm": null, "total_l": 495, "fridge_l": 330, "freezer_l": 165, "energy_class": "E", "kwh_year": 301, "noise_db": 40, "noise_class": "C", "no_frost": true, "ice": "auto_plumbed_only", "water_tank_l": null, "water_dispenser": true, "color": "Silber / Edelstahl-Optik", "price_eur": 979, "price_range": "ca. 980-1.200 EUR (Samsung via eBay 979 EUR; Kaufland 1.059 EUR; Stand Jul/Aug 2026)", "price_source_url": "https://www.testbericht.de/produkte/samsung-rf50c530es9-ef", "product_url": "https://www.samsung.com/de/business/refrigerators/built-in-french-door/rf5000c-french-door-smartthings-495l-silver-rf50c530es9-ef", "hinge_clearance_cm": 5, "door_open_notes": "Türanschlag laut Samsung wechselbar. Nur allgemeine Samsung-Angabe 50 mm seitlich.", "interior_highlights": ["Wasserspender aus Tank (ohne Anschluss nutzbar)", "Twin Cooling", "No Frost+", "schmal: 81,7 cm"], "reliability_notes": "Samsung DE: 2 Jahre + 10 Jahre Teilegarantie Digital Inverter Kompressor.", "availability": "lieferbar, teils knapp", "notes": "Near-miss mehrfach: Eisbereiter (In-Door) nur mit Festwasseranschluss - Tank speist nur den Wasserspender; 40 dB; 495 l knapp unter 500. Nur relevant, falls die 81-85-cm-Nische zwingend ist. Samsung kündigte zur IFA 2026 eine neue Slim-French-Door-Serie (83,4 cm, 535 l) an - Modellcodes/Tank-Ausstattung noch nicht gefunden.", "gallery": [{"src": "img/gal/samsung-rf50c530es9-0.jpg", "cap": "Außen"}, {"src": "img/gal/samsung-rf50c530es9-1.jpg", "cap": "Innen leer"}, {"src": "img/gal/samsung-rf50c530es9-2.jpg", "cap": "Innen eingeräumt"}, {"src": "img/gal/samsung-rf50c530es9-3.jpg", "cap": "Gemüseschublade"}], "image": "img/samsung-rf50c530es9.jpg"}, {"id": "hisense-rf728n4sase", "brand": "Hisense", "model": "RF728N4SASE", "name": "French Door Kühl-Gefrierkombination Premium Inox-Look", "type": "french", "width_cm": 91.4, "height_cm": 178.5, "depth_cm": 72.5, "depth_open_door_cm": null, "total_l": 560, "fridge_l": null, "freezer_l": null, "energy_class": "E", "kwh_year": 344, "noise_db": 39, "noise_class": null, "no_frost": true, "ice": "auto_tank", "water_tank_l": null, "water_dispenser": true, "color": "Inox-Look (Seitenwände grau)", "price_eur": 1547, "price_range": "ca. 1.547 EUR + 99,90 EUR Versand (moebelplus, Auslaufartikel; UVP 2.799 EUR)", "price_source_url": "https://www.moebelplus.de/hisense-rf728n4sase-french-door-kuehl-gefrier-kombination-premium-inox-look-56039.html", "product_url": "https://www.moebelplus.de/hisense-rf728n4sase-french-door-kuehl-gefrier-kombination-premium-inox-look-56039.html", "hinge_clearance_cm": null, "door_open_notes": "Keine Angaben gefunden.", "interior_highlights": ["Eiswürfelbereiter + Eiscrusher", "Wasserspender mit Tank, ohne Festwasseranschluss", "Total No Frost", "Multi Airflow"], "reliability_notes": "moebelplus nennt 5 Jahre Garantie (Händler-/Herstelleraktion, prüfen). Hisense-Langzeitzuverlässigkeit wenig dokumentiert.", "availability": "Auslaufartikel (Restbestand)", "notes": "Auf dem Papier passend (91,4 cm, 178,5 cm, Tank + Eis, Inox-Look), aber 39 dB, Auslaufmodell, Fremdquellen widersprüchlich bei Kühl/Gefrier-Split (329/151 vs. 231/329) - daher null. Ob Eisbereiter automatisch aus Tank befüllt wird, nicht vom Hersteller bestätigt (Schätzung).", "gallery": [{"src": "img/gal/hisense-rf728n4sase-0.jpg", "cap": "Außen"}, {"src": "img/gal/hisense-rf728n4sase-1.jpg", "cap": "Innen leer"}, {"src": "img/gal/hisense-rf728n4sase-2.jpg", "cap": "Innen eingeräumt"}, {"src": "img/gal/hisense-rf728n4sase-3.jpg", "cap": "Eis- und Wasserspender"}], "image": "img/hisense-rf728n4sase.jpg"}, {"id": "gorenje-nrr9185esxl", "brand": "Gorenje", "model": "NRR9185ESXL", "name": "G800 Side-by-Side mit IceMaker und Wasserspender", "type": "sbs", "width_cm": 91.5, "height_cm": 178.6, "depth_cm": 69.8, "depth_open_door_cm": null, "total_l": 566, "fridge_l": 376, "freezer_l": 190, "energy_class": "E", "kwh_year": 324, "noise_db": 39, "noise_class": "C", "no_frost": true, "ice": "auto_tank", "water_tank_l": null, "water_dispenser": true, "color": "Edelstahl", "price_eur": 782, "price_range": "ca. 780-930 EUR (Preisvergleich 781,76 EUR; eBay 929,90 EUR)", "price_source_url": "https://www.guenstiger.de/Produkt/Gorenje/NRR9185ESXL.html", "product_url": "https://www.alternate.de/gorenje/NRR9185ESXL-Side-by-Side/html/product/100072782", "hinge_clearance_cm": null, "door_open_notes": "Keine Angaben gefunden.", "interior_highlights": ["IceMaker + Wasserspender aus Wassertank", "NoFrost Plus", "Inverter-Kompressor"], "reliability_notes": "Gorenje gehört zu Hisense. Keine belastbaren Zuverlässigkeitsdaten gefunden.", "availability": "lieferbar", "notes": "Budget-Near-miss: sehr günstig, Tank + Eisbereiter ohne Anschluss (Händlerdatenblatt), aber 39 dB (EPREL 1995316; Händler nennt 38 dB), Side-by-Side, 566 l. Ob der IceMaker vollautomatisch ist, nicht vom Hersteller verifiziert."}], "brand_reliability": ["Liebherr: in DE traditionell als besonders langlebig eingeschätzt; aktuell 10 Jahre Herstellergarantie laut Liebherr-Shop (Msdd 9012, MBsddi 9024). Belastbare Fehlerquoten (Which?-Tabellen) liegen hinter Paywall.", "Samsung: in DE 2 Jahre Gewährleistung + 10 Jahre Teilegarantie auf den Digital Inverter Kompressor (nicht 20 Jahre wie in den USA). Bekannte US-Sammelklagen betrafen Eisbereiter in der Kühlschranktür von US-French-Door-Modellen; die hier gelisteten EU-Modelle haben Eisbereiter im Gefrierbereich bzw. Side-by-Side-Spender - kein EU-Beleg für gehäufte Ausfälle gefunden.", "LG: in DE 10 Jahre (2 gesetzlich + 8 Material) auf den Inverter Linear Compressor. Consumer Reports (USA) berichtete, LG French-Door-/Side-by-Side-Modelle hätten häufiger Kompressorprobleme als die meisten Marken (US-Geräte, älterer Bericht) - die lange Kompressorgarantie mildert das Risiko.", "Bosch/BSH: solide Mittelklasse; Which? erwähnt 5 Jahre Garantie für ausgewählte Bosch-Geräte und mind. 10 Jahre Software-Updates für Home Connect. Bosch-Geräte mit Spender benötigen Festwasser.", "Haier/Hisense/Gorenje: preisaggressiv, Ausstattung stark; Langzeit-Zuverlässigkeitsdaten kaum öffentlich. Which? listet die Marken in der Umfrage, Fehlerquoten aber nur für Mitglieder. Garantie meist 2 Jahre (EPREL 24 Monate), Händler-Aktionen bis 3-5 Jahre.", "Stiftung Warentest (test.de, Kühlschranktest, Update Juni 2026): Side-by-Side-/French-Door-Geräte verbrauchen deutlich mehr Strom als Standard-Kombis (Beispiel: bis 3.160 EUR Stromkosten über 15 Jahre); Einzelnoten hinter Paywall. Which? (Umfrage Juli 2025, 5.132 Geräte): häufigste Fehler markenübergreifend = Ausfall ohne erkennbaren Grund (11%), Eisbildung im Kühlteil (10%) bzw. im No-Frost-Gefrierteil (9%)."], "clearance_guidance": {"summary": "Bei einer Wand direkt LINKS ist die linke Tür (Scharnier links) das Problem: Sie kann nur so weit öffnen, bis Tür/Griff die Wand berührt. Bündig an der Wand bleibt meist nur ca. 90° oder weniger; Gemüseschubladen und Glasböden im Kühlteil lassen sich bei French Doors oft erst ab >90° vollständig herausnehmen. Untere Gefrierschubladen (French Door/Multi-Door) werden gerade herausgezogen und sind von der Wand unabhängig.", "manufacturer_figures": ["Samsung RF59C7* (Handbuch DE): seitlich 'Empfehlung: mehr als 50 mm', Türöffnung bis 125°, Breite mit geöffneten Türen 1488 mm bei 912 mm Gehäuse (ca. 29 cm Überstand je Seite bei Vollöffnung), Tiefe bei offener Tür ca. 1093 mm. Handbuch-Fehlersuche: 'auf allen Seiten mindestens 5 cm' Abstand.", "Samsung allgemein (Support DE): 50 mm links/rechts/hinten, 100 mm oben.", "Haier FD 90 / Cube 90 Serie 7 (Handbuch): Abstand an der Scharnierseite mindestens 10 cm, damit die Tür richtig öffnet; >10 cm rundum.", "LG (Handbuch GMG861): >50 mm hinten; Breite mit offenen Türen 1416 mm bei 835 mm Gehäuse. Seitliche Mindestmaße nicht angegeben; LG nennt nur 'Zero Clearance'-Modelle als wandtauglich - die hier gelisteten sind nicht als Zero Clearance ausgewiesen.", "Samsung IFA 2026: neues French-Door-Modell (185 cm, 648 l) mit nur 4 mm Seitenabstand ('Kitchen Fit') - die verfügbare Variante RM70F63NER hat aber Festwasseranschluss.", "Liebherr/Bosch: Werte nur in beiliegender Einbau-/Montageanleitung, online nicht gefunden."], "recommendation": "Links mindestens 5 cm (Samsung) bzw. 10 cm (Haier) Luft planen; wer die linke Tür auf ~110-125° öffnen will (Schubladen komplett entnehmen), braucht je nach Modell deutlich mehr (Türdicke + Griff ~5-10 cm über die Gehäusekante bei 90°; volle Öffnung bis ~29 cm). Alternative: Side-by-Side wählen - dort ist links die schmale Gefriertür, und die breite Kühlteiltür liegt rechts frei. Vor dem Kauf die Maßzeichnung im Handbuch des konkreten Modells prüfen (Breite/Tiefe bei geöffneter Tür)."}, "sources": ["https://www.samsung.com/de/business/refrigerators/french-door/rf7000cc-french-door-bespoke-design-and-non-plumbing-649l-silver-rf59c700es9-eg", "https://img.moebelplus.de/pdf/samsung_rf59c701es9eg_bedien.pdf", "https://www.guenstiger.de/Produkt/Samsung/RF59C700ES9_EG.html", "https://www.samsung.com/de/refrigerators/side-by-side/refrigerator-sbs-rs90f-basic-634l-silver-rs70f67kctef", "https://www.samsung.com/de/refrigerators/side-by-side/refrigerator-sbs-rs90f-basic-640l-silver-rs70f65ketef", "https://www.samsung.com/de/refrigerators/side-by-side/refrigerator-sbs-rs90f-basic-635l-silver-rs70f65kdtef", "https://www.samsung.com/de/business/refrigerators/built-in-french-door/rf5000c-french-door-smartthings-495l-silver-rf50c530es9-ef", "https://www.samsung.com/de/support/home-appliances/kuehlschrank-aufstellen/", "https://news.samsung.com/de/kuhlen-mit-kopfchen-samsung-macht-den-family-hub-durch-google-gemini-noch-intelligenter-und-prasentiert-spannende-losungen-fur-die-kuche", "https://eprel.ec.europa.eu/api/products/refrigeratingappliances2019/2244098", "https://eprel.ec.europa.eu/api/products/refrigeratingappliances2019/2244086", "https://eprel.ec.europa.eu/api/products/refrigeratingappliances2019/2244088", "https://eprel.ec.europa.eu/api/products/refrigeratingappliances2019/682134", "https://eprel.ec.europa.eu/api/products/refrigeratingappliances2019/1114282", "https://eprel.ec.europa.eu/api/products/refrigeratingappliances2019/2161513", "https://eprel.ec.europa.eu/api/products/refrigeratingappliances2019/1995316", "https://www.lg.com/de/kuehlschraenke-gefrierschraenke/side-by-side-kuehlschraenke/gsxv91bsae/", "https://www.lg.com/de/kuehlschraenke-gefrierschraenke/multi-door-kuehlschraenke/gmg961mbke", "https://www.lg.com/at/kuhlschranke/side-by-side-kuhlschranke/gsxe91evad/buy", "https://www.manualslib.de/manual/1259713/Lg-Gmg861Epae.html?page=14", "https://www.haier-europe.com/de_DE/mehrturer/34005705/hfr79f19efgk/", "https://www.expert-technomarkt.de/Side-by-Side/Haier-HFR79F19EFGK-Side-by-Side-K%C3%BChl-/-Gefrierkombination-French-Door-449-l-/-254-l-365-kWh-NoFrost-1900-mm-x-905-mm-Edelstahl-Edelstahl.32625106408.html", "https://www.mediaexpert.pl/products/files/77/7773837/15735356-instrukcja-obslugi-HAIER-HFR79F19DFGB.pdf", "https://www.mediaexpert.pl/products/files/38/3889854/instrukcja-obslugi-HAIER-HCR7918EIMB.pdf", "https://www.liebherr.com/de-de/gefrier-kuehlschraenke/french-door-kuehlschraenke-7028529", "https://www.liebherr.com/de-de/p/msdd-9012-7028530", "https://www.liebherr.com/de-de/p/mbsddi-9024-7028530", "https://www.coolblue.de/produkt/978988/liebherr-msdd-9012-20.html", "https://www.bosch-home.com/de/de/product/kuehlen-gefrieren/kuehl-gefrier-kombinationen/freistehende-kuehl-gefrier-kombinationen-gefrierteil-unten/KFN96APEA", "https://www.bosch-home.com/mt/en/mkt-product/fridgesandfreezers/KFF96PIEP", "https://www.siemens-home.bsh-group.com/de/de/product/kuehlschraenke-gefrierschraenke/freistehend/gefrierbereich-unten/KF96RSBEA", "https://www.moebelplus.de/hisense-rf728n4sase-french-door-kuehl-gefrier-kombination-premium-inox-look-56039.html", "https://www.zajadacz.de/documents/AZ_DB_NR_NRR9185ESXL.pdf", "https://www.test.de/Kuehlschraenke-im-Test-4735177-0/", "https://www.which.co.uk/reviews/fridge-freezers/article/which-fridge-freezer-brand/most-reliable-fridge-freezer-brands"]}</script>
+<script>
+(() => {
+"use strict";
+const DATA = JSON.parse(document.getElementById("fridge-data").textContent);
+const MODELS = DATA.models;
+const byId = Object.fromEntries(MODELS.map(m => [m.id, m]));
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const fmtEur = n => n == null ? "–" : n.toLocaleString("de-DE") + " €";
+const fmt = (n, u) => n == null ? "–" : String(n).replace(".", ",") + (u ? " " + u : "");
+const TYPE_NAME = { french: "French Door", multi: "Multi-Door", sbs: "Side-by-Side" };
+const ICE_NAME = { auto_tank: "Automatisch (Tank)", auto_plumbed_only: "Nur mit Wasseranschluss", trays: "Eiswürfelschalen", none: "Kein Eisfach-Zubehör" };
+
+const store = {
+  get(k, d) { try { const v = localStorage.getItem("kf:" + k); return v == null ? d : JSON.parse(v) } catch { return d } },
+  set(k, v) { try { localStorage.setItem("kf:" + k, JSON.stringify(v)) } catch {} }
+};
+
+/* ---------- Einstellungen ---------- */
+const PRESETS = {
+  wunsch: { types: ["french", "multi", "sbs"], width: "both", height: 185, ice: "prefer", noise: 39, budget: 2500, stretch: true, vol: 500, w: { leise: 3, sparsam: 2, preis: 2, platz: 2, form: 2 } },
+  leise:  { types: ["french", "multi", "sbs"], width: "both", height: 185, ice: "prefer", noise: 37, budget: 3000, stretch: true, vol: 480, w: { leise: 3, sparsam: 3, preis: 1, platz: 1, form: 1 } },
+  preis:  { types: ["french", "multi", "sbs"], width: "both", height: 185, ice: "any",    noise: 40, budget: 2000, stretch: false, vol: 480, w: { leise: 2, sparsam: 2, preis: 3, platz: 1, form: 1 } },
+  platz:  { types: ["french", "multi", "sbs"], width: "wide", height: 185, ice: "prefer", noise: 40, budget: 3000, stretch: true, vol: 580, w: { leise: 1, sparsam: 1, preis: 1, platz: 3, form: 2 } },
+};
+const WEIGHTS = [["leise", "Leise"], ["sparsam", "Wenig Strom"], ["preis", "Niedriger Preis"], ["platz", "Viel Platz"], ["form", "French Door"]];
+let S = Object.assign(structuredClone(PRESETS.wunsch), store.get("prefs", {}), { preset: store.get("preset", "wunsch") });
+
+$("#weights").innerHTML = WEIGHTS.map(([k, n]) => `<span>${n}</span><div class="seg" role="radiogroup" aria-label="${n}">${
+  [[1, "wenig"], [2, "mittel"], [3, "sehr"]].map(([v, t]) => `<label><input type="radio" name="w-${k}" id="w-${k}-${v}" value="${v}"><span>${t}</span></label>`).join("")}</div>`).join("");
+
+function writeForm() {
+  document.querySelectorAll('input[name=type]').forEach(i => i.checked = S.types.includes(i.value));
+  document.querySelectorAll('input[name=width]').forEach(i => i.checked = i.value === S.width);
+  document.querySelectorAll('input[name=ice]').forEach(i => i.checked = i.value === S.ice);
+  $("#height").value = S.height; $("#noise").value = S.noise; $("#budget").value = S.budget; $("#vol").value = S.vol; $("#stretch").checked = S.stretch;
+  WEIGHTS.forEach(([k]) => { const el = document.getElementById(`w-${k}-${S.w[k]}`); if (el) el.checked = true });
+  document.querySelectorAll(".preset").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.preset === S.preset)));
+  outputs();
+}
+function outputs() {
+  $("#o-height").textContent = S.height + " cm";
+  $("#o-noise").textContent = S.noise + " dB";
+  $("#o-budget").textContent = fmtEur(S.budget);
+  $("#o-vol").textContent = S.vol + " l";
+}
+function readForm() {
+  S.types = [...document.querySelectorAll('input[name=type]:checked')].map(i => i.value);
+  S.width = (document.querySelector('input[name=width]:checked') || {}).value || "both";
+  S.ice = (document.querySelector('input[name=ice]:checked') || {}).value || "prefer";
+  S.height = +$("#height").value; S.noise = +$("#noise").value; S.budget = +$("#budget").value; S.vol = +$("#vol").value; S.stretch = $("#stretch").checked;
+  WEIGHTS.forEach(([k]) => { const el = document.querySelector(`input[name=w-${k}]:checked`); if (el) S.w[k] = +el.value });
+}
+$("#prefs").addEventListener("input", () => { readForm(); S.preset = null; save(); writeForm(); render() });
+document.querySelectorAll(".preset").forEach(b => b.addEventListener("click", () => {
+  S = Object.assign(structuredClone(PRESETS[b.dataset.preset]), { preset: b.dataset.preset }); save(); writeForm(); render();
+}));
+function save() { const { preset, ...p } = S; store.set("prefs", p); store.set("preset", preset) }
+
+/* ---------- Bewertung ---------- */
+const clamp01 = x => Math.max(0, Math.min(1, x));
+function evaluate(m) {
+  const checks = []; let fail = false;
+  const add = (lvl, text) => { checks.push({ lvl, text }); if (lvl === "bad") fail = true };
+  // Bauform
+  if (!S.types.includes(m.type)) add("bad", `${TYPE_NAME[m.type]} abgewählt`);
+  // Breite
+  const w = m.width_cm;
+  if (w == null) add("warn", "Breite unbekannt");
+  else if (w >= 89.5 && w <= 92.5) add("ok", `Breite ${fmt(w)} cm`);
+  else if (w >= 80.5 && w <= 85.5) add(S.width === "both" ? "warn" : "bad", `Schmaler: ${fmt(w)} cm`);
+  else if (w > 92.5) add("bad", `Zu breit: ${fmt(w)} cm`);
+  else add("bad", `Zu schmal: ${fmt(w)} cm`);
+  // Höhe
+  const h = m.height_cm;
+  if (h == null) add("warn", "Höhe unbekannt");
+  else if (h <= S.height) add("ok", `Höhe ${fmt(h)} cm`);
+  else if (h <= S.height + 2) add("warn", `Knapp: ${fmt(h)} cm hoch`);
+  else add("bad", `Zu hoch: ${fmt(h)} cm`);
+  // No-Frost
+  if (m.no_frost === false) add("bad", "Kein No-Frost");
+  else if (m.no_frost == null) add("warn", "No-Frost unklar");
+  // Eis
+  if (m.ice === "auto_tank") add("ok", `Eis automatisch${m.water_tank_l ? `, Tank ${fmt(m.water_tank_l)} l` : ""}`);
+  else if (m.ice === "auto_plumbed_only") add(S.ice === "must" ? "bad" : "warn", "Eisbereiter braucht Wasseranschluss");
+  else add(S.ice === "must" ? "bad" : (S.ice === "prefer" ? "warn" : "ok"), "Eis nur per Schale");
+  // Lautstärke
+  const n = m.noise_db;
+  if (n == null) add("warn", "Lautstärke unbekannt");
+  else if (n <= Math.min(S.noise, 36)) add("ok", `Sehr leise: ${n} dB`);
+  else if (n <= S.noise) add("ok", `${n} dB`);
+  else if (n <= S.noise + 1) add("warn", `Etwas lauter: ${n} dB`);
+  else add("bad", `Zu laut: ${n} dB`);
+  // Preis
+  const p = m.price_eur, cap = S.stretch ? Math.max(S.budget, 3000) : S.budget;
+  if (p == null) add("warn", "Preis unbekannt");
+  else if (p <= S.budget) add("ok", `Im Budget`);
+  else if (p <= cap) add("warn", `Über Budget: ${fmtEur(p)}`);
+  else add("bad", `Zu teuer: ${fmtEur(p)}`);
+  // Inhalt
+  const v = m.total_l;
+  if (v != null && v < S.vol) add("warn", `Nur ${v} l Inhalt`);
+  if (m.fridge_l && m.freezer_l) {
+    const share = m.freezer_l / (m.fridge_l + m.freezer_l);
+    if (share < 0.3) add("warn", `Kleines Gefrierfach (${m.freezer_l} l)`);
+  }
+  if (m.color && !/edelstahl|silber|inox|steel/i.test(m.color.split("(")[0])) add("warn", `Farbe: ${m.color.split("(")[0].trim()}`);
+  if (m.availability && /^(unsicher|auslauf)|discontinued|eingestellt/i.test(m.availability)) add("warn", "Schwer erhältlich");
+
+  // Punkte
+  const parts = [
+    [S.w.leise,   n == null ? .4 : clamp01((42 - n) / 7)],
+    [S.w.sparsam, m.kwh_year == null ? .4 : clamp01((460 - m.kwh_year) / 200)],
+    [S.w.preis,   p == null ? .4 : clamp01((3600 - p) / 2100)],
+    [S.w.platz,   v == null ? .4 : clamp01((v - 450) / 220)],
+    [S.w.form,    { french: 1, multi: .85, sbs: .55 }[m.type] ?? .5],
+    [S.ice === "any" ? 1 : 3, { auto_tank: 1, trays: .45, none: .35, auto_plumbed_only: .3 }[m.ice] ?? .3],
+  ];
+  const tw = parts.reduce((a, [w]) => a + w, 0);
+  let score = parts.reduce((a, [w, x]) => a + w * x, 0) / tw * 100;
+  score -= checks.filter(c => c.lvl === "warn").length * 5;
+  score = Math.round(Math.max(1, Math.min(99, score)));
+  return { checks, fail, score };
+}
+
+/* ---------- Vergleich & Merkliste: Zustand ---------- */
+let cmp = store.get("cmp", []).filter(id => byId[id]);
+let favs = store.get("favs", {});   // id -> {fav, note}
+let remote = null;                   // db-Anbindung, falls verfügbar
+
+/* ---------- Liste ---------- */
+function ring(score, fail) {
+  const r = 34, c = 2 * Math.PI * r, col = fail ? "var(--bad)" : score >= 70 ? "var(--ok)" : score >= 50 ? "var(--warn)" : "var(--muted)";
+  return `<svg viewBox="0 0 76 76" aria-hidden="true"><circle cx="38" cy="38" r="${r}" fill="none" stroke="var(--surface-2)" stroke-width="6"/><circle cx="38" cy="38" r="${r}" fill="none" stroke="${col}" stroke-width="6" stroke-linecap="round" stroke-dasharray="${c * score / 100} ${c}" transform="rotate(-90 38 38)"/></svg>`;
+}
+function card(m, ev, rank) {
+  const f = favs[m.id] || {};
+  const dims = [m.width_cm, m.height_cm, m.depth_cm].map(x => x == null ? "?" : fmt(x)).join(" × ");
+  const idealo = "https://www.idealo.de/preisvergleich/MainSearchProductCategory.html?q=" + encodeURIComponent(m.model);
+  const chips = ev.checks.slice().sort((a, b) => ({ bad: 0, warn: 1, ok: 2 }[a.lvl] - { bad: 0, warn: 1, ok: 2 }[b.lvl]));
+  return `<article class="card${rank === 1 && !ev.fail ? " top1" : ""}${ev.fail ? " out" : ""}" data-id="${esc(m.id)}">
+    <div class="side">${gallery(m)}<div class="score" title="Passung ${ev.score} von 100">${ring(ev.score, ev.fail)}<b>${ev.score}</b><small>Passung</small></div></div>
+    <div class="card-body">
+      <div class="card-head">
+        <div class="name">
+          <div class="badges">${rank && !ev.fail ? `<span class="badge rank">Platz ${rank}</span>` : ""}<span class="badge">${TYPE_NAME[m.type] || esc(m.type)}</span>${m.energy_class ? `<span class="badge">Energie ${esc(m.energy_class)}</span>` : ""}</div>
+          <h3>${esc(m.brand)} ${esc(m.name || "")}</h3>
+          <span class="model">${esc(m.model)}</span>
+        </div>
+        <div class="price"><b>${p(m)}</b><small>${esc(m.price_range || "")}</small></div>
+      </div>
+      <div class="facts">
+        <div class="fact"><span class="label">B × H × T (cm)</span><b>${dims}</b></div>
+        <div class="fact"><span class="label">Inhalt</span><b>${fmt(m.total_l, "l")}</b><span class="muted" style="font-size:.8rem">${m.fridge_l ? `${m.fridge_l} kühl / ${m.freezer_l ?? "?"} gefr.` : ""}</span></div>
+        <div class="fact"><span class="label">Lautstärke</span><b>${fmt(m.noise_db, "dB")}</b></div>
+        <div class="fact"><span class="label">Strom pro Jahr</span><b>${fmt(m.kwh_year, "kWh")}</b><span class="muted" style="font-size:.8rem">${m.kwh_year ? `≈ ${Math.round(m.kwh_year * 0.35)} € bei 35 ct` : ""}</span></div>
+        <div class="fact"><span class="label">Eis</span><b>${ICE_NAME[m.ice] || "–"}</b></div>
+      </div>
+      <div class="checks">${chips.map(c => `<span class="chk ${c.lvl}">${esc(c.text)}</span>`).join("")}</div>
+      <details class="more"><summary>Mehr zu diesem Gerät</summary><div class="more-grid">
+        ${m.interior_highlights?.length ? `<div><span class="label">Innenausstattung</span><ul>${m.interior_highlights.map(x => `<li>${esc(x)}</li>`).join("")}</ul></div>` : ""}
+        ${m.reliability_notes ? `<div><span class="label">Haltbarkeit &amp; Garantie</span><p>${esc(m.reliability_notes)}</p></div>` : ""}
+        ${m.door_open_notes ? `<div><span class="label">Türen</span><p>${esc(m.door_open_notes)}</p></div>` : ""}
+        ${m.notes ? `<div><span class="label">Hinweis</span><p>${esc(m.notes)}</p></div>` : ""}
+      </div></details>
+      <div class="actions">
+        <button type="button" class="btn fav" data-act="fav" aria-pressed="${!!f.fav}">${f.fav ? "★ Gemerkt" : "☆ Merken"}</button>
+        <button type="button" class="btn cmp" data-act="cmp" aria-pressed="${cmp.includes(m.id)}">${cmp.includes(m.id) ? "✓ Im Vergleich" : "Vergleichen"}</button>
+        <button type="button" class="btn" data-act="door">Passt die Tür?</button>
+        <a class="btn" href="${idealo}" target="_blank" rel="noopener">Preise ansehen ↗</a>
+        ${m.product_url ? `<a class="btn" href="${esc(m.product_url)}" target="_blank" rel="noopener">Hersteller ↗</a>` : ""}
+      </div>
+    </div></article>`;
+}
+const FRIDGE_ICON = `<svg viewBox="0 0 40 70" aria-hidden="true"><rect x="2" y="2" width="36" height="66" rx="3" fill="none" stroke="#8a979c" stroke-width="3"/><line x1="20" y1="2" x2="20" y2="44" stroke="#8a979c" stroke-width="2.5"/><line x1="2" y1="44" x2="38" y2="44" stroke="#8a979c" stroke-width="2.5"/></svg>`;
+function photo(m, cls) {
+  return m.image ? `<div class="${cls}"><img src="${esc(m.image)}" alt="${esc(m.brand + " " + m.model)}" loading="lazy"></div>`
+    : `<div class="${cls} none" title="Kein Bild gefunden">${FRIDGE_ICON}</div>`;
+}
+document.addEventListener("error", e => { const img = e.target; if (img.tagName === "IMG" && img.parentNode) { img.parentNode.classList.add("none"); img.outerHTML = FRIDGE_ICON } }, true);
+const pics = m => m.gallery?.length ? m.gallery : (m.image ? [{ src: m.image, cap: "Außen" }] : []);
+const galIdx = {};
+function gallery(m) {
+  const g = pics(m); if (!g.length) return photo(m, "photo");
+  const i = galIdx[m.id] || 0, multi = g.length > 1;
+  return `<div class="photo gal" data-gal="${esc(m.id)}" role="button" tabindex="0" aria-label="Bilder von ${esc(m.brand + " " + m.model)} groß ansehen">
+    <img src="${esc(g[i].src)}" alt="${esc(m.brand + " " + m.model + ": " + g[i].cap)}" loading="lazy">
+    ${multi ? `<button type="button" class="gal-nav prev" data-step="-1" aria-label="Vorheriges Bild">‹</button><button type="button" class="gal-nav next" data-step="1" aria-label="Nächstes Bild">›</button>` : ""}
+    <span class="gal-count">${multi ? `${i + 1}/${g.length} · ` : ""}${esc(g[i].cap)}</span></div>`;
+}
+function stepGal(id, step) {
+  const g = pics(byId[id]); galIdx[id] = ((galIdx[id] || 0) + step + g.length) % g.length;
+  document.querySelectorAll(`[data-gal="${CSS.escape(id)}"]`).forEach(el => el.outerHTML = gallery(byId[id]));
+  if (lbId === id && lb.open) drawLb();
+}
+let lbId = null; const lb = document.getElementById("lb");
+function openLb(id) { lbId = id; drawLb(); try { lb.showModal() } catch { lb.setAttribute("open", "") } }
+function drawLb() {
+  const m = byId[lbId], g = pics(m), i = galIdx[lbId] || 0;
+  document.getElementById("lb-title").textContent = `${m.brand} ${m.name || m.model}`;
+  document.getElementById("lb-cap").textContent = `Bild ${i + 1} von ${g.length}: ${g[i].cap}`;
+  const st = document.getElementById("lb-stage");
+  st.innerHTML = `<img src="${esc(g[i].src)}" alt="${esc(g[i].cap)}">${g.length > 1 ? `<button type="button" class="gal-nav prev" data-lbstep="-1" aria-label="Vorheriges Bild">‹</button><button type="button" class="gal-nav next" data-lbstep="1" aria-label="Nächstes Bild">›</button>` : ""}`;
+  document.getElementById("lb-thumbs").innerHTML = g.length > 1 ? g.map((x, k) => `<button type="button" data-lbgo="${k}" aria-label="${esc(x.cap)}" aria-current="${k === i}"><img src="${esc(x.src)}" alt=""></button>`).join("") : "";
+}
+document.addEventListener("click", e => {
+  const nav = e.target.closest(".gal .gal-nav"); if (nav) { e.stopPropagation(); stepGal(nav.closest("[data-gal]").dataset.gal, +nav.dataset.step); return }
+  const box = e.target.closest("[data-gal]"); if (box) { openLb(box.dataset.gal); return }
+  const ls = e.target.closest("[data-lbstep]"); if (ls) { stepGal(lbId, +ls.dataset.lbstep); return }
+  const go = e.target.closest("[data-lbgo]"); if (go) { galIdx[lbId] = +go.dataset.lbgo; stepGal(lbId, 0); return }
+}, true);
+document.addEventListener("keydown", e => {
+  const box = e.target.closest?.("[data-gal]");
+  if (box && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); openLb(box.dataset.gal) }
+  if (lb.open && (e.key === "ArrowRight" || e.key === "ArrowLeft")) stepGal(lbId, e.key === "ArrowRight" ? 1 : -1);
+});
+let swipeX = null;
+document.getElementById("lb-stage").addEventListener("pointerdown", e => { swipeX = e.clientX });
+document.getElementById("lb-stage").addEventListener("pointerup", e => { if (swipeX != null && Math.abs(e.clientX - swipeX) > 40) stepGal(lbId, e.clientX < swipeX ? 1 : -1); swipeX = null });
+document.getElementById("lb-close").addEventListener("click", () => lb.close ? lb.close() : lb.removeAttribute("open"));
+lb.addEventListener("click", e => { if (e.target === lb) lb.close() });
+const p = m => m.price_eur == null ? "Preis ?" : "ab " + fmtEur(m.price_eur);
+
+let lastEval = {};
+function render() {
+  const rows = MODELS.map(m => ({ m, ev: evaluate(m) }));
+  rows.forEach(r => lastEval[r.m.id] = r.ev);
+  const key = $("#sort").value;
+  const sorters = {
+    score: (a, b) => b.ev.score - a.ev.score,
+    price: (a, b) => (a.m.price_eur ?? 1e9) - (b.m.price_eur ?? 1e9),
+    noise: (a, b) => (a.m.noise_db ?? 99) - (b.m.noise_db ?? 99),
+    energy: (a, b) => (a.m.kwh_year ?? 1e9) - (b.m.kwh_year ?? 1e9),
+    vol: (a, b) => (b.m.total_l ?? 0) - (a.m.total_l ?? 0),
+  };
+  rows.sort(sorters[key]);
+  const fit = rows.filter(r => !r.ev.fail), out = rows.filter(r => r.ev.fail);
+  const ranked = fit.slice().sort(sorters.score);
+  $("#sum-title").textContent = fit.length ? `${fit.length} von ${MODELS.length} Geräten passen` : "Kein Gerät erfüllt alle Wünsche";
+  $("#list").innerHTML = fit.length ? fit.map(r => card(r.m, r.ev, ranked.indexOf(r) + 1)).join("")
+    : `<p class="block" style="padding:18px">Lockern Sie eine Einstellung, zum Beispiel Lautstärke oder Budget. Unten sehen Sie, woran es bei jedem Gerät scheitert.</p>`;
+  $("#out-head").innerHTML = out.length ? `<h2 style="font-size:1.2rem">Passt nicht ganz (${out.length})</h2><span class="muted">Rot markiert: der Grund</span>` : "";
+  $("#list-out").innerHTML = out.map(r => card(r.m, r.ev, 0)).join("");
+  renderCompare(); renderFavs();
+}
+$("#sort").addEventListener("change", render);
+
+document.addEventListener("click", e => {
+  const b = e.target.closest("[data-act]"); if (!b) return;
+  const id = b.closest("[data-id]").dataset.id;
+  if (b.dataset.act === "fav") toggleFav(id);
+  if (b.dataset.act === "cmp") toggleCmp(id);
+  if (b.dataset.act === "door") openDoor(id);
+  if (b.dataset.act === "uncmp") toggleCmp(id);
+});
+
+function toast(t) { const el = document.createElement("div"); el.className = "toast"; el.setAttribute("role", "status"); el.textContent = t; document.body.append(el); setTimeout(() => el.remove(), 2400) }
+
+function toggleCmp(id) {
+  if (cmp.includes(id)) cmp = cmp.filter(x => x !== id);
+  else { if (cmp.length >= 3) { toast("Höchstens 3 Geräte im Vergleich"); return } cmp.push(id); toast("Zum Vergleich hinzugefügt, unten ansehen") }
+  store.set("cmp", cmp); render();
+}
+$("#cmp-clear").addEventListener("click", () => { cmp = []; store.set("cmp", cmp); render() });
+
+/* ---------- Vergleich ---------- */
+function renderCompare() {
+  const ms = cmp.map(id => byId[id]);
+  if (!ms.length) { $("#cmp-body").innerHTML = `<p class="muted">Noch nichts ausgewählt. Tippen Sie bei bis zu drei Geräten auf „Vergleichen“.</p>`; $("#cmp-clear").hidden = true; return }
+  $("#cmp-clear").hidden = false;
+  const rows = [
+    ["Passung", m => lastEval[m.id].score, "max", v => v + " / 100"],
+    ["Preis ab", m => m.price_eur, "min", fmtEur],
+    ["Bauform", m => TYPE_NAME[m.type]],
+    ["Breite", m => m.width_cm, null, v => fmt(v, "cm")],
+    ["Höhe", m => m.height_cm, "min", v => fmt(v, "cm")],
+    ["Tiefe", m => m.depth_cm, null, v => fmt(v, "cm")],
+    ["Überstand über 60-cm-Arbeitsplatte", m => m.depth_cm == null ? null : Math.round(m.depth_cm + 5 - 60), null, v => v == null ? "–" : v + " cm"],
+    ["Inhalt gesamt", m => m.total_l, "max", v => fmt(v, "l")],
+    ["Kühlteil / Gefrierteil", m => m.fridge_l ? `${m.fridge_l} / ${m.freezer_l ?? "?"} l` : null],
+    ["Lautstärke", m => m.noise_db, "min", v => fmt(v, "dB")],
+    ["Strom pro Jahr", m => m.kwh_year, "min", v => fmt(v, "kWh")],
+    ["Energieklasse", m => m.energy_class],
+    ["Eiswürfel", m => ICE_NAME[m.ice]],
+    ["Wassertank", m => m.water_tank_l, null, v => fmt(v, "l")],
+    ["Wasserspender", m => m.water_dispenser == null ? null : (m.water_dispenser ? "ja" : "nein")],
+    ["No-Frost", m => m.no_frost == null ? null : (m.no_frost ? "ja" : "nein")],
+    ["Seitenabstand Tür (Hersteller)", m => m.hinge_clearance_cm, null, v => fmt(v, "cm")],
+    ["Garantie & Haltbarkeit", m => m.reliability_notes],
+  ];
+  const cell = (v, f) => v == null || v === "" ? "–" : (f ? f(v) : esc(v));
+  $("#cmp-body").innerHTML = `<div class="table-wrap"><table class="cmp"><thead><tr><th></th>${ms.map(m => `<th data-id="${esc(m.id)}">${photo(m, "thumb")}${esc(m.brand)} ${esc(m.name || m.model)}<br><button type="button" class="btn" style="margin-top:6px;padding:4px 10px;font-size:.8rem" data-act="uncmp">Entfernen</button></th>`).join("")}</tr></thead><tbody>${
+    rows.map(([label, get, best, f]) => {
+      const vals = ms.map(get);
+      let bi = -1;
+      if (best && ms.length > 1) { const nums = vals.map(v => typeof v === "number" ? v : null); const valid = nums.filter(v => v != null);
+        if (valid.length > 1) { const t = best === "max" ? Math.max(...valid) : Math.min(...valid); if (valid.filter(v => v === t).length === 1) bi = nums.indexOf(t) } }
+      return `<tr><th scope="row">${label}</th>${vals.map((v, i) => `<td class="${i === bi ? "best" : ""}">${cell(v, f)}</td>`).join("")}</tr>`;
+    }).join("")}</tbody></table></div><p class="hint">Grün = bester Wert in der Zeile. Überstand: Gerätetiefe plus 5 cm Wandabstand hinten, minus 60 cm Arbeitsplatte.</p>`;
+}
+
+/* ---------- Merkliste (geteilt über db, sonst nur dieses Gerät) ---------- */
+function renderFavs() {
+  const ids = Object.keys(favs).filter(id => favs[id]?.fav && byId[id]);
+  $("#fav-body").innerHTML = ids.length ? ids.map(id => { const m = byId[id];
+    return `<div class="fav-row" data-id="${esc(id)}"><div style="display:flex;gap:12px"><div>${photo(m, "thumb")}</div><div><h3>${esc(m.brand)} ${esc(m.name || "")}</h3><span class="muted">${esc(m.model)} · ${p(m)} · Passung ${lastEval[id]?.score ?? "–"}</span>
+      <div class="actions" style="margin-top:8px"><button type="button" class="btn fav" data-act="fav" aria-pressed="true">★ Entfernen</button><button type="button" class="btn" data-act="cmp" aria-pressed="${cmp.includes(id)}">${cmp.includes(id) ? "✓ Im Vergleich" : "Vergleichen"}</button></div></div></div>
+      <label><span class="label">Notiz</span><textarea id="note-${esc(id)}" data-note="${esc(id)}" placeholder="z. B. im Laden angesehen, Türen gefallen">${esc(favs[id].note || "")}</textarea></label></div>` }).join("")
+    : `<p class="muted">Noch nichts gemerkt. Tippen Sie bei einem Gerät auf „☆ Merken“.</p>`;
+  $("#fav-copy").hidden = !ids.length;
+}
+const noteTimers = {};
+document.addEventListener("input", e => {
+  const id = e.target.dataset?.note; if (!id) return;
+  favs[id] = { ...(favs[id] || {}), note: e.target.value }; store.set("favs", favs);
+  clearTimeout(noteTimers[id]); noteTimers[id] = setTimeout(() => pushFav(id), 900);
+});
+function toggleFav(id) {
+  const cur = favs[id] || {}; favs[id] = { ...cur, fav: !cur.fav }; store.set("favs", favs);
+  toast(favs[id].fav ? "Gemerkt" : "Von der Merkliste entfernt"); render(); pushFav(id);
+}
+const writing = {};
+async function pushFav(id) {
+  if (!remote) return;
+  if (writing[id]) { writing[id] = "again"; return }
+  writing[id] = true;
+  try { await remote.doc("favs/" + id).set({ fav: !!favs[id]?.fav, note: favs[id]?.note || "", at: new Date().toISOString() }) }
+  catch (e) { if (e?.code === "invalid_argument") { remote = null; setSync("local") } }
+  const again = writing[id] === "again"; writing[id] = false; if (again) pushFav(id);
+}
+function setSync(mode) {
+  $("#sync").textContent = mode === "shared" ? "Die Merkliste wird geteilt: Alle, die diesen Link angemeldet öffnen, sehen dieselbe Liste und Notizen."
+    : mode === "loading" ? "Merkliste wird geladen …"
+    : "Die Merkliste wird nur auf diesem Gerät gespeichert. Zum Weitergeben: „Merkliste als Text kopieren“ und per Nachricht schicken.";
+}
+$("#fav-copy").addEventListener("click", async () => {
+  const ids = Object.keys(favs).filter(id => favs[id]?.fav && byId[id]);
+  const text = "Unsere Kühlschrank-Merkliste:\n\n" + ids.map(id => { const m = byId[id];
+    return `★ ${m.brand} ${m.name || ""} (${m.model})\n  ${p(m)} · ${fmt(m.width_cm)}×${fmt(m.height_cm)}×${fmt(m.depth_cm)} cm · ${fmt(m.noise_db, "dB")} · ${fmt(m.total_l, "l")}${favs[id].note ? "\n  Notiz: " + favs[id].note : ""}` }).join("\n\n");
+  try { await navigator.clipboard.writeText(text); toast("Kopiert. Jetzt in eine Nachricht einfügen.") }
+  catch { const t = $("#fav-text"); t.hidden = false; t.value = text; t.focus(); t.select(); toast("Text markiert. Bitte kopieren.") }
+});
+
+async function connectDb() {
+  setSync("loading");
+  const timer = setTimeout(() => setSync("local"), 10000);
+  try {
+    const db = await window.claude?.use?.("db");
+    if (!db) { clearTimeout(timer); setSync("local"); return }
+    const u = await window.claude.use("user");
+    const canWrite = u ? await u.can("data.write") : null;
+    db.collection("favs").onSnapshot(snap => {
+      clearTimeout(timer);
+      if (!snap.metadata.fromCache) {
+        // Geteilten Stand übernehmen; lokale Einträge, die noch nicht geteilt sind, dazuschreiben
+        const shared = {}; snap.docs.forEach(d => { const x = d.data(); shared[d.id] = { fav: !!x.fav, note: x.note || "" } });
+        const localOnly = Object.keys(favs).filter(id => !(id in shared) && favs[id]?.fav);
+        favs = { ...shared }; localOnly.forEach(id => favs[id] = store.get("favs", {})[id]);
+        store.set("favs", favs);
+        if (canWrite !== false) { remote = db; setSync("shared"); localOnly.forEach(pushFav) } else setSync("local");
+        const active = document.activeElement?.dataset?.note; if (!active) render();
+      }
+    }, () => { clearTimeout(timer); remote = null; setSync("local") });
+  } catch { clearTimeout(timer); setSync("local") }
+}
+
+/* ---------- Türskizze ---------- */
+let doorId = null;
+const dlg = $("#dlg");
+$("#gap").value = store.get("gap", 3);
+function openDoor(id) { doorId = id; drawDoor(); try { dlg.showModal() } catch { dlg.setAttribute("open", "") } }
+$("#dlg-close").addEventListener("click", () => dlg.close ? dlg.close() : dlg.removeAttribute("open"));
+dlg.addEventListener("click", e => { if (e.target === dlg) dlg.close() });
+$("#gap").addEventListener("input", () => { store.set("gap", +$("#gap").value); drawDoor() });
+
+function maxAngle(gap, w, t, h) {
+  // Drehpunkt vorne links am Gehäuse. Tür: Breite w, Dicke t (hinter der Front), Griff h vor der Front, kurz vor dem Türende.
+  const pts = [[0, -t], [w, -t], [w, 0], [w - 6, h], [w - 16, h]];
+  let best = 0;
+  for (let a = 0; a <= 180; a += 1) {
+    const r = a * Math.PI / 180, ok = pts.every(([x, y]) => gap + x * Math.cos(r) - y * Math.sin(r) >= -0.01);
+    if (ok) best = a; else break;
+  }
+  return best;
+}
+function drawDoor() {
+  const m = byId[doorId]; if (!m) return;
+  const gap = +$("#gap").value; $("#o-gap").textContent = fmt(gap, "cm");
+  const W = m.width_cm ?? 91, D = m.depth_cm ?? 72, backGap = 5, counter = 60;
+  const doorW = m.type === "sbs" ? W * 0.42 : W / 2, t = 7, hnd = 6;
+  const ang = maxAngle(gap, doorW, t, hnd);
+  const S2 = 2.45, ox = 60, oy = 26; // Maßstab px/cm
+  const X = x => ox + x * S2, Y = y => oy + y * S2;
+  const front = backGap + D;
+  const showAng = Math.min(ang, 100), r = showAng * Math.PI / 180;
+  const rot = ([x, y]) => [gap + x * Math.cos(r) - y * Math.sin(r), front + x * Math.sin(r) + y * Math.cos(r)];
+  const door = [[0, -t], [doorW, -t], [doorW, 0], [0, 0]].map(rot);
+  const handle = [[doorW - 16, 0], [doorW - 16, hnd], [doorW - 6, hnd], [doorW - 6, 0]].map(rot);
+  const poly = pts => pts.map(([x, y]) => `${X(x).toFixed(1)},${Y(y).toFixed(1)}`).join(" ");
+  const arcR = doorW * S2;
+  const need = m.hinge_clearance_cm;
+  const svg = `
+    <defs><pattern id="hatch" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="8" height="8" fill="var(--surface-2)"/><line x1="0" y1="0" x2="0" y2="8" stroke="var(--wall)" stroke-width="3"/></pattern></defs>
+    <rect x="${X(-18)}" y="0" width="${18 * S2}" height="400" fill="url(#hatch)"/>
+    <rect x="${X(-18)}" y="0" width="520" height="${oy}" fill="url(#hatch)"/>
+    <text x="${X(-16)}" y="${Y(150)}" fill="var(--fg)" font-size="13" font-weight="700" transform="rotate(-90 ${X(-11)} ${Y(150)})">Wand</text>
+    <rect x="${X(gap + W)}" y="${Y(0)}" width="${(170 - gap - W) * S2}" height="${counter * S2}" fill="var(--surface-2)" stroke="var(--line)"/>
+    <text x="${X(gap + W + 6)}" y="${Y(30)}" fill="var(--muted)" font-size="13">Arbeitsplatte 60 cm</text>
+    <line x1="${X(gap + W)}" y1="${Y(counter)}" x2="${X(gap + W + 40)}" y2="${Y(counter)}" stroke="var(--muted)" stroke-dasharray="4 4"/>
+    <rect x="${X(gap)}" y="${Y(backGap)}" width="${W * S2}" height="${(D - t) * S2}" fill="var(--surface)" stroke="var(--fg)" stroke-width="2"/>
+    <text x="${X(gap + W / 2)}" y="${Y(backGap + D / 2 - 4)}" text-anchor="middle" fill="var(--fg)" font-size="14" font-weight="700">${esc(m.brand)}</text>
+    <text x="${X(gap + W / 2)}" y="${Y(backGap + D / 2 + 4)}" text-anchor="middle" fill="var(--muted)" font-size="12">${fmt(W)} × ${fmt(D)} cm</text>
+    <rect x="${X(gap + doorW)}" y="${Y(front - t)}" width="${(W - doorW) * S2}" height="${t * S2}" fill="var(--surface)" stroke="var(--fg)" stroke-width="1.5"/>
+    <path d="M ${X(gap + doorW)} ${Y(front)} A ${arcR} ${arcR} 0 0 1 ${X(gap)} ${Y(front + doorW)}" fill="none" stroke="var(--muted)" stroke-dasharray="3 5"/>
+    <polygon points="${poly(door)}" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="2"/>
+    <polygon points="${poly(handle)}" fill="var(--accent)"/>
+    <circle cx="${X(gap)}" cy="${Y(front)}" r="4" fill="var(--fg)"/>
+    <text x="${X(gap) + 10}" y="${Y(front) + 34}" fill="var(--accent)" font-size="15" font-weight="700">${ang >= 180 ? "180°+" : ang + "°"}</text>
+    <line x1="${X(gap + W + 2)}" y1="${Y(counter)}" x2="${X(gap + W + 2)}" y2="${Y(front)}" stroke="var(--fg)"/>
+    <text x="${X(gap + W + 5)}" y="${Y((counter + front) / 2) + 4}" fill="var(--fg)" font-size="12">${Math.round(front - counter)} cm Überstand</text>
+    ${gap > 0 ? `<text x="${X(gap) + 4}" y="${Y(backGap) - 4}" fill="var(--fg)" font-size="11">← ${fmt(gap)} cm</text>` : ""}`;
+  $("#sketch").innerHTML = svg;
+  $("#dlg-title").textContent = `${m.brand} ${m.name || m.model}: Passt die Tür?`;
+  const v = $("#verdict");
+  const needOk = need == null || gap >= need;
+  if (ang >= 90 && needOk) { v.className = "verdict ok"; v.textContent = `Die linke Tür öffnet bis ca. ${ang >= 180 ? "180" : ang}°. Schubladen sollten sich herausziehen lassen.` }
+  else if (ang >= 90) { v.className = "verdict warn"; v.textContent = `Rechnerisch ${ang}°, aber der Hersteller verlangt ${fmt(need)} cm Seitenabstand. Lieber mehr Platz lassen.` }
+  else if (ang >= 80) { v.className = "verdict warn"; v.textContent = `Die Tür öffnet nur ca. ${ang}°. Schubladen gehen eventuell nicht ganz heraus. Etwas mehr Wandabstand hilft.` }
+  else { v.className = "verdict bad"; v.textContent = `Die Tür stößt bei ca. ${ang}° an die Wand. Schubladen lassen sich so nicht herausnehmen.` }
+  $("#door-note").textContent = [
+    need != null ? `Herstellerangabe Seitenabstand: ${fmt(need)} cm.` : "Herstellerangabe zum Seitenabstand nicht gefunden: in der Aufstellanleitung nachsehen.",
+    m.door_open_notes || "",
+    m.type === "sbs" ? "Bei Side-by-Side ist links das Gefrierteil: dessen Tür ist schmal, die Schubladen dahinter brauchen meist volle 90°." : "",
+    "Die Skizze rechnet mit 7 cm Türdicke und 6 cm Griff. Sie ersetzt nicht das Nachmessen."
+  ].filter(Boolean).join(" ");
+}
+
+/* ---------- Statische Teile ---------- */
+const CHECK = [
+  "Nische messen: Breite an drei Höhen, Höhe bis zum Hängeschrank, Tiefe bis zur Wand.",
+  "Abstand zur linken Wand beim alten Gerät messen und mit „Passt die Tür?“ prüfen.",
+  "Weg ins Haus messen: Haustür, Flur, Küchentür. Viele Geräte sind ohne Türen 70–75 cm tief.",
+  "Steckdose hinter dem Gerät: frei erreichbar, kein Mehrfachstecker.",
+  "Lieferung bis in die Küche, Aufstellen und Altgerät-Mitnahme mitbestellen.",
+  "Garantie prüfen: 2 Jahre gesetzlich, Kompressor oft 10–20 Jahre beim Hersteller registrieren.",
+  "Nach Lieferung 2–4 Stunden stehen lassen, bevor der Stecker rein kommt.",
+  "Wassertank fürs Eis: wöchentlich nachfüllen, Wasserfilter je nach Modell alle 6 Monate.",
+  "Preis kurz vor dem Kauf bei idealo vergleichen: Preise ändern sich oft wöchentlich.",
+];
+let done = store.get("check", []);
+$("#checklist").innerHTML = CHECK.map((c, i) => `<li><label><input type="checkbox" id="c-${i}" data-i="${i}" ${done.includes(i) ? "checked" : ""}><span>${esc(c)}</span></label></li>`).join("");
+$("#checklist").addEventListener("change", e => { const i = +e.target.dataset.i; done = e.target.checked ? [...new Set([...done, i])] : done.filter(x => x !== i); store.set("check", done) });
+
+const rel = DATA.brand_reliability || [];
+if (rel.length) $("#rel").innerHTML = rel.map(x => `<li>${esc(x)}</li>`).join(""); else $("#rel-sec").hidden = true;
+
+$("#foot").innerHTML = `<p>Stand der Daten: ${esc(DATA.meta?.stand ? new Date(DATA.meta.stand).toLocaleDateString("de-DE") : "")}. Preise schwanken; „ab“ ist der niedrigste gefundene Preis. „–“ heißt: Wert nicht sicher belegt. Produktbilder: Hersteller bzw. Händler, nur zur Ansicht. Alle Angaben ohne Gewähr, vor dem Kauf im Datenblatt prüfen.</p>${
+  DATA.sources?.length ? `<p>Quellen: ${DATA.sources.slice(0, 30).map((s, i) => `<a href="${esc(s)}" target="_blank" rel="noopener">[${i + 1}]</a>`).join(" ")}</p>` : ""}`;
+
+writeForm(); render(); connectDb();
+})();
+</script>
+</body></html>
