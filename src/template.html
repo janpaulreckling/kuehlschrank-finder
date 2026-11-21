@@ -96,7 +96,20 @@ input[type=range] { width: 100%; accent-color: var(--accent); height: 28px }
 .photo img { width: 100%; height: 100%; object-fit: contain }
 .photo.none svg { width: 46%; height: auto }
 .photo-cap { font-size: .7rem; color: var(--muted); text-align: center; margin-top: -8px }
-@media (max-width: 520px) { .card { grid-template-columns: 92px minmax(0, 1fr); gap: 12px; padding: 14px } .photo { width: 92px } }
+@media (max-width: 520px) { .card { grid-template-columns: minmax(0, 1fr); gap: 12px; padding: 14px } .side { flex-direction: row; justify-content: flex-start; gap: 24px } .photo { width: 96px } .score small { bottom: -18px } }
+.gal { position: relative; cursor: zoom-in }
+.gal-nav { position: absolute; top: 50%; transform: translateY(-50%); width: 34px; height: 34px; border-radius: 50%; border: 1px solid #cfd8dc; background: rgb(255 255 255 / .92); color: #172226; font-size: 1.3rem; line-height: 1; cursor: pointer; display: grid; place-items: center; padding: 0 }
+.gal-nav.prev { left: 4px } .gal-nav.next { right: 4px }
+.gal-count { position: absolute; left: 0; right: 0; bottom: 0; background: rgb(23 34 38 / .72); color: #fff; font-size: .72rem; text-align: center; padding: 3px 4px; line-height: 1.25 }
+#lb { width: min(980px, calc(100vw - 16px)) }
+.lb-stage { position: relative; background: #fff; border-radius: 8px; display: grid; place-items: center; height: min(68vh, 640px); touch-action: pan-y; user-select: none }
+.lb-stage img { max-width: 100%; max-height: 100%; object-fit: contain }
+.lb-stage .gal-nav { width: 52px; height: 52px; font-size: 1.8rem }
+.lb-stage .gal-nav.prev { left: 10px } .lb-stage .gal-nav.next { right: 10px }
+.lb-thumbs { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px }
+.lb-thumbs button { flex: none; width: 72px; height: 72px; border: 2px solid var(--line); border-radius: 6px; background: #fff; padding: 2px; cursor: pointer }
+.lb-thumbs button[aria-current="true"] { border-color: var(--accent) }
+.lb-thumbs img { width: 100%; height: 100%; object-fit: contain }
 .thumb { width: 64px; aspect-ratio: 3 / 4; border-radius: 6px; background: #fff; border: 1px solid var(--line); overflow: hidden; display: grid; place-items: center; flex: none }
 .thumb img { width: 100%; height: 100%; object-fit: contain }
 .card.top1 { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent) }
@@ -106,16 +119,18 @@ input[type=range] { width: 100%; accent-color: var(--accent); height: 28px }
 .score b { font-family: var(--font-display); font-size: 1.5rem; font-variant-numeric: tabular-nums }
 .score small { position: absolute; bottom: -20px; left: 0; right: 0; text-align: center; font-size: .72rem; color: var(--muted) }
 .card-body { display: flex; flex-direction: column; gap: 12px; min-width: 0 }
-.card-head { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 16px }
+.card-head { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px 16px; align-items: start }
+
 .card-head .name { display: flex; flex-direction: column; gap: 2px; min-width: 0 }
 .card-head .model { color: var(--muted); font-size: .9rem; overflow-wrap: anywhere }
 .price { text-align: right }
 .price b { font-family: var(--font-display); font-size: 1.4rem; font-variant-numeric: tabular-nums }
-.price small { display: block; color: var(--muted); font-size: .8rem }
+.price small { display: block; color: var(--muted); font-size: .8rem; max-width: 26ch; margin-left: auto }
+@media (max-width: 600px) { .card-head { grid-template-columns: minmax(0, 1fr) } .price { text-align: left } .price small { margin-left: 0 } }
 .badges { display: flex; flex-wrap: wrap; gap: 6px }
 .badge { font-size: .78rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; padding: 2px 8px; border-radius: 4px; background: var(--surface-2); color: var(--muted) }
 .badge.rank { background: var(--accent); color: var(--accent-fg) }
-.facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(118px, 1fr)); gap: 8px }
+.facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(118px, 40%), 1fr)); gap: 8px }
 .fact { background: var(--surface-2); border-radius: 8px; padding: 8px 10px; display: flex; flex-direction: column; gap: 1px }
 .fact .label { font-size: .7rem }
 .fact b { font-variant-numeric: tabular-nums; font-size: 1rem }
@@ -293,7 +308,7 @@ footer a { color: var(--accent) }
       <div><span class="label">Draufsicht, vereinfacht</span><h2 id="dlg-title">Passt die Tür?</h2></div>
       <button type="button" class="btn" id="dlg-close">Schließen</button>
     </div>
-    <svg class="sketch" id="sketch" viewBox="0 0 520 330" role="img" aria-label="Draufsicht: Wand links, Kühlschrank, Arbeitsplatte rechts"></svg>
+    <svg class="sketch" id="sketch" viewBox="0 0 520 400" role="img" aria-label="Draufsicht: Wand links, Kühlschrank, Arbeitsplatte rechts"></svg>
     <fieldset>
       <div class="range-row"><legend>Abstand Gerät zur linken Wand</legend><output id="o-gap" class="num"></output></div>
       <input type="range" id="gap" min="0" max="15" step="0.5">
@@ -301,6 +316,18 @@ footer a { color: var(--accent) }
     </fieldset>
     <div class="verdict" id="verdict"></div>
     <p class="hint" id="door-note"></p>
+  </div>
+</dialog>
+
+<dialog id="lb" aria-labelledby="lb-title">
+  <div class="dlg">
+    <div class="dlg-head">
+      <div><span class="label">Bilder</span><h2 id="lb-title">Bilder</h2></div>
+      <button type="button" class="btn" id="lb-close">Schließen</button>
+    </div>
+    <div class="lb-stage" id="lb-stage"></div>
+    <p class="hint" id="lb-cap"></p>
+    <div class="lb-thumbs" id="lb-thumbs"></div>
   </div>
 </dialog>
 
@@ -411,7 +438,7 @@ function evaluate(m) {
     const share = m.freezer_l / (m.fridge_l + m.freezer_l);
     if (share < 0.3) add("warn", `Kleines Gefrierfach (${m.freezer_l} l)`);
   }
-  if (m.color && !/edelstahl|silber|inox|steel/i.test(m.color)) add("warn", `Farbe: ${m.color.split("(")[0].trim()}`);
+  if (m.color && !/edelstahl|silber|inox|steel/i.test(m.color.split("(")[0])) add("warn", `Farbe: ${m.color.split("(")[0].trim()}`);
   if (m.availability && /^(unsicher|auslauf)|discontinued|eingestellt/i.test(m.availability)) add("warn", "Schwer erhältlich");
 
   // Punkte
@@ -446,7 +473,7 @@ function card(m, ev, rank) {
   const idealo = "https://www.idealo.de/preisvergleich/MainSearchProductCategory.html?q=" + encodeURIComponent(m.model);
   const chips = ev.checks.slice().sort((a, b) => ({ bad: 0, warn: 1, ok: 2 }[a.lvl] - { bad: 0, warn: 1, ok: 2 }[b.lvl]));
   return `<article class="card${rank === 1 && !ev.fail ? " top1" : ""}${ev.fail ? " out" : ""}" data-id="${esc(m.id)}">
-    <div class="side">${photo(m, "photo")}<div class="score" title="Passung ${ev.score} von 100">${ring(ev.score, ev.fail)}<b>${ev.score}</b><small>Passung</small></div></div>
+    <div class="side">${gallery(m)}<div class="score" title="Passung ${ev.score} von 100">${ring(ev.score, ev.fail)}<b>${ev.score}</b><small>Passung</small></div></div>
     <div class="card-body">
       <div class="card-head">
         <div class="name">
@@ -485,6 +512,47 @@ function photo(m, cls) {
     : `<div class="${cls} none" title="Kein Bild gefunden">${FRIDGE_ICON}</div>`;
 }
 document.addEventListener("error", e => { const img = e.target; if (img.tagName === "IMG" && img.parentNode) { img.parentNode.classList.add("none"); img.outerHTML = FRIDGE_ICON } }, true);
+const pics = m => m.gallery?.length ? m.gallery : (m.image ? [{ src: m.image, cap: "Außen" }] : []);
+const galIdx = {};
+function gallery(m) {
+  const g = pics(m); if (!g.length) return photo(m, "photo");
+  const i = galIdx[m.id] || 0, multi = g.length > 1;
+  return `<div class="photo gal" data-gal="${esc(m.id)}" role="button" tabindex="0" aria-label="Bilder von ${esc(m.brand + " " + m.model)} groß ansehen">
+    <img src="${esc(g[i].src)}" alt="${esc(m.brand + " " + m.model + ": " + g[i].cap)}" loading="lazy">
+    ${multi ? `<button type="button" class="gal-nav prev" data-step="-1" aria-label="Vorheriges Bild">‹</button><button type="button" class="gal-nav next" data-step="1" aria-label="Nächstes Bild">›</button>` : ""}
+    <span class="gal-count">${multi ? `${i + 1}/${g.length} · ` : ""}${esc(g[i].cap)}</span></div>`;
+}
+function stepGal(id, step) {
+  const g = pics(byId[id]); galIdx[id] = ((galIdx[id] || 0) + step + g.length) % g.length;
+  document.querySelectorAll(`[data-gal="${CSS.escape(id)}"]`).forEach(el => el.outerHTML = gallery(byId[id]));
+  if (lbId === id && lb.open) drawLb();
+}
+let lbId = null; const lb = document.getElementById("lb");
+function openLb(id) { lbId = id; drawLb(); try { lb.showModal() } catch { lb.setAttribute("open", "") } }
+function drawLb() {
+  const m = byId[lbId], g = pics(m), i = galIdx[lbId] || 0;
+  document.getElementById("lb-title").textContent = `${m.brand} ${m.name || m.model}`;
+  document.getElementById("lb-cap").textContent = `Bild ${i + 1} von ${g.length}: ${g[i].cap}`;
+  const st = document.getElementById("lb-stage");
+  st.innerHTML = `<img src="${esc(g[i].src)}" alt="${esc(g[i].cap)}">${g.length > 1 ? `<button type="button" class="gal-nav prev" data-lbstep="-1" aria-label="Vorheriges Bild">‹</button><button type="button" class="gal-nav next" data-lbstep="1" aria-label="Nächstes Bild">›</button>` : ""}`;
+  document.getElementById("lb-thumbs").innerHTML = g.length > 1 ? g.map((x, k) => `<button type="button" data-lbgo="${k}" aria-label="${esc(x.cap)}" aria-current="${k === i}"><img src="${esc(x.src)}" alt=""></button>`).join("") : "";
+}
+document.addEventListener("click", e => {
+  const nav = e.target.closest(".gal .gal-nav"); if (nav) { e.stopPropagation(); stepGal(nav.closest("[data-gal]").dataset.gal, +nav.dataset.step); return }
+  const box = e.target.closest("[data-gal]"); if (box) { openLb(box.dataset.gal); return }
+  const ls = e.target.closest("[data-lbstep]"); if (ls) { stepGal(lbId, +ls.dataset.lbstep); return }
+  const go = e.target.closest("[data-lbgo]"); if (go) { galIdx[lbId] = +go.dataset.lbgo; stepGal(lbId, 0); return }
+}, true);
+document.addEventListener("keydown", e => {
+  const box = e.target.closest?.("[data-gal]");
+  if (box && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); openLb(box.dataset.gal) }
+  if (lb.open && (e.key === "ArrowRight" || e.key === "ArrowLeft")) stepGal(lbId, e.key === "ArrowRight" ? 1 : -1);
+});
+let swipeX = null;
+document.getElementById("lb-stage").addEventListener("pointerdown", e => { swipeX = e.clientX });
+document.getElementById("lb-stage").addEventListener("pointerup", e => { if (swipeX != null && Math.abs(e.clientX - swipeX) > 40) stepGal(lbId, e.clientX < swipeX ? 1 : -1); swipeX = null });
+document.getElementById("lb-close").addEventListener("click", () => lb.close ? lb.close() : lb.removeAttribute("open"));
+lb.addEventListener("click", e => { if (e.target === lb) lb.close() });
 const p = m => m.price_eur == null ? "Preis ?" : "ab " + fmtEur(m.price_eur);
 
 let lastEval = {};
@@ -655,7 +723,7 @@ function drawDoor() {
   const W = m.width_cm ?? 91, D = m.depth_cm ?? 72, backGap = 5, counter = 60;
   const doorW = m.type === "sbs" ? W * 0.42 : W / 2, t = 7, hnd = 6;
   const ang = maxAngle(gap, doorW, t, hnd);
-  const S2 = 2.6, ox = 60, oy = 26; // Maßstab px/cm
+  const S2 = 2.45, ox = 60, oy = 26; // Maßstab px/cm
   const X = x => ox + x * S2, Y = y => oy + y * S2;
   const front = backGap + D;
   const showAng = Math.min(ang, 100), r = showAng * Math.PI / 180;
@@ -667,7 +735,7 @@ function drawDoor() {
   const need = m.hinge_clearance_cm;
   const svg = `
     <defs><pattern id="hatch" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="8" height="8" fill="var(--surface-2)"/><line x1="0" y1="0" x2="0" y2="8" stroke="var(--wall)" stroke-width="3"/></pattern></defs>
-    <rect x="${X(-18)}" y="0" width="${18 * S2}" height="330" fill="url(#hatch)"/>
+    <rect x="${X(-18)}" y="0" width="${18 * S2}" height="400" fill="url(#hatch)"/>
     <rect x="${X(-18)}" y="0" width="520" height="${oy}" fill="url(#hatch)"/>
     <text x="${X(-16)}" y="${Y(150)}" fill="var(--fg)" font-size="13" font-weight="700" transform="rotate(-90 ${X(-11)} ${Y(150)})">Wand</text>
     <rect x="${X(gap + W)}" y="${Y(0)}" width="${(170 - gap - W) * S2}" height="${counter * S2}" fill="var(--surface-2)" stroke="var(--line)"/>
@@ -684,7 +752,7 @@ function drawDoor() {
     <text x="${X(gap) + 10}" y="${Y(front) + 34}" fill="var(--accent)" font-size="15" font-weight="700">${ang >= 180 ? "180°+" : ang + "°"}</text>
     <line x1="${X(gap + W + 2)}" y1="${Y(counter)}" x2="${X(gap + W + 2)}" y2="${Y(front)}" stroke="var(--fg)"/>
     <text x="${X(gap + W + 5)}" y="${Y((counter + front) / 2) + 4}" fill="var(--fg)" font-size="12">${Math.round(front - counter)} cm Überstand</text>
-    ${gap > 0 ? `<text x="${X(gap / 2)}" y="${Y(backGap + 12)}" text-anchor="middle" fill="var(--fg)" font-size="11">${fmt(gap)}</text>` : ""}`;
+    ${gap > 0 ? `<text x="${X(gap) + 4}" y="${Y(backGap) - 4}" fill="var(--fg)" font-size="11">← ${fmt(gap)} cm</text>` : ""}`;
   $("#sketch").innerHTML = svg;
   $("#dlg-title").textContent = `${m.brand} ${m.name || m.model}: Passt die Tür?`;
   const v = $("#verdict");
